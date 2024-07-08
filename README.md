@@ -1,7 +1,3 @@
-Certainly! Below is a sample README file for your GitHub repository for the "Reappear Management System" project. This README file provides an overview of the project, its features, and instructions for contributors.
-
----
-
 # Reappear Management System (RMS)
 
 Welcome to the Reappear Management System (RMS) project repository! RMS is an open-source project designed to assist students who need to manage subjects they have failed in exams. This platform aims to provide tools for accessing notes, MCQs, important topics, and more, helping students prepare effectively for reappearing in exams.
@@ -22,9 +18,8 @@ Thank you for considering contributing to RMS! To get started, follow these step
 
 2. **Clone the Repository**: Clone the forked repository to your local machine using the following command:
    ```
-   git clone https://github.com/your-username/rms.git
+   git clone https://github.com/anshjaiswal11/rms.git
    ```
-   Replace `your-username` with your GitHub username.
 
 3. **Set Up Development Environment**: Ensure you have Node.js installed. Use npm to install dependencies:
    ```
