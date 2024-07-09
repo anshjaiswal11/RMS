@@ -1,76 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Index</title>
-    <link rel="stylesheet" href="/RMS/main/style.css">
+    <link rel="stylesheet" href="/RMS/main/style.css" />
     <script
-    defer
-    src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
-  <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-  
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-</head>
-<body id="body" class="body">
-    <div class="navbar">
-        <nav class="navbar">
-            <a href="#">Home</a>
-            <a href="#">Updates</a>
-            <a href="#">Upload Notes</a>
-            <a href="/RMS/SignUp/index (2).html">sign-up</a>
-        </nav>
-    </div>
-    <div class="container">
-        <h1>
-            Reappear Management System
-        </h1>
-    </div>
-    <div class="image">
-        <!-- <img src="img1.jpg" alt="image"> -->
-    </div>
-    <div class="loader"></div>
+      defer
+      src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
 
-    <div class="subjects-container">
-        <div class="subject">
-            <h2>Subject 1</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </head>
+  <body id="body" class="body">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="#" class="navbar-brand">Reappear Management System</a>
         </div>
-        <div class="subject">
-            <h2>Subject 2</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
+        <div class="navbar-right">
+            <a href="#">Home</a>
+            <a href="#">Upload</a>
+            <a href="#">Notes</a>
         </div>
-        <div class="subject">
-            <h2>Subject 3</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
-        </div>
-        <div class="subject">
-            <h2>Subject 4</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
-        </div>
-        <div class="subject">
-            <h2>Subject 5</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
-        </div>
-        <div class="subject">
-            <h2>Subject 6</h2>
-            <p>Notes</p>
-            <p>Previous Year Papers</p>
-            <p>Assignments</p>
-        </div>
+    </nav>
+
+    <div class="container">
+        
+        <h1 class="container-head">Selected Subjects</h1>
+        <input type="text" class="search-box" id="searchBox" placeholder="Search subjects..." onkeyup="filterSubjects()">
+      <div class="subjects" id="subjectsList">
+          <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+           <h4 class="header4">MTH174 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">PEL130 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">PEL125 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">PEL120 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
+        <div class="selected"></div>
+      </div>
     </div>
-    
-</body>
+<script src="/RMS/main/script.js"></script>
+  </body>
 </html>
