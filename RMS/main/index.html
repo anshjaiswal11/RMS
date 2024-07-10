@@ -5,49 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Index</title>
     <link rel="stylesheet" href="/RMS/main/style.css" />
-    <script
-      defer
-      src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"
-    ></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-
+    <script defer src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
   </head>
+  
   <body id="body" class="body">
-    <nav class="navbar">
-        <div class="navbar-left">
-            <a href="#" class="navbar-brand">Reappear Management System</a>
-        </div>
-        <div class="navbar-right">
-            <a href="#">Home</a>
-            <a href="#">Upload Notes</a>
-            <a href="#">Blogs</a>
-        </div>
-    </nav>
-
+    <header class="navbar" id="nav">
+      <div>
+        <a href="#" class="navbar-left">Reappear Management System</a>
+      </div>
+      <div class="navbar-right">
+        <a href="#home">Home</a>
+        <a href="#upload">Upload</a>
+        <a href="#notes">Notes</a>
+      </div>
+    </header>
     <div class="container">
-        
-        <h1 class="container-head"> Subjects</h1>
-        <input type="text" class="search-box" id="searchBox" placeholder="Search subjects..." onkeyup="filterSubjects()">
+      <h1 class="container-head">Selected Subjects</h1>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search subjects..." onkeyup="filterSubjects()">
       <div class="subjects" id="subjectsList">
-          <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-           <h4 class="header4">MTH174 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">PEL130 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">PEL125 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">PEL120 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-            <h4 class="header4">CSE320 SOFTWARE ENGINEERING</h4>
-        <div class="selected"></div>
+          <div class="subject-item"><h4 class="header4">CHE110 ENVIRONMENTAL STUDIES ENGINEERING</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">CSE111 ORIENTATION TO COMPUTING-I</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">CSE326 INTERNET PROGRAMMING LABORATORY</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">ECE249 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">ECE279 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING LABORATORY</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">INT108 PYTHON PROGRAMMING</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">INT306 DATABASE MANAGEMENT SYSTEMS</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">MEC136 ENGINEERING GRAPHICS AND DIGITAL FABRICATION</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">MTH174 ENGINEERING MATHEMATICS</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">MTH401 DISCRETE MATHEMATICS</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">PES318 SOFT SKILLS-I</h4><button class="add-button">+</button></div>
+          <div class="subject-item"><h4 class="header4">PHY110 ENGINEERING PHYSICS</h4><button class="add-button">+</button></div>
       </div>
     </div>
-<script src="/RMS/main/script.js"></script>
+    <script src="/RMS/main/script.js"></script>
+    
   </body>
 </html>
