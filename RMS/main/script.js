@@ -1,16 +1,15 @@
-
 function filterSubjects() {
     const searchInput = document.getElementById('searchBox').value.toUpperCase();
     const subjectsList = document.getElementById('subjectsList');
-    const subjects = subjectsList.getElementsByClassName('header4');
-    
-    for (let i = 0; i < subjects.length; i++) {
-        const subject = subjects[i];
-        const textValue = subject.textContent || subject.innerText;
+    const subjectItems = subjectsList.getElementsByClassName('subject-item');
+
+    for (let i = 0; i < subjectItems.length; i++) {
+        const subjectItem = subjectItems[i];
+        const textValue = subjectItem.getElementsByClassName('header4')[0].textContent || subjectItem.getElementsByClassName('header4')[0].innerText;
         if (textValue.toUpperCase().indexOf(searchInput) > -1) {
-            subject.style.display = "";
+            subjectItem.style.display = "";
         } else {
-            subject.style.display = "none";
+            subjectItem.style.display = "none";
         }
     }
 }
