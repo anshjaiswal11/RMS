@@ -40,7 +40,7 @@ Thank you for considering contributing to RMS! To get started, follow these step
    git push origin master
    ```
 
-8. **Submit a Pull Request**: Go to your forked repository on GitHub and submit a pull request to the main repository. Provide a clear description of your changes.
+8. **Submit a Pull Request**: Go to your forked repository on GitHub and submit a pull request to the main repository. Provide a clear description of your changes..
 
 ## Support
 
