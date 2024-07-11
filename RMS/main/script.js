@@ -13,3 +13,19 @@ function filterSubjects() {
         }
     }
 }
+
+function selectSubject(button) {
+    const subjectItem = button.parentElement;
+    const selectedSubjects = document.getElementById('selectedSubjects');
+    const subjectText = subjectItem.getElementsByClassName('header4')[0].textContent || subjectItem.getElementsByClassName('header4')[0].innerText;
+    const existingItems = selectedSubjects.getElementsByClassName('subject-item');
+    for (let i = 0; i < existingItems.length; i++) {
+        const existingText = existingItems[i].getElementsByClassName('header4')[0].textContent || existingItems[i].getElementsByClassName('header4')[0].innerText;
+        if (existingText === subjectText) {
+            return;
+        }
+    }
+    const clonedItem = subjectItem.cloneNode(true);
+    clonedItem.querySelector('button').remove(); 
+    selectedSubjects.appendChild(clonedItem);
+}
