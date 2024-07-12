@@ -4,50 +4,106 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Index</title>
-    <link rel="stylesheet" href="/RMS/main/style.css" />
+    <link rel="stylesheet" href="/main/style.css" />
     <script defer src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
   </head>
-  
+
   <body id="body" class="body">
     <header class="navbar" id="nav">
-      <div>
-        <a href="#" class="navbar-left">Reappear Management System</a>
-      </div>
-      <div class="navbar-right">
-        <a href="#home">Home</a>
-        <a href="#upload">Upload Notes</a>
-        <a href="#blogs">Blogs</a>
-      </div>
+        <div>
+            <a href="#" class="navbar-left">Reappear Management System</a>
+        </div>
+        <div class="navbar-right">
+            <a href="#home">Home</a>
+            <a href="#upload">Upload Notes</a>
+            <a href="#notes">Blogs</a>
+        </div>
     </header>
     <div class="container">
-      <div class="box1">
-      <h1 class="container-head">All Subjects</h1>
-      <input type="text" class="search-box" id="searchBox" placeholder="Search subjects..." onkeyup="filterSubjects()">
-      <section class="subjects" id="subjectsList">
-                <div class="subject-item"><h4 class="header4">CHE110 ENVIRONMENTAL STUDIES ENGINEERING</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">CSE111 ORIENTATION TO COMPUTING-I</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">CSE326 INTERNET PROGRAMMING LABORATORY</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">ECE249 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">ECE279 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING LABORATORY</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">INT108 PYTHON PROGRAMMING</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">INT306 DATABASE MANAGEMENT SYSTEMS</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">MEC136 ENGINEERING GRAPHICS AND DIGITAL FABRICATION</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">MTH174 ENGINEERING MATHEMATICS</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">MTH401 DISCRETE MATHEMATICS</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">PES318 SOFT SKILLS-I</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-                <div class="subject-item"><h4 class="header4">PHY110 ENGINEERING PHYSICS</h4><button class="add-button" onclick="selectSubject(this)">+</button></div>
-          </section>
+        <h1 class="container-head">All Subjects</h1>
+        <input type="text" class="search-box" id="searchBox" placeholder="Search subjects..." onkeyup="filterSubjects()">
+        <div class="subjects-container">
+            <div class="subjects" id="subjectsList">
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4" id="che110">CHE110 ENVIRONMENTAL STUDIES ENGINEERING</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">CSE111 ORIENTATION TO COMPUTING-I</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">CSE326 INTERNET PROGRAMMING LABORATORY</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">ECE249 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">ECE279 BASIC ELECTRICAL AND ELECTRONICS ENGINEERING LABORATORY</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">INT108 PYTHON PROGRAMMING</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">INT306 DATABASE MANAGEMENT SYSTEMS</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">MEC136 ENGINEERING GRAPHICS AND DIGITAL FABRICATION</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">MTH174 ENGINEERING MATHEMATICS</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">MTH401 DISCRETE MATHEMATICS</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">PES318 SOFT SKILLS-I</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+                <div class="subject-item">
+                    <div class="subject-header">
+                        <h4 class="header4">PHY110 ENGINEERING PHYSICS</h4>
+                        <button class="add-button" onclick="selectSubject(this)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="selected-subjects" id="selectedSubjects">
+                <h2 class="container-head">Selected Subjects by You</h2>
+            </div>
+        </div>
     </div>
-    <div class="box2">
-    <h1 class="container-head">Selected Subjects</h1>
-    <section class="subjects-selected" id="selectedSubjects">                
-      </section>
-
-    </div>
-    </div>
-    <script src="/RMS/main/script.js"></script>
-    
-  </body>
+    <script src="/main/script.js"></script>
+</body>
 </html>
