@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Alata&family=Prata&family=Oswald:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Alata&family=Prata&family=Oswald:wght@500&display=swap");
 * {
   margin: 0px;
   padding: 0px;
@@ -16,9 +16,6 @@ a {
   margin-right: 10px;
 }
 
-
-
-
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -26,8 +23,6 @@ a {
   background-color: #333;
   padding: 10px;
 }
-
-
 
 .navbar-left {
   color: white;
@@ -42,8 +37,6 @@ a {
 .navbar-left:hover {
   filter: drop-shadow(0px 0px 14px rgba(255, 174, 0, 0.712));
 }
-
-
 
 .navbar-right a {
   color: white;
@@ -72,12 +65,7 @@ a {
   transform: scaleX(1);
 }
 
-
-
-
-
-
-.container-head{
+.container-head {
   margin-left: 70px;
   margin-bottom: 20px;
   font-family: "Alata", sans-serif;
@@ -85,42 +73,45 @@ a {
   font-style: normal;
   /* color: #fff; */
 }
-.container{
+.container {
   margin-top: 10px;
   padding: 50px;
   background-color: #bababa;
+  display: flex;
+  justify-content: space-between;
+
 }
-.header4{
+.header4 {
   padding: 15px;
 }
 .subjects {
   overflow-y: scroll;
-  height: 350px; 
-  width: 35%;
+  height: 400px;
+  width: 75%;
   background-color: #d3d3d3;
-  border-radius: 10px;  
+  border-radius: 10px;
 }
 
 .subjects::-webkit-scrollbar {
-  width: 10px; 
+  width: 10px;
 }
 
 .subjects::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
 }
 
 .subjects::-webkit-scrollbar-thumb {
-  background-color: #888; 
-  border-radius: 10px; 
-  border: 2px solid #f1f1f1; 
+  background-color: #888;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
 }
 
 .subjects::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
 
 .search-box {
-  width:33%;
+  width: 33%;
   margin-bottom: 10px;
   padding: 10px;
   border: 1px solid #aba8a8;
@@ -130,17 +121,15 @@ a {
   background-color: #d3d3d3;
 }
 
-
 .subjects .subject-item {
   transition: background-color 0.3s, color 0.3s;
 }
 
 .subjects .subject-item:hover {
-  background-color: #f0f0f0; 
-  color: #333; 
+  background-color: #f0f0f0;
+  color: #333;
   cursor: pointer;
 }
-
 
 .subject-item {
   display: flex;
@@ -150,7 +139,8 @@ a {
   font-family: "Manrope", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
-  font-style: normal;}
+  font-style: normal;
+}
 
 .add-button {
   background-color: #313131;
@@ -164,3 +154,23 @@ a {
   cursor: pointer;
   border-radius: 5px;
 }
+
+.subjects-selected {
+  overflow: scroll;
+  margin-top: 60px;
+  height: 400px;
+  width:100%;
+  background-color: #d3d3d3;
+  border-radius: 10px;
+
+}
+
+.subjects-selected::-webkit-scrollbar {
+  width: 10px;
+}
+.subjects-selected::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
+}
+
