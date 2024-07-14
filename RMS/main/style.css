@@ -461,3 +461,13 @@ a {
     font-size: 1.2em;
     color: var(--on-surface-variant);
 }
+
+
+
+#myDiv{
+    text-align: center;
+    margin-top: 50px;
+    width: 100%;
+    height: auto;
+}
+

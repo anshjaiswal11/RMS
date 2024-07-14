@@ -56,11 +56,39 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h4 class="header4">${subjectName}</h4>
                 </div>
                 <div class="dropdown-content hide">
-                    <button><p>Notes</p></button>
+                    <button id = "dropdown-btn" onclick = ""><p>Notes</p></button>
                     <button><p>MCQs</p></button>
                     <button><p>PYQs</p></button>
                 </div>
             `;
+            const dropdownBtn = newSubjectItem.querySelector("#dropdown-btn");
+            const buttonId = newSubjectItem.querySelector("#btn-id");
+            const notesContainer = document.getElementById("myDiv");
+            
+            dropdownBtn.addEventListener('click', () => {
+                fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Loop through each chapter and append to notesContainer
+                        for (let i = 1; i <= 6; i++) {
+                            if (data[subjectName].Notes.chapters[i]) {
+                                const chapterData = data[subjectName].Notes.chapters[i];
+                                notesContainer.innerHTML += `
+                                    <h1>${subjectName}</h1>
+                                    <br>
+                                    <h2>Chapter ${i}</h2>
+                                    <br>
+                                    <iframe src="${chapterData}" frameborder="0" allowfullscreen></iframe>
+                                `;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the data:', error);
+                        notesContainer.innerHTML = `<p>Error loading notes. Please try again later.</p>`;
+                    });
+            });
+        
 
         // added event listener for hoveing to show dropdown
             newSubjectItem.addEventListener('mouseenter', () => {
@@ -77,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 300);
             });
 
+
         // remove the new subject item to selected subjects
             selectedSubjects.appendChild(newSubjectItem);
 
@@ -91,14 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // check ingwhen the page loads
     updateNoSubjectsMessage();
+
 });
-
-
-
-
-
-
-
-
 
 
