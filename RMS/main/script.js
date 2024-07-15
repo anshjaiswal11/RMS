@@ -64,21 +64,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const dropdownBtn = newSubjectItem.querySelector("#dropdown-btn");
             const buttonId = newSubjectItem.querySelector("#btn-id");
             const notesContainer = document.getElementById("myDiv");
+            const chaptername = document.querySelector("#chapters");
             
             dropdownBtn.addEventListener('click', () => {
+                chaptername.style.display = 'flex'
                 fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
                     .then(response => response.json())
                     .then(data => {
-                        // Loop through each chapter and append to notesContainer
+                        notesContainer.innerHTML = `<h1 class="title" >${subjectName}</h1>`
                         for (let i = 1; i <= 6; i++) {
                             if (data[subjectName].Notes.chapters[i]) {
                                 const chapterData = data[subjectName].Notes.chapters[i];
+                                const embedLink = chapterData.replace("/view", "/preview");
                                 notesContainer.innerHTML += `
-                                    <h1>${subjectName}</h1>
                                     <br>
-                                    <h2>Chapter ${i}</h2>
+                                    <h2 class="title2" >Chapter ${i}</h2>
                                     <br>
-                                    <iframe src="${chapterData}" frameborder="0" allowfullscreen></iframe>
+                                    <iframe src="${embedLink}" class="chapter-iframe" allow="autoplay"></iframe>
                                 `;
                             }
                         }
@@ -122,5 +124,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateNoSubjectsMessage();
 
 });
-
 

@@ -464,10 +464,42 @@ a {
 
 
 
-#myDiv{
+.title {
+    font-size: 2em;
+    /* color: #333; */
     text-align: center;
-    margin-top: 50px;
-    width: 100%;
-    height: auto;
+    margin-top: 20px;
+}
+
+.title2 {
+    font-size: 1.5em;
+    /* color: #555; */
+    margin-top: 15px;
+}
+
+iframe {
+    width: 80%;
+    height: 100vh;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+.notes {
+    padding: 20px;
+    /* background-color: #f9f9f9; */
+    text-align: center;
+    padding: 20px;
+}
+
+.class-chapter{
+    display: none;
+    align-items: center;
+    padding: 20px;
+    justify-content: center;
+}
+.one{
+    padding: 20px;;
+    border: 0.5px solid #ccc;
+    border-radius: 5px;
 }
 
