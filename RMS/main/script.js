@@ -56,11 +56,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h4 class="header4">${subjectName}</h4>
                 </div>
                 <div class="dropdown-content hide">
-                    <button><p>Notes</p></button>
+                    <button id = "dropdown-btn" onclick = ""><p>Notes</p></button>
                     <button><p>MCQs</p></button>
                     <button><p>PYQs</p></button>
                 </div>
             `;
+            const dropdownBtn = newSubjectItem.querySelector("#dropdown-btn");
+            const buttonId = newSubjectItem.querySelector("#btn-id");
+            const notesContainer = document.getElementById("myDiv");
+            const chaptername = document.querySelector("#chapters");
+            
+            dropdownBtn.addEventListener('click', () => {
+                chaptername.style.display = 'flex'
+                fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
+                    .then(response => response.json())
+                    .then(data => {
+                        notesContainer.innerHTML = `<h1 class="title" >${subjectName}</h1>`
+                        for (let i = 1; i <= 6; i++) {
+                            if (data[subjectName].Notes.chapters[i]) {
+                                const chapterData = data[subjectName].Notes.chapters[i];
+                                const embedLink = chapterData.replace("/view", "/preview");
+                                notesContainer.innerHTML += `
+                                    <br>
+                                    <h2 class="title2" >Chapter ${i}</h2>
+                                    <br>
+                                    <iframe src="${embedLink}" class="chapter-iframe" allow="autoplay"></iframe>
+                                `;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the data:', error);
+                        notesContainer.innerHTML = `<p>Error loading notes. Please try again later.</p>`;
+                    });
+            });
+        
 
         // added event listener for hoveing to show dropdown
             newSubjectItem.addEventListener('mouseenter', () => {
@@ -77,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 300);
             });
 
+
         // remove the new subject item to selected subjects
             selectedSubjects.appendChild(newSubjectItem);
 
@@ -91,14 +122,104 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // check ingwhen the page loads
     updateNoSubjectsMessage();
+
+    const quizData = [{
+        question: "Which of the following is a client site language?",
+        a: "Java",
+        b: "C",
+        c: "Python",
+        d: "JavaScript",
+        correct: "d",
+    },
+    {
+        question: "What does HTML stand for?",
+        a: "Hypertext Markup Language",
+        b: "Cascading Style Sheet",
+        c: "Jason Object Notation",
+        d: "Helicopters Terminals Motorboats Lamborginis",
+        correct: "a",
+    },
+    {
+        question: "What year was JavaScript launched?",
+        a: "1996",
+        b: "1995",
+        c: "1994",
+        d: "none of the above",
+        correct: "b",
+    },
+    {
+        question: "What does CSS stands for?",
+        a: "Hypertext Markup Language",
+        b: "Cascading Style Sheet",
+        c: "Jason Object Notation",
+        d: "Helicopters Terminals Motorboats Lamborginis",
+        correct: "b",
+    }
+    ];
+    let index = 0;
+    let correct = 0,
+    incorrect = 0,
+    total = quizData.length;
+    let questionBox = document.getElementById("questionBox");
+    let allInputs = document.querySelectorAll("input[type='radio']")
+    const loadQuestion = () => {
+    if (total === index) {
+        return quizEnd()
+    }
+    reset()
+    const data = quizData[index]
+    questionBox.innerHTML = `${index + 1}) ${data.question}`
+    allInputs[0].nextElementSibling.innerText = data.a
+    allInputs[1].nextElementSibling.innerText = data.b
+    allInputs[2].nextElementSibling.innerText = data.c
+    allInputs[3].nextElementSibling.innerText = data.d
+    }
+    
+    document.querySelector("#submit").addEventListener(
+    "click",
+    function() {
+        const data = quizData[index]
+        const ans = getAnswer()
+        if (ans === data.correct) {
+            correct++;
+        } else {
+            incorrect++;
+        }
+        index++;
+        loadQuestion()
+    }
+    )
+    
+    const getAnswer = () => {
+    let ans;
+    allInputs.forEach(
+        (inputEl) => {
+            if (inputEl.checked) {
+                ans = inputEl.value;
+            }
+        }
+    )
+    return ans;
+    }
+    
+    const reset = () => {
+    allInputs.forEach(
+        (inputEl) => {
+            inputEl.checked = false;
+        }
+    )
+    }
+    
+    const quizEnd = () => {
+    // console.log(document.getElementsByClassName("container"));
+    document.getElementsByClassName("containers")[0].innerHTML = `
+        <div class="col" style = "text-align: center">
+            <h3 class="w-100"> Hii, you've scored ${correct} / ${total} </h3>
+        </div>
+    `
+    console.log(correct/total);
+    }
+    loadQuestion(index);
+
 });
-
-
-
-
-
-
-
-
-
 
