@@ -60,37 +60,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const dropdownBtnNotes = newSubjectItem.querySelector("#dropdown-btn-notes");
             const dropdownBtnMCQs = newSubjectItem.querySelector("#dropdown-btn-mcqs");
+            const chapters = document.getElementById("chapters");
 
             dropdownBtnNotes.addEventListener('click', () => {
                 chaptername.style.display = 'flex';
-                notesContainer.style.display = 'block';  
-
+                notesContainer.style.display = 'block';
+            });
+            function fetchAndDisplayChapterNotes(chapterNumber) {
                 fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
                     .then(response => response.json())
                     .then(data => {
-                        notesContainer.innerHTML = `<h1 class="title">${subjectName}</h1>`;
-                        for (let i = 1; i <= 6; i++) {
-                            if (data[subjectName].Notes.chapters[i]) {
-                                const chapterData = data[subjectName].Notes.chapters[i];
-                                const embedLink = chapterData.replace("/view", "/preview");
-                                notesContainer.innerHTML += `
-                                    <br>
-                                    <h2 class="title2">Chapter ${i}</h2>
-                                    <br>
-                                    <iframe src="${embedLink}" class="chapter-iframe" allow="autoplay"></iframe>
-                                `;
-                            }
+                        const chapterData = data[subjectName].Notes.chapters[chapterNumber];
+                        if (chapterData) {
+                            const embedLink = chapterData.replace("/view", "/preview");
+                            notesContainer.innerHTML = `
+                                <h1 class="title">${subjectName}</h1>
+                                <br>
+                                <h2 class="title2">Chapter ${chapterNumber}</h2>
+                                <br>
+                                <iframe src="${embedLink}" class="chapter-iframe" allow="autoplay"></iframe>
+                            `;
+                        } else {
+                            notesContainer.innerHTML = `<p>No notes available for Chapter ${chapterNumber}.</p>`;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching the data:', error);
                         notesContainer.innerHTML = `<p>Error loading notes. Please try again later.</p>`;
                     });
+            }
+            const chapterLinks = chapters.getElementsByClassName('one');
+            Array.from(chapterLinks).forEach((chapterLink, index) => {
+                chapterLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    fetchAndDisplayChapterNotes(index + 1);
+                });
             });
 
             dropdownBtnMCQs.addEventListener('click', () => {
                 chaptername.style.display = 'none';
-                notesContainer.style.display = 'block';  
+                notesContainer.style.display = 'block';
 
                 fetch('https://raw.githubusercontent.com/ravi-kumar-t/json/main/api.json')
                     .then(response => response.json())
