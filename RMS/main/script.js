@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h4 class="header4">${subjectName}</h4>
                 </div>
                 <div class="dropdown-content hide">
+                    <button id="dropdown-btn-syllabus"><p>Syllabus</p></button>
                     <button id="dropdown-btn-notes"><p>Notes</p></button>
                     <button id="dropdown-btn-mcqs"><p>MCQs</p></button>
                     <button><p>PYQs</p></button>
@@ -60,12 +61,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const dropdownBtnNotes = newSubjectItem.querySelector("#dropdown-btn-notes");
             const dropdownBtnMCQs = newSubjectItem.querySelector("#dropdown-btn-mcqs");
-            const chapters = document.getElementById("chapters");
+            const dropdownBtnSyllabus = newSubjectItem.querySelector("#dropdown-btn-syllabus");
+
+            dropdownBtnSyllabus.addEventListener('click', () => {
+                fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
+                    .then(response => response.json())
+                    .then(data =>{
+                        const syllabus = data[subjectName].Syllabus;
+                        console.log(syllabus);
+                        const link = syllabus.replace("/view", "/preview");
+                        notesContainer.innerHTML = `<h1 class="title">${subjectName} Syllabus</h1>
+                        <br>
+                                <iframe src="${link}" class="chapter-iframe" allow="autoplay"></iframe>
+                        
+                        
+                        `;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the data:', error);
+                        notesContainer.innerHTML = `<p>Error loading syllabus. Please try again later.</p>`;
+                    });
+            });
 
             dropdownBtnNotes.addEventListener('click', () => {
                 chaptername.style.display = 'flex';
                 notesContainer.style.display = 'block';
             });
+
             function fetchAndDisplayChapterNotes(chapterNumber) {
                 fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/RMS.JSON')
                     .then(response => response.json())
@@ -89,7 +111,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         notesContainer.innerHTML = `<p>Error loading notes. Please try again later.</p>`;
                     });
             }
-            const chapterLinks = chapters.getElementsByClassName('one');
+
+            const chapterLinks = chaptername.getElementsByClassName('one');
             Array.from(chapterLinks).forEach((chapterLink, index) => {
                 chapterLink.addEventListener('click', (event) => {
                     event.preventDefault();
