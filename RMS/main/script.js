@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button id="dropdown-btn-syllabus"><p>Syllabus</p></button>
                     <button id="dropdown-btn-notes"><p>Notes</p></button>
                     <button id="dropdown-btn-mcqs"><p>MCQs</p></button>
-                    <button><p>PYQs</p></button>
                 </div>
             `;
 
