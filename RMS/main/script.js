@@ -123,9 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 chaptername.style.display = 'none';
                 notesContainer.style.display = 'block';
 
-                fetch('https://raw.githubusercontent.com/ravi-kumar-t/json/main/api.json')
+                fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/Mcq.json')
                     .then(response => response.json())
                     .then(data => {
+                        console.log(data);
                         const mcqList = data[subjectName] ? data[subjectName].MCQs : [];
                         notesContainer.innerHTML = `<h1 class="title">${subjectName} MCQs</h1>`;
 
