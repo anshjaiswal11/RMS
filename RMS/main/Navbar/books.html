@@ -9,7 +9,7 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #000000;
+    background-color: #131217;
 }
 
 .container {
@@ -69,6 +69,11 @@ header h1 {
     font-size: 15px;
     font-weight: 600;
 }
+.book-img:hover{
+    transform: scale(1.1);
+    transition: transform 0.5s;
+
+}
 
     </style>
 </head>
@@ -80,19 +85,24 @@ header h1 {
         <main>
             <div class="book-container">
                 <div class="book">
-                    <img src="/IMG/books.png" alt="book img">
+                    <img src="/IMG/books.png" alt="book img" class="book-img">
                     <h6 class="subname">MTH401 DISCRETE MATHEMATICS</h6>
                     <button onclick="viewBook('https://drive.google.com/file/d/1dDJu3Vygw1ovIAyflCwhbVfnzoJUMHha/view?usp=sharing')">view/download</button>
                 </div>
                 <div class="book">
-                    <img src="/IMG/books2.png" alt="book img">
+                    <img src="/IMG/books2.png" alt="book img" class="book-img">
                     <h6 class="subname">INT108 PYTHON PROGRAMMING</h6>
                     <button onclick="viewBook('https://drive.google.com/file/d/1HTmB2CEEgmEwgsfKuAIU_BWav7zDoKm8/view?usp=sharing')">view/download</button>
                 </div>
                 <div class="book">
-                    <img src="/IMG/book3" alt="book img">
+                    <img src="/IMG/book3" alt="book img" class="book-img">
                     <h6 class="subname">PHY110 ENGINEERING PHYSICS</h6>
                     <button onclick="viewBook('https://drive.google.com/file/d/1ZeYJJ-dmKdCv_RxuoIMy4nwD2ArpBgTW/view?usp=sharing')">view/download</button>
+                </div>
+                <div class="book">
+                    <img src="/IMG/book4.png" alt="book img" class="book-img">
+                    <h6 class="subname">CSE101 COMPUTER PROGRAMMING</h6>
+                    <button onclick="viewBook('https://drive.google.com/file/d/1sHPNpECUdjs14FMTfBcmKJoKVvjoVcKv/view?usp=sharing')">view/download</button>
                 </div>
             </div>
         </main>
