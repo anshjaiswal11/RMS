@@ -753,3 +753,9 @@ iframe {
 .dropdown-content.show {
   display: block;
 }
+.error-underdev{
+  text-align: center;
+  font-size: 2em;
+  margin-top: 20px;
+}
+

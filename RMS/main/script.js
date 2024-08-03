@@ -78,7 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(error => {
                         console.error('Error fetching the data:', error);
-                        notesContainer.innerHTML = `<p>Error loading syllabus. Please try again later.</p>`;
+                        notesContainer.innerHTML = `<h6 class="error-underdev"We Apologize for the Inconvenience</h6>
+                        <br> <p>Our services are currently under development. Unfortunately, we are unable to assist you with this request at the moment. Thank you for your understanding.</p>`;
                     });
             });
 
@@ -107,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(error => {
                         console.error('Error fetching the data:', error);
-                        notesContainer.innerHTML = `<p>Error loading notes. Please try again later.</p>`;
+                        notesContainer.innerHTML = `<h6 class="error-underdev">We Apologize for the Inconvenience</h6>
+                        <br> <p>Our services are currently under development. Unfortunately, we are unable to assist you with this request at the moment, we will be updating soon. Thank you for your understanding.</p>`;
                     });
             }
 
