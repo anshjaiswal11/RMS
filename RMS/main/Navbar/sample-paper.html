@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+  <head>
+    <title>Samplepaper-rms</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abel&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: "Abel", sans-serif;
+      }
+      .code-font {
+        position: relative;
+        color: darkblue;
+        font-size: 2.5rem;
+      }
+      .main-text {
+        font-size: 4.5rem;
+        color: #53538a;
+      }
+      .code-font::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        display: inline-block;
+        background-color: #606060;
+        vertical-align: top;
+        width: 5px;
+        height: 45px;
+        -webkit-animation: blink 1s step-end infinite;
+        animation: blink 1s step-end infinite;
+      }
+      @-webkit-keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="h-100">
+    <div class="container h-100">
+      <div class="d-flex flex-column justify-content-around h-100">
+        <h3 class="text-center h1">
+          <code class="code-font">&gt; Hello, Vertos</code>
+        </h3>
+
+        <div class="row">
+          <div class="col d-none d-sm-block d-xs-block">
+            <img
+              id="background-img"
+              src="/IMG/development-dark-simple.svg"
+              alt="Under Construction Image"
+              width="100%"
+              class="img-responsive"
+              height="100%"
+            />
+          </div>
+          <div class="col text-md-left text-center">
+            <div class="pt-5 mt-5">
+              <div class="text-uppercase">
+                <h1 class="main-text">Coming</h1>
+                <h1 class="main-text">Soon...</h1>
+          </div>
+        </div>
+
+        <div class="row justify-content-center">
+          <a
+            target="_blank"
+            referrerpolicy="no-referrer"
+            href="https://github.com/anshjaiswal11/"
+          >
+            <img src="/IMG/icons/g.png" alt="Github" class="mx-2" />
+          </a>
+          <a
+            target="_blank"
+            referrerpolicy="no-referrer"
+            href="https://www.instagram.com/buildwithansh?igsh=MTJ3Mm5iOWVIMWduZA=="
+          >
+            <img src="/IMG/icons/i.png" alt="Instagram" class="mx-2" />
+          </a>
+          <a
+            target="_blank"
+            referrerpolicy="no-referrer"
+            href="https://www.linkedin.com/in/anshjais/"
+          >
+            <img src="/IMG/icons/l.png" alt="LinkedIn" class="mx-2" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

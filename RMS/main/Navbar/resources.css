@@ -221,6 +221,7 @@ a {
 #subjectSelect {
   padding: 5px;
   margin-right: 10px;
+  justify-content: center;
 }
 
 #clearAll {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form</title>
+    <link rel="stylesheet" href="/RMS/main/Navbar/contact.css">
+</head>
+<body>
+    <div class="container">
+        <form id="contactForm" action="/submit-form" method="POST">
+            <h2>Contact Us</h2>
+            <div class="input-box">
+                <input type="text" id="name" name="name" required>
+                <label for="name">Name</label>
+            </div>
+            <div class="input-box">
+                <input type="text" id="phone" name="phone" required>
+                <label for="phone">Phone No</label>
+            </div>
+            <div class="input-box">
+                <input type="email" id="email" name="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-box">
+                <textarea id="message" name="message" required></textarea>
+                <label for="message">Message</label>
+            </div>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.linkedin.com" target="_blank">LinkedIn</a>
+            <a href="https://github.com" target="_blank">GitHub</a>
+            <a href="https://www.instagram.com" target="_blank">Instagram</a>
+            <a href="https://www.facebook.com" target="_blank">Facebook</a>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 const videoData = {
     CHE110: [
-        { title: 'Introduction to Environmental Engineering', url: 'https://www.youtube.com/watch?v=KRUz68YmlTk' },
+        { title: 'Introduction to Environmental Engineering', url: 'https://www.youtube.com/embed/kXCFFupDK0g' },
         { title: 'Environmental Studies - Overview', url: 'https://www.youtube.com/watch?v=CN9XGyTfI68' },
         { title: 'Environmental Impact Assessment', url: 'https://www.youtube.com/watch?v=jzW6w4Fq8JQ' },
         { title: 'Pollution Control Technologies', url: 'https://www.youtube.com/watch?v=Y5cX7N77Fg0' },
@@ -166,10 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 videoCard.classList.add('video-card');
                 
                 videoCard.innerHTML = `
-                    <iframe src="${video.url}?autoplay=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    <div class="video-header">${video.title}</div>
-                `;
-                
+                <iframe src="${video.url}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <div class="video-header">${video.title}</div>
+            `;
                 videoContainer.appendChild(videoCard);
             });
             
