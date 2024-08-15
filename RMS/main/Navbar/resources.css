@@ -1,0 +1,292 @@
+/* Existing styles */
+
+@import url("https://fonts.googleapis.com/css2?family=Alata&family=Prata&family=Oswald:wght@500&display=swap");
+
+:root {
+  /* COLORS */
+  /* light themes */
+  --background-light: hsl(293, 100%, 98%);
+  --on-background-light: hsl(264, 8%, 12%);
+  --surface-light: hsl(293, 100%, 98%);
+  --on-surface-light: hsl(264, 8%, 12%);
+  --on-surface-variant-light: hsl(264, 7%, 29%);
+  --surface-container-low-light: hsl(278, 44%, 96%);
+  --surface-container-light: hsl(276, 38%, 95%);
+  --surface-bright-light: hsl(293, 100%, 98%);
+  --primary-light: hsl(256, 34%, 48%);
+  --on-primary-light: hsl(0, 0%, 100%);
+  --outline-light: hsl(270, 4%, 47%);
+  --outline-variant-light: hsl(270, 11%, 79%);
+
+  /* dark themes */
+  --background-dark: hsl(260, 14%, 8%);
+  --on-background-dark: hsl(280, 17%, 90%);
+  --surface-dark: hsl(260, 14%, 8%);
+  --on-surface-variant-dark: hsl(270, 11%, 79%);
+  --on-surface-dark: hsl(280, 17%, 90%);
+  --surface-container-low-dark: hsl(264, 8%, 12%);
+  --surface-container-dark: hsl(257, 10%, 14%);
+  --surface-bright-dark: hsl(270, 5%, 23%);
+  --primary-dark: hsl(258, 100%, 87%);
+  --on-primary-dark: hsl(259, 58%, 28%);
+  --outline-dark: hsl(264, 5%, 58%);
+  --outline-variant-dark: hsl(264, 7%, 29%);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: var(--background-light);
+  --on-background: var(--on-background-light);
+  --surface: var(--surface-light);
+  --on-surface: var(--on-surface-light);
+  --on-surface-variant: var(--on-surface-variant-light);
+  --surface-container-low: var(--surface-container-low-light);
+  --surface-container: var(--surface-container-light);
+  --surface-bright: var(--surface-bright-light);
+  --primary: var(--primary-light);
+  --on-primary: var(--on-primary-light);
+  --outline: var(--outline-light);
+  --outline-variant: var(--outline-variant-light);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: var(--background-dark);
+  --on-background: var(--on-background-dark);
+  --surface: var(--surface-dark);
+  --on-surface: var(--on-surface-dark);
+  --on-surface-variant: var(--on-surface-variant-dark);
+  --surface-container-low: var(--surface-container-low-dark);
+  --surface-container: var(--surface-container-dark);
+  --surface-bright: var(--surface-bright-dark);
+  --primary: var(--primary-dark);
+  --on-primary: var(--on-primary-dark);
+  --outline: var(--outline-dark);
+  --outline-variant: var(--outline-variant-dark);
+}
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  border: none;
+}
+
+body {
+  background-color: var(--background);
+}
+
+a {
+  text-decoration: none;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .logo .light,
+[data-theme="light"] .logo .dark {
+  display: none;
+}
+
+[data-theme="dark"] .logo .dark,
+[data-theme="light"] .logo .light {
+  display: block;
+}
+
+.theme-btn .dark {
+  display: block;
+}
+
+.theme-btn .light {
+  display: none;
+}
+
+[data-theme="light"] .theme-btn .dark {
+  display: none;
+}
+
+[data-theme="light"] .theme-btn .light {
+  display: block;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 70px;
+  border: none;
+}
+
+.navbar {
+  background-color: var(--surface-container);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--top-bar-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px;
+  padding-inline: 30px;
+  z-index: 4;
+}
+
+.navbar-left {
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  font-size: 1.6rem;
+  font-family: "Oswald", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.navbar-left:hover {
+  filter: drop-shadow(0px 0px 14px rgba(255, 174, 0, 0.712));
+}
+
+.navbar-right a {
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  margin-left: 20px;
+  font-family: "Manrope", sans-serif;
+  font-size: 1em;
+  position: relative;
+}
+
+.navbar-right a::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  border-radius: 4px;
+  background-color: #ff9900;
+  bottom: 0;
+  left: 0;
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.navbar-right a:hover::before {
+  transform-origin: left;
+  transform: scaleX(1);
+}
+
+@media (max-width: 768px) {
+  .class-chapter h4 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .class-chapter {
+    flex-direction: column;
+  }
+
+  .class-chapter h4 {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+/* RESPONSIVE */
+
+@media screen and (max-width: 800px) {
+  .navbar-left {
+    font-size: 1.2rem;
+  }
+
+  .navbar-right a {
+    font-size: 0.8em;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .navbar-left {
+    font-size: 1.2rem;
+  }
+
+  .navbar-right a {
+    font-size: 0.8em;
+  }
+}
+
+.controls {
+  margin: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#subjectSelect {
+  padding: 5px;
+  margin-right: 10px;
+  justify-content: center;
+}
+
+#clearAll {
+  padding: 5px 10px;
+}
+
+#resultMessage {
+  margin: 20px;
+  font-size: 16px;
+}
+
+#videoContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px;
+}
+
+.video-card {
+  width: calc(25% - 20px);
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.video-card iframe {
+  width: 100%;
+  height: 180px;
+  border: none;
+  border-radius: 10px;
+}
+
+.video-card .video-header {
+  padding: 10px;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  #subjectSelect {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  #clearAll {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .video-card {
+    width: calc(33.3333% - 20px);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .video-card {
+    width: calc(50% - 20px);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .video-card {
+    width: calc(100% - 20px);
+  }
+}

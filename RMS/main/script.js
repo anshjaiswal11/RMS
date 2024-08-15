@@ -249,4 +249,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderQuestion(currentQuestionIndex);
     }
+const hamburger = document.querySelector('.hamburger');
+const navLinks = document.querySelector('.navbar-right');
+const navlist_display = document.querySelector('.navbar-left');
+
+hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    navlist_display.classList.toggle('hidden');
+});
+
 });
