@@ -1,44 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form</title>
-    <link rel="stylesheet" href="/RMS/main/Navbar/contact.css">
-</head>
-<body>
-    <div class="container">
-        <form id="contactForm" action="/submit-form" method="POST">
-            <h2>Contact Us</h2>
-            <div class="input-box">
-                <input type="text" id="name" name="name" required>
-                <label for="name">Name</label>
-            </div>
-            <div class="input-box">
-                <input type="text" id="phone" name="phone" required>
-                <label for="phone">Phone No</label>
-            </div>
-            <div class="input-box">
-                <input type="email" id="email" name="email" required>
-                <label for="email">Email</label>
-            </div>
-            <div class="input-box">
-                <textarea id="message" name="message" required></textarea>
-                <label for="message">Message</label>
-            </div>
-            <button type="submit">Send</button>
-        </form>
-    </div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Overpass+Mono&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/RMS/main/Navbar/contact.css">
+        <title>Contact-Us</title>
+    </head>
+    <body>
+        <main>
+            <div class="title">Contact us</div>
+            <div class="title-info">We'll get back to you soon!</div>
 
-    <footer>
-        <div class="social-links">
-            <a href="https://www.linkedin.com" target="_blank">LinkedIn</a>
-            <a href="https://github.com" target="_blank">GitHub</a>
-            <a href="https://www.instagram.com" target="_blank">Instagram</a>
-            <a href="https://www.facebook.com" target="_blank">Facebook</a>
-        </div>
-    </footer>
+            <form id="contact-form" class="form" action="mailto:anshjaiswal1804@gmail.com" method="POST" enctype="text/plain">
+                <div class="input-group">
+                    <input type="text" name="first_name" id="first-name" placeholder="First name" required>
+                    <label for="first-name">First name</label>
+                </div>
+            
+                <div class="input-group">
+                    <input type="text" name="last_name" id="last-name" placeholder="Last name" required>
+                    <label for="last-name">Last name</label>
+                </div>
+            
+                <div class="input-group">
+                    <input type="email" name="email" id="email" placeholder="e-mail" required>
+                    <label for="email">e-mail</label>
+                </div>
+            
+                <div class="textarea-group">
+                    <textarea name="message" id="message" rows="5" placeholder="Message" required></textarea>
+                    <label for="message">Message</label>
+                </div>
+            
+                <div class="button-div">
+                    <button type="submit" id="submit">Send</button>
+                </div>
+            </form>
+            
+        </main>
 
-    <script src="scripts.js"></script>
-</body>
+        <footer>
+            <a href="#" target="_blank"><img class="social-media-img" src="/IMG/icons/github.svg" alt="GitHub"></a>
+            <a href="#" target="_blank"><img class="social-media-img" src="/IMG/icons/instagram.svg" alt="Instagram"></a> 
+            <a href="#" target="_blank"><img class="social-media-img" src="/IMG/icons/linkedin.svg" alt="LinkedIn"></a>
+        </footer>
+        <script>const dropdown = document.querySelector(".dropdown");
+            const account = document.querySelector(".account");
+            
+            account.addEventListener
+            (
+                "click",
+                (event) =>
+                {
+                    dropdown.classList.toggle("hide");
+                    event.stopPropagation();
+                }
+            );
+            
+            window.addEventListener
+            (
+                "click",
+                () =>
+                {
+                    dropdown.classList.add("hide");
+                }
+            );
+            burger_menu.addEventListener
+            (
+                "click",
+                (event) =>
+                {
+                    ul.classList.toggle("hide-burger-menu");
+                    event.stopPropagation();
+                }
+            );
+            
+            window.addEventListener
+            (
+                "click",
+                () =>
+                {
+                    ul.classList.add("hide-burger-menu");
+                }
+            );</script>
+    </body>
 </html>
