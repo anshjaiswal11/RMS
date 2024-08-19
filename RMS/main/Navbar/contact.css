@@ -6,6 +6,7 @@ main
     justify-content: center;
     width: 90%;
     margin: auto;
+    margin-top: 60px;
 }
 
 .title
@@ -172,7 +173,7 @@ button:hover
         font-size: 15px;
     }
 }
-footer
+.footer1
 {
     display: flex;
     justify-content: space-around;
@@ -184,12 +185,26 @@ footer
     border-top: 1px solid #212121;
 }
 
-footer:hover
+.footer1:hover
 {
     animation: fade 0.3s ease;
     opacity: 0.9;
 }
-
+.footer2
+{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 20vh;
+    width: 75%;
+    margin: auto;
+    opacity: 0.2;
+}
+.footer2:hover
+{
+    animation: fade 0.3s ease;
+    opacity: 0.9;
+}
 .social-media-img
 {
     height: 5vh;

@@ -81,7 +81,7 @@
   border: none;
 }
 body {
-  background-color: var(--background);
+  /* background-color: var(--background); */
 }
 a {
   text-decoration: none;

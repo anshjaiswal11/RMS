@@ -92,6 +92,23 @@
         transform: scale(1.1);
         transition: transform 0.5s;
       }
+      footer
+{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 20vh;
+    width: 75%;
+    margin: auto;
+    opacity: 0.2;
+    border-top: 1px solid #212121;
+}
+
+footer:hover
+{
+    animation: fade 0.3s ease;
+    opacity: 0.9;
+}
     </style>
   </head>
   <body id="body" class="body">
@@ -235,5 +252,8 @@
         window.open(url, "_blank");
       }
     </script>
+    <footer class="footer" style="padding: 20px; color: white; text-align: center;">
+        <p style="margin-top: 15px;">&copy; 2024 Reappear Management System. All Rights Reserved.</p>
+    </footer>
   </body>
 </html>
