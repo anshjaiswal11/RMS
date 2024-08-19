@@ -1,154 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Books</title>
+    <script
+      defer
+      src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5152588894171364"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/RMS/main/Navbar/navbar.css" />
     <style>
       body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #131217;
-}
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #131217;
+      }
 
-.container {
-    width: 100%;
-    margin: auto;
-    overflow: hidden;
-}
+      .container {
+        width: 100%;
+        margin: auto;
+        overflow: hidden;
+      }
 
-header {
-    background: #222027;
-    color: #fff;
-    padding-top: 20px;
-    min-height: 50px;
-}
+      .welcum {
+        color: #fff;
+        padding-top: 20px;
+        min-height: 50px;
+        margin-top: 60px;
+      }
 
-header h1 {
-    text-align: center;
-    text-transform: uppercase;
-    margin: 0;
-    font-size: 24px;
-}
+      .welcum h1 {
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0;
+        font-size: 24px;
+      }
 
-.book-container {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
+      .book-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
 
-.book {
-    padding: 20px;
-    margin: 20px;
-    text-align: center;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
+      .book {
+        padding: 20px;
+        margin: 20px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
 
-.book img {
-    width: 300px;
-    height: 350px;
-    margin-bottom: 10px;
-}
+      .book img {
+        width: 300px;
+        height: 350px;
+        margin-bottom: 10px;
+      }
 
-.book button {
-    background: #333;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    text-transform: uppercase;
-}
+      .book button {
+        background: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        text-transform: uppercase;
+      }
 
-.book button:hover {
-    background: #555;
-}
-.subname{
-  color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-}
-.book-img:hover{
-    transform: scale(1.1);
-    transition: transform 0.5s;
-
-}
-
+      .book button:hover {
+        background: #555;
+      }
+      .subname {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .book-img:hover {
+        transform: scale(1.1);
+        transition: transform 0.5s;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body id="body" class="body">
+    <header class="navbar" id="nav">
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div>
+        <a href="/index.html" class="navbar-left">Reappear Management System</a>
+      </div>
+      <div class="navbar-right">
+        <a href="/RMS/main/Navbar/sample-paper.html">Sample Paper</a>
+        <a href="/RMS/main/Navbar/resources.html">Resource</a>
+        <a href="/RMS/main/Navbar/contact.html">Contact us</a>
+        <a href="/RMS/main/Navbar/books.html">Books</a>
+      </div>
+      <button class="icon-btn theme-btn" data-theme-btn>
+        <span class="material-symbols-outlined dark" aria-hidden="true">
+          dark_mode
+        </span>
+        <span class="material-symbols-outlined light" aria-hidden="true">
+          light_mode
+        </span>
+        <div class="state-layer"></div>
+      </button>
+    </header>
+    <header class="welcum">
+      <h1 class="head1">welcome to books</h1>
+    </header>
     <div class="container">
-        <header>
-            <h1>welcome to books</h1>
-        </header>
-        <main>
-            <div class="book-container">
-                <div class="book">
-                    <img src="/IMG/books.png" alt="book img" class="book-img">
-                    <h6 class="subname">MTH401 DISCRETE MATHEMATICS</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1dDJu3Vygw1ovIAyflCwhbVfnzoJUMHha/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/books2.png" alt="book img" class="book-img">
-                    <h6 class="subname">INT108 PYTHON PROGRAMMING</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1HTmB2CEEgmEwgsfKuAIU_BWav7zDoKm8/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/book3" alt="book img" class="book-img">
-                    <h6 class="subname">PHY110 ENGINEERING PHYSICS</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1ZeYJJ-dmKdCv_RxuoIMy4nwD2ArpBgTW/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/book4.png" alt="book img" class="book-img">
-                    <h6 class="subname">CSE101 COMPUTER PROGRAMMING</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1sHPNpECUdjs14FMTfBcmKJoKVvjoVcKv/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/Screenshot 2024-07-30 171756.png" alt="book img" class="book-img">
-                    <h6 class="subname">CHE110 ENVIRONMENTAL STUDIES ENGINEERING</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1yZ6RPYZrOaBFmxJw8bdVjYF2Sg36EqyY/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/Screenshot 2024-07-30 172442.png" alt="book img" class="book-img">
-                    <h6 class="subname">MEC136 ENGINEERING GRAPHICS</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/16fd1E1v3mBapIbNWQgX3s-SSyBA301IX/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/Screenshot 2024-07-30 180852.png" alt="book img" class="book-img">
-                    <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1Wlqi6f7QPSImJpftPZhLkdIhRrHTtyY5/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/Screenshot 2024-07-31 002253.png" alt="book img" class="book-img">
-                    <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS MCQ</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/11jTofXEgQN4fQNebY0fsU45CYusOK-Y8/view?usp=sharing')">view/download</button>
-                </div>
-                <div class="book">
-                    <img src="/IMG/Screenshot 2024-08-01 140309.png" alt="book img" class="book-img">
-                    <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS MCQ</h6>
-                    <button onclick="viewBook('https://drive.google.com/file/d/1k5cJRfNtDfZFlPqrw5pWz9vBcnCMxAgy/view?usp=sharing')">view/download</button>
-                </div>
-            </div>
-        </main>
+      <main>
+        <div class="book-container">
+          <div class="book">
+            <img src="/IMG/books.png" alt="book img" class="book-img" />
+            <h6 class="subname">MTH401 DISCRETE MATHEMATICS</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1dDJu3Vygw1ovIAyflCwhbVfnzoJUMHha/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img src="/IMG/books2.png" alt="book img" class="book-img" />
+            <h6 class="subname">INT108 PYTHON PROGRAMMING</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1HTmB2CEEgmEwgsfKuAIU_BWav7zDoKm8/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img src="/IMG/book3" alt="book img" class="book-img" />
+            <h6 class="subname">PHY110 ENGINEERING PHYSICS</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1ZeYJJ-dmKdCv_RxuoIMy4nwD2ArpBgTW/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img src="/IMG/book4.png" alt="book img" class="book-img" />
+            <h6 class="subname">CSE101 COMPUTER PROGRAMMING</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1sHPNpECUdjs14FMTfBcmKJoKVvjoVcKv/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img
+              src="/IMG/Screenshot 2024-07-30 171756.png"
+              alt="book img"
+              class="book-img"
+            />
+            <h6 class="subname">CHE110 ENVIRONMENTAL STUDIES ENGINEERING</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1yZ6RPYZrOaBFmxJw8bdVjYF2Sg36EqyY/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img
+              src="/IMG/Screenshot 2024-07-30 172442.png"
+              alt="book img"
+              class="book-img"
+            />
+            <h6 class="subname">MEC136 ENGINEERING GRAPHICS</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/16fd1E1v3mBapIbNWQgX3s-SSyBA301IX/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img
+              src="/IMG/Screenshot 2024-07-30 180852.png"
+              alt="book img"
+              class="book-img"
+            />
+            <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1Wlqi6f7QPSImJpftPZhLkdIhRrHTtyY5/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img
+              src="/IMG/Screenshot 2024-07-31 002253.png"
+              alt="book img"
+              class="book-img"
+            />
+            <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS MCQ</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/11jTofXEgQN4fQNebY0fsU45CYusOK-Y8/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+          <div class="book">
+            <img
+              src="/IMG/Screenshot 2024-08-01 140309.png"
+              alt="book img"
+              class="book-img"
+            />
+            <h6 class="subname">INT306 DATABASE MANAGEMENT SYSTEMS MCQ</h6>
+            <button
+              onclick="viewBook('https://drive.google.com/file/d/1k5cJRfNtDfZFlPqrw5pWz9vBcnCMxAgy/view?usp=sharing')"
+            >
+              view/download
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
     <script>
       function viewBook(url) {
-    window.open(url, '_blank');
-}
-
+        window.open(url, "_blank");
+      }
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5152588894171364"
-    crossorigin="anonymous"></script>
-<!-- new-rms-ads -->
-<ins class="adsbygoogle"
-    style="display:block"
-    data-ad-client="ca-pub-5152588894171364"
-    data-ad-slot="9388588907"
-    data-ad-format="auto"
-    data-full-width-responsive="true"></ins>
-<script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-</body>
+  </body>
 </html>

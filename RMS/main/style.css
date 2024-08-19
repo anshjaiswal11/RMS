@@ -796,7 +796,6 @@ iframe {
       display: none;
       flex-direction: column;
       width: 100%;
-      background-color: #2d2c2c;
   }
 
   .navbar-right.active {

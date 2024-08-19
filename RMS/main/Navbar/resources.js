@@ -178,4 +178,12 @@ document.addEventListener('DOMContentLoaded', function() {
             resultMessage.textContent = '0 Results Found';
         }
     }
+    const hamburger = document.querySelector('.hamburger');
+const navLinks = document.querySelector('.navbar-right');
+const navlist_display = document.querySelector('.navbar-left');
+
+hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    navlist_display.classList.toggle('hidden');
+});
 });
