@@ -9,10 +9,13 @@ main
     margin-top: 60px;
 }
 
-.title
-{
+.title{
     font-size: 50px;
+    font-family: verdana;
     font-weight: bold;
+    background: linear-gradient(#fee140, #fa709a);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
     padding: 1.5% 0;
 }
 
@@ -81,14 +84,12 @@ textarea:focus ~ label, textarea:not(:placeholder-shown) ~ label
     font-size: 15px;
 }
 
-.button-div
-{
+.button-div{
     display: flex;
     justify-content: center;
 }
 
-button
-{
+#submit {
     padding: 2%;
     width: 50%;
     border: 1px solid;
@@ -96,15 +97,13 @@ button
     border-radius: 5px;
     font-family: inherit;
     font-size: 18px;
-    background-color: black;
-    color: inherit;
+    background: linear-gradient(#60ffaf, #0d6b28);    color: inherit;
     box-shadow: 0 0 10px #212121;
 }
 
-button:hover
-{
-    background-color: #424242;
-    color: #69f0ae;
+#submit:hover{
+    background: linear-gradient(#0f8f4f, #88ffaa);    color: inherit;
+    color: #ffffff;
     cursor: pointer;
 }
 
@@ -273,4 +272,94 @@ a:hover
 .hide
 {
     display: none;
+}
+
+
+
+
+
+
+/* General Styles for Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    color: white;
+}
+
+.navbar-left {
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.navbar-right {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 50%;
+}
+
+.nav-bar {
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-bar:hover {
+    color: #69f0ae;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.hamburger span {
+    height: 3px;
+    width: 25px;
+    background-color: #fff;
+    margin-bottom: 4px;
+    border-radius: 2px;
+}
+
+/* Media Queries for Mobile */
+@media screen and (max-width: 768px) {
+    .navbar-right {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        position: absolute;
+        top: 60px;
+        left: 0;
+        z-index: 1;
+    }
+    .navbar-right.active {
+        display: flex;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    .navbar-left {
+        flex-grow: 1;
+    }
+    
+    .navbar-right a {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
+    .navbar-right a:hover{
+        background-color: #000000;
+        transition: ease 0.5s;
+    }
+
+    .navbar-right a:last-child {
+        border-bottom: none;
+    }
 }
