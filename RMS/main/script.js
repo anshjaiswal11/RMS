@@ -71,14 +71,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         const link = syllabus.replace("/view", "/preview");
                         notesContainer.innerHTML = `<h1 class="title">${subjectName} Syllabus</h1>
                         <br>
-                                <iframe src="${link}" class="chapter-iframe" allow="autoplay"></iframe>
-                        
-                        
+                        <iframe src="${link}" class="chapter-iframe" allow="autoplay"></iframe>
                         `;
                     })
                     .catch(error => {
                         console.error('Error fetching the data:', error);
-                        notesContainer.innerHTML = `<h6 class="error-underdev"We Apologize for the Inconvenience</h6>
+                        notesContainer.innerHTML = `<h6 class="error-underdev">We Apologize for the Inconvenience</h6>
                         <br> <p>Our services are currently under development. Unfortunately, we are unable to assist you with this request at the moment. Thank you for your understanding.</p>`;
                     });
             });
@@ -180,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </label>
                             `).join('')}
                         </div>
+                        <p id="correct-answer-${index}" class="correct-answer" style="display:none; margin-top: 10px; color: red;">Correct Answer: ${mcq.answer}</p>
                     </div>
                     <div class="mcq-buttons">
                         <button class="mcq-btn mcq-btn-primary" ${index === 0 ? 'style="display:none;"' : ''} onclick="prevQuestion(${index})">Previous</button>
@@ -189,6 +188,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     <p id="feedback-${index}" class="feedback"></p>
                 </div>
             `;
+
+            const options = document.querySelectorAll(`input[name="mcq${index}"]`);
+            options.forEach(option => {
+                option.addEventListener('change', () => {
+                    const selectedOption = document.querySelector(`input[name="mcq${index}"]:checked`);
+                    const correctAnswerElement = document.getElementById(`correct-answer-${index}`);
+
+                    if (selectedOption) {
+                        const selectedValue = selectedOption.value;
+                        if (selectedValue !== mcq.answer) {
+                            correctAnswerElement.style.display = 'block';
+                        } else {
+                            correctAnswerElement.style.display = 'none';
+                        }
+                    }
+                });
+            });
         }
 
         window.nextQuestion = function (index) {
@@ -249,13 +265,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderQuestion(currentQuestionIndex);
     }
-const hamburger = document.querySelector('.hamburger');
-const navLinks = document.querySelector('.navbar-right');
-const navlist_display = document.querySelector('.navbar-left');
 
-hamburger.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-    navlist_display.classList.toggle('hidden');
-});
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.navbar-right');
+    const navlist_display = document.querySelector('.navbar-left');
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        navlist_display.classList.toggle('hidden');
+    });
 
 });
