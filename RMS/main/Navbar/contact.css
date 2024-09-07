@@ -231,9 +231,22 @@ textarea:focus ~ label, textarea:not(:placeholder-shown) ~ label
 
 @media screen and (max-width: 1295px)
 {
+    .footer1{
+        width: 20%;
+    }
     footer
     {
         width: 95%;
+    }
+    .footer2{
+        gap: 10px;
+    }
+    .footer2 h1{
+        font-size: 30px;
+    }
+    .footer{
+        font-size: 20px;
+        /* width: 50%; */
     }
 }
 
@@ -242,6 +255,10 @@ textarea:focus ~ label, textarea:not(:placeholder-shown) ~ label
     footer
     {
         opacity: 0.9;
+    }
+    .footer{
+        font-size: 20px;
+        /* width: 50%; */
     }
 }
 *
@@ -256,6 +273,7 @@ body
     background-color: black;
     font-family: 'Overpass Mono', monospace;
     color: #f5f5f5;
+    width: 100%;
 }
 
 a
@@ -286,6 +304,7 @@ a:hover
     align-items: center;
     padding: 1rem;
     color: white;
+    width: auto;
 }
 
 .navbar-left {
@@ -298,12 +317,6 @@ a:hover
     justify-content: space-around;
     align-items: center;
     width: 50%;
-}
-
-.nav-bar {
-    padding: 10px;
-    color: white;
-    text-decoration: none;
 }
 
 .nav-bar:hover {
