@@ -824,6 +824,8 @@ footer:hover
     animation: fade 0.3s ease;
     opacity: 0.9;
 }
+
+/* pop-up will be removed after 7 days */
 .popup {
   display: none; 
   position: fixed; 
