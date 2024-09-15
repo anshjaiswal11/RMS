@@ -866,3 +866,7 @@ footer:hover
     width: 80%;
   }
 }
+
+.drop-down-content{
+  padding: 5px;
+}
