@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h4 class="header4">${subjectName}</h4>
                 </div>
                 <div class="dropdown-content hide">
-                    <button id="dropdown-btn-syllabus"><p>Syllabus</p></button>
-                    <button id="dropdown-btn-notes"><p>Notes</p></button>
-                    <button id="dropdown-btn-mcqs"><p>MCQs</p></button>
+                    <button id="dropdown-btn-syllabus" class="drop-down-content"><p>Syllabus</p></button>
+                    <button id="dropdown-btn-notes" class="drop-down-content"><p>Notes</p></button>
+                    <button id="dropdown-btn-mcqs" class="drop-down-content"><p>MCQs</p></button>
                 </div>
             `;
 
