@@ -874,3 +874,17 @@ footer:hover
   padding: 5px;
   font-size: 1.2em;
 }
+.popup-link-BTN{
+  background-color: #ff9900;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.popup-content h2, .popup-content p, .popup-content ul, .popup-content a {
+  margin-bottom: 20px;
+}
