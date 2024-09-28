@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap" rel="stylesheet">
+    <title>MCQ Display with Pagination</title>
+    <style>
+        /* General Styles */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* Card Styles */
+        .card {
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+            background-color: #222;
+        }
+
+        .question-heading {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .para {
+            font-size: 1rem;
+            color: #ddd;
+        }
+
+        .answer {
+            font-size: 1.2rem;
+            color: #0f0;
+            display: none;
+        }
+
+        /* Pagination and Button Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #777;
+        }
+
+        /* Loader Styles */
+        #loader {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100vh;
+        }
+
+        .loading-text {
+            font-size: 5rem;
+            font-family: "Protest Guerrilla", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            margin-right: 50px;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            /* position: fixed; */
+            width: 100%;
+            bottom: 0;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .card {
+                padding: 8px;
+            }
+
+            .question-heading {
+                font-size: 1.2rem;
+            }
+
+            .para {
+                font-size: 0.9rem;
+            }
+
+            .answer {
+                font-size: 1rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+
+            .loading-text {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 5px;
+            }
+
+            .question-heading {
+                font-size: 1rem;
+            }
+
+            .para {
+                font-size: 0.8rem;
+            }
+
+            button {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+
+            .loading-text {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>1000 Operating System MCQs</h1>
+    <div class="pagination" id="pagination">
+        <button id="prev-btn" disabled>Previous</button>
+        <button id="next-btn">Next</button>
+    </div>
+
+    <div id="mcq"></div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <h1 class="loading-text">RMSLPU</h1>
+        <img src="/IMG/74H8.gif" alt="Loading...">
+        </div>
+    <footer>
+        RMSLPU &copy; 2024 - All Rights Reserved
+    </footer>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalMCQs = 0;
+
+        // Fetch MCQs from the API
+        fetch('https://raw.githubusercontent.com/owaisansarii/sanfoundry-api/refs/heads/main/saved/1000%20Operating%20System%20MCQs.json')
+            .then(response => response.json())
+            .then(data => {
+                totalMCQs = data.length;
+                displayMCQs(data, currentPage);
+
+                // Next button functionality
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    if (currentPage < Math.ceil(totalMCQs / itemsPerPage)) {
+                        currentPage++;
+                        loadMCQs(data);
+                    }
+                });
+
+                // Previous button functionality
+                document.getElementById('prev-btn').addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        loadMCQs(data);
+                    }
+                });
+
+                function loadMCQs(data) {
+                    // Show loading text or animation
+                    document.getElementById('loader').style.display = 'flex';
+                    document.getElementById('mcq').style.display = 'none';
+                    document.getElementById('pagination').style.display = 'none'; // Hide the MCQs temporarily
+
+                    setTimeout(() => {
+                        displayMCQs(data, currentPage);
+                        document.getElementById('loader').style.display = 'none'; // Hide the loader
+                        document.getElementById('mcq').style.display = 'block';
+                        document.getElementById('pagination').style.display = 'flex'; // Show the MCQs
+
+                        // Scroll smoothly to the top of the MCQs section
+                        document.getElementById('mcq').scrollIntoView({ behavior: 'smooth' });
+
+                        // Toggle the pagination buttons based on the page
+                        togglePaginationButtons();
+                    }, 2000); // Simulate loading delay (500ms)
+                }
+
+                function togglePaginationButtons() {
+                    document.getElementById('prev-btn').disabled = currentPage === 1;
+                    document.getElementById('next-btn').disabled = currentPage >= Math.ceil(totalMCQs / itemsPerPage);
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+        // Function to display MCQs based on the current page
+        function displayMCQs(data, page) {
+            const mcq = document.getElementById('mcq');
+            mcq.innerHTML = ''; // Clear the MCQs
+
+            // Calculate start and end index for MCQs to display
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, data.length);
+
+            // Generate the MCQ HTML for the current page
+            for (let i = startIndex; i < endIndex; i++) {
+                mcq.innerHTML += `
+                <div class="card">
+                    <h1 class="question-heading">Q(${i + 1}): ${data[i].Question}</h1>
+                    <p class="para">${data[i].Options[0]}</p>
+                    <p class="para">${data[i].Options[1]}</p>
+                    <p class="para">${data[i].Options[2]}</p> 
+                    <p class="para">${data[i].Options[3]}</p>
+                    <h3 class="answer">${data[i].Answer}</h3>
+                    <button class="show-answer-btn">Show Answer</button>
+                </div>
+                `;
+            }
+
+            // Add event listeners to the "Show Answer" buttons for the current page
+            const buttons = document.querySelectorAll('.show-answer-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const answer = this.previousElementSibling; // Select the answer element before the button
+                    answer.style.display = 'block'; // Show the answer
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

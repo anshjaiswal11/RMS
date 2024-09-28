@@ -139,6 +139,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 chaptername.style.display = 'none';
                 notesContainer.style.display = 'block';
 
+                if (subjectName === "CSE316 OPERATING SYSTEMS") {
+                    window.location.href = '/RMS/main/CSE316.HTML'; // Redirect to cse316.html
+                    return; // Exit the function to prevent further code execution
+                }
+
                 fetch('https://raw.githubusercontent.com/CODINGWITHU/RMSAPI/main/Mcq.json')
                     .then(response => response.json())
                     .then(data => {
