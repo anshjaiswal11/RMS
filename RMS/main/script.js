@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 chaptername.style.display = 'none';
                 notesContainer.style.display = 'block';
 
-                if (subjectName === "CSE316 OPERATING SYSTEMS") {
+                if (subjectName === "CSE306 COMPUTER NETWORKS") {
                     window.location.href = '/RMS/main/CSE316.HTML'; // Redirect to cse316.html
                     return; // Exit the function to prevent further code execution
                 }
