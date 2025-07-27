@@ -1,20 +1,21 @@
-# Allow all web crawlers to access most content
 User-agent: *
-Disallow:
+Allow: /
 
-# Disallow search engines from crawling specific files or directories
-# Prevent duplicate content from being indexed
-Disallow: /pdfs/
-Disallow: /printable-versions/
+# Sitemap
+Sitemap: https://rmslpu.xyz/sitemap.xml
 
-# Prevent search engines from indexing any admin or private areas
+# Disallow admin and private areas
 Disallow: /admin/
-Disallow: /login/
 Disallow: /private/
+Disallow: /api/
 
-# Disallow temporary files or sensitive data
-Disallow: /temp/
-Disallow: /backup/
+# Allow important pages
+Allow: /
+Allow: /subjects
+Allow: /ai-summarizer
+Allow: /resources
+Allow: /contact
+Allow: /privacy
 
-# Direct crawlers to your XML sitemap
-Sitemap: https://www.rmslpu.xyz/sitemap.xml
+# Crawl delay
+Crawl-delay: 1
