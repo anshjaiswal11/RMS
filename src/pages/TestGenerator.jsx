@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
@@ -22,7 +22,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '';
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY ;
 const YOUR_SITE_URL = process.env.REACT_APP_SITE_URL || 'http://localhost:3000';
 const YOUR_SITE_NAME = process.env.REACT_APP_SITE_NAME || 'RMS Study Assistant';
 
@@ -71,6 +71,7 @@ const TestGenerator = () => {
     }
   ];
 
+  // Handle file drop
   const onDrop = useCallback((acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
     if (uploadedFile && uploadedFile.type === 'application/pdf') {
@@ -124,126 +125,179 @@ const TestGenerator = () => {
     }
   };
 
-  // Generate test questions using AI
-  const generateTest = async (level) => {
-    if (!file) {
-      toast.error('Please upload a PDF file first.');
-      return;
+  // Parse AI response into structured test data
+  // Replace the parseTestResponse function with this improved version:
+const parseTestResponse = (text) => {
+  console.log("Raw AI Response:", text); // Debug log
+  
+  const questions = [];
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  
+  let currentQuestion = null;
+  let inExplanation = false;
+  
+  lines.forEach(line => {
+    const trimmedLine = line.trim();
+    
+    // Match question pattern (more flexible)
+    if (trimmedLine.match(/^Question\s*\d+[:.]/i)) {
+      // Save previous question if valid
+      if (currentQuestion && 
+          currentQuestion.text && 
+          currentQuestion.options.length >= 2 && 
+          currentQuestion.correctAnswer) {
+        questions.push(currentQuestion);
+      }
+      
+      // Extract question text more robustly
+      const questionText = trimmedLine.replace(/^Question\s*\d+[:.]\s*/i, '').trim();
+      currentQuestion = {
+        text: questionText || "Unknown question",
+        options: [],
+        correctAnswer: '',
+        explanation: ''
+      };
+      inExplanation = false;
+    } 
+    // Match option pattern (more flexible)
+    else if (currentQuestion && trimmedLine.match(/^[A-D][\).]\s+/i)) {
+      // Handle options
+      if (currentQuestion.options.length < 4) {
+        const option = trimmedLine.replace(/^[A-D][\).]\s+/i, '').trim();
+        if (option) {
+          currentQuestion.options.push(option);
+        }
+      }
+    } 
+    // Match correct answer pattern
+    else if (currentQuestion && trimmedLine.match(/^Correct\s+Answer[:.]\s*[A-D]/i)) {
+      const answerMatch = trimmedLine.match(/[A-D]/i);
+      if (answerMatch) {
+        currentQuestion.correctAnswer = answerMatch[0].toUpperCase();
+      }
+    } 
+    // Match explanation start
+    else if (currentQuestion && trimmedLine.match(/^Explanation[:.]/i)) {
+      currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').trim();
+      inExplanation = true;
+    } 
+    // Continue explanation or add to current content
+    else if (currentQuestion) {
+      if (inExplanation && trimmedLine) {
+        currentQuestion.explanation += ' ' + trimmedLine;
+      }
+      // Handle unstructured content that might be part of question/explanation
+      else if (!inExplanation && !currentQuestion.correctAnswer && trimmedLine && 
+               currentQuestion.options.length < 4) {
+        // This might be part of the question text or stray content
+        if (currentQuestion.text === "Unknown question") {
+          currentQuestion.text = trimmedLine;
+        }
+      }
+    }
+  });
+  
+  // Add the last question if valid
+  if (currentQuestion && 
+      currentQuestion.text && 
+      currentQuestion.text !== "Unknown question" &&
+      currentQuestion.options.length >= 2 && 
+      currentQuestion.correctAnswer) {
+    questions.push(currentQuestion);
+  }
+  
+  console.log("Parsed Questions:", questions); // Debug log
+  return { questions };
+};
+
+// Also update the generateTest function with better error handling:
+const generateTest = async (level) => {
+  if (!file) {
+    toast.error('Please upload a PDF file first.');
+    return;
+  }
+
+  setIsProcessing(true);
+  setUploadProgress(0);
+  setTestResults(null);
+  setIsSubmitted(false);
+  setUserAnswers({});
+
+  try {
+    // Show progress
+    setUploadProgress(30);
+    const pdfContent = await extractTextFromPDF(file);
+    setUploadProgress(70);
+
+    const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
+    
+    Requirements:
+    - Generate exactly ${level === 'basic' ? 15 : level === 'medium' ? 20 : 50} questions
+    - Use EXACTLY this format for each question:
+      Question 1: [Question text]
+      A) [Option A]
+      B) [Option B]
+      C) [Option C]
+      D) [Option D]
+      Correct Answer: A
+      Explanation: [Detailed explanation]
+      
+    - For Advanced level, include some questions that extend knowledge beyond the provided content
+    - All questions must have exactly 4 options (A, B, C, D)
+    - Include detailed explanations for each answer
+    - Do not use markdown formatting or special characters
+    - Number questions sequentially (1, 2, 3, etc.)
+    - Put each element on its own line
+    - Do not add extra text or comments`;
+
+    const messagesPayload = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: `Generate a ${level} level test based on:\n\n${pdfContent.substring(0, 3000)}` } // Limit content to prevent overload
+    ];
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "HTTP-Referer": YOUR_SITE_URL,
+        "X-Title": YOUR_SITE_NAME,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        messages: messagesPayload,
+        temperature: 0.7,
+        max_tokens: 4000
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
 
-    setIsProcessing(true);
-    setUploadProgress(0);
-    setTestResults(null);
-    setIsSubmitted(false);
-    setUserAnswers({});
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
 
-    try {
-      // Show progress
-      setUploadProgress(30);
-      const pdfContent = await extractTextFromPDF(file);
-      setUploadProgress(70);
-
-      const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
-      
-      Requirements:
-      - Generate exactly ${level === 'basic' ? 15 : level === 'medium' ? 20 : 50} questions
-      - Questions must be in the following format:
-        Question 1: [Question text]
-        A) [Option A]
-        B) [Option B]
-        C) [Option C]
-        D) [Option D]
-        Correct Answer: [A/B/C/D]
-        Explanation: [Detailed explanation of why the answer is correct and why others are incorrect]
-        
-      - For Advanced level, include some questions that extend knowledge beyond the provided content
-      - All questions must have exactly 4 options
-      - Include detailed explanations for each answer
-      - Use proper markdown formatting
-      - Distribute difficulty appropriately: Basic (foundational), Medium (application), Advanced (critical thinking)`;
-
-      const messagesPayload = [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate a ${level} level test based on the following content:\n\n${pdfContent}` }
-      ];
-
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "HTTP-Referer": YOUR_SITE_URL,
-          "X-Title": YOUR_SITE_NAME,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
-          messages: messagesPayload,
-          temperature: 0.7
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
-
-      // Parse the AI response into questions
-      const parsedTest = parseTestResponse(aiResponse);
-      
+    // Parse the AI response into questions
+    const parsedTest = parseTestResponse(aiResponse);
+    
+    // More lenient validation - accept even 1 valid question
+    if (parsedTest.questions && parsedTest.questions.length > 0) {
       setTests(prev => ({ ...prev, [level]: parsedTest }));
       setActiveTest(parsedTest);
       setUploadProgress(100);
       toast.success(`Test generated successfully! ${parsedTest.questions.length} questions created.`);
-    } catch (error) {
-      console.error('Error generating test:', error);
-      toast.error('Error generating test. Please try again.');
-    } finally {
-      setIsProcessing(false);
+    } else {
+      console.error("No valid questions parsed from response:", aiResponse);
+      throw new Error("The AI response didn't contain properly formatted questions. Please try again with a different document.");
     }
-  };
-
-  // Parse AI response into structured test data
-  const parseTestResponse = (text) => {
-    const questions = [];
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    
-    let currentQuestion = null;
-    let optionCounter = 0;
-    
-    lines.forEach(line => {
-      if (line.startsWith('Question ')) {
-        if (currentQuestion) {
-          questions.push(currentQuestion);
-        }
-        const questionText = line.replace(/^Question \d+:\s*/, '');
-        currentQuestion = {
-          text: questionText,
-          options: [],
-          correctAnswer: '',
-          explanation: ''
-        };
-        optionCounter = 0;
-      } else if (/^[A-D]\)/.test(line.trim())) {
-        const option = line.trim().substring(3);
-        currentQuestion.options.push(option);
-        optionCounter++;
-      } else if (line.startsWith('Correct Answer:')) {
-        currentQuestion.correctAnswer = line.split(':')[1].trim();
-      } else if (line.startsWith('Explanation:')) {
-        currentQuestion.explanation = line.substring(12).trim();
-      } else if (currentQuestion && currentQuestion.explanation) {
-        currentQuestion.explanation += ' ' + line.trim();
-      }
-    });
-    
-    if (currentQuestion) {
-      questions.push(currentQuestion);
-    }
-    
-    return { questions };
-  };
+  } catch (error) {
+    console.error('Error generating test:', error);
+    toast.error(error.message || 'Error generating test. Please try again with a different document.');
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   // Handle answer selection
   const handleAnswerSelect = (questionIndex, option) => {
@@ -307,7 +361,75 @@ const TestGenerator = () => {
 
   // Render test questions
   const renderTest = () => {
-    if (!activeTest) return null;
+    if (!activeTest) {
+      return (
+        <div className="text-center py-16">
+          <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BookOpen className="w-12 h-12 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
+            Generate Your Practice Test
+          </h3>
+          <p className="text-secondary-600 dark:text-secondary-400 mb-8 max-w-2xl mx-auto">
+            Upload a PDF document to create personalized multiple-choice questions. 
+            Our AI will generate tests tailored to your study material and knowledge level.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {testLevels.map((level, index) => (
+              <motion.div
+                key={level.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2 }}
+                className="card p-6"
+              >
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <span className="text-white font-bold">{level.questions}</span>
+                  </div>
+                  <h4 className="font-bold text-lg text-secondary-900 dark:text-white">
+                    {level.name}
+                  </h4>
+                  <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                    {level.time}
+                  </p>
+                </div>
+                <p className="text-center text-secondary-600 dark:text-secondary-400 text-sm">
+                  {level.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    if (!activeTest.questions || activeTest.questions.length === 0) {
+      return (
+        <div className="text-center py-16">
+          <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FileText className="w-12 h-12 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
+            No Valid Questions Generated
+          </h3>
+          <p className="text-secondary-600 dark:text-secondary-400 mb-6">
+            The AI couldn't generate valid questions from your document. Please try:
+          </p>
+          <ul className="text-left text-secondary-600 dark:text-secondary-400 max-w-md mx-auto mb-8 space-y-2">
+            <li>• Upload a different PDF with clearer content</li>
+            <li>• Try a different test difficulty level</li>
+            <li>• Ensure your PDF contains sufficient educational content</li>
+          </ul>
+          <button 
+            onClick={resetTest}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
+        </div>
+      );
+    }
     
     return (
       <div className="space-y-8">
@@ -337,67 +459,74 @@ const TestGenerator = () => {
         </div>
         
         <div className="space-y-6">
-          {activeTest.questions.map((question, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="card p-6"
-            >
-              <h4 className="font-semibold text-lg mb-4 text-secondary-900 dark:text-white">
-                {index + 1}. {question.text}
-              </h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {question.options.map((option, optIndex) => {
-                  const optionLetter = String.fromCharCode(65 + optIndex);
-                  const isSelected = userAnswers[index] === optionLetter;
-                  const isCorrect = question.correctAnswer === optionLetter;
-                  const showCorrect = isSubmitted && isCorrect;
-                  const showIncorrect = isSubmitted && isSelected && !isCorrect;
-                  
-                  return (
-                    <button
-                      key={optIndex}
-                      onClick={() => handleAnswerSelect(index, optionLetter)}
-                      disabled={isSubmitted}
-                      className={`p-4 text-left rounded-lg border transition-all ${
-                        isSelected 
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
-                          : isSubmitted
-                            ? showCorrect
-                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                              : showIncorrect
-                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                : 'border-secondary-200 dark:border-secondary-700'
-                            : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        <span className="font-medium mr-3">{optionLetter})</span>
-                        <span>{option}</span>
-                        {isSubmitted && (
-                          <div className="ml-auto">
-                            {showCorrect && <CheckCircle className="w-5 h-5 text-green-500" />}
-                            {showIncorrect && <FileText className="w-5 h-5 text-red-500" />}
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {isSubmitted && (
-                <div className="mt-4 p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
-                  <p className="font-medium text-secondary-700 dark:text-secondary-300">
-                    Explanation: {question.explanation}
-                  </p>
+          {activeTest.questions.map((question, index) => {
+            // Validate question before rendering
+            if (!question || !question.text || !question.options || question.options.length < 2) {
+              return null;
+            }
+            
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="card p-6"
+              >
+                <h4 className="font-semibold text-lg mb-4 text-secondary-900 dark:text-white">
+                  {index + 1}. {question.text}
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {question.options.map((option, optIndex) => {
+                    const optionLetter = String.fromCharCode(65 + optIndex);
+                    const isSelected = userAnswers[index] === optionLetter;
+                    const isCorrect = question.correctAnswer === optionLetter;
+                    const showCorrect = isSubmitted && isCorrect;
+                    const showIncorrect = isSubmitted && isSelected && !isCorrect;
+                    
+                    return (
+                      <button
+                        key={optIndex}
+                        onClick={() => handleAnswerSelect(index, optionLetter)}
+                        disabled={isSubmitted}
+                        className={`p-4 text-left rounded-lg border transition-all ${
+                          isSelected 
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                            : isSubmitted
+                              ? showCorrect
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                : showIncorrect
+                                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                  : 'border-secondary-200 dark:border-secondary-700'
+                              : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <span className="font-medium mr-3">{optionLetter})</span>
+                          <span>{option}</span>
+                          {isSubmitted && (
+                            <div className="ml-auto">
+                              {showCorrect && <CheckCircle className="w-5 h-5 text-green-500" />}
+                              {showIncorrect && <FileText className="w-5 h-5 text-red-500" />}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </motion.div>
-          ))}
+                
+                {isSubmitted && question.explanation && (
+                  <div className="mt-4 p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
+                    <p className="font-medium text-secondary-700 dark:text-secondary-300">
+                      Explanation: {question.explanation}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
         
         {isSubmitted && testResults && (
@@ -647,48 +776,7 @@ const TestGenerator = () => {
               className="lg:col-span-2"
             >
               <div className="card">
-                {activeTest ? (
-                  renderTest()
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <BookOpen className="w-12 h-12 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-                      Generate Your Practice Test
-                    </h3>
-                    <p className="text-secondary-600 dark:text-secondary-400 mb-8 max-w-2xl mx-auto">
-                      Upload a PDF document to create personalized multiple-choice questions. 
-                      Our AI will generate tests tailored to your study material and knowledge level.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                      {testLevels.map((level, index) => (
-                        <motion.div
-                          key={level.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.2 }}
-                          className="card p-6"
-                        >
-                          <div className="text-center mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                              <span className="text-white font-bold">{level.questions}</span>
-                            </div>
-                            <h4 className="font-bold text-lg text-secondary-900 dark:text-white">
-                              {level.name}
-                            </h4>
-                            <p className="text-sm text-secondary-500 dark:text-secondary-400">
-                              {level.time}
-                            </p>
-                          </div>
-                          <p className="text-center text-secondary-600 dark:text-secondary-400 text-sm">
-                            {level.description}
-                          </p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {renderTest()}
               </div>
             </motion.div>
           </div>

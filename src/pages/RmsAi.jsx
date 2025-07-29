@@ -15,7 +15,8 @@ import {
   Bot,
   User,
   Settings,
-  Wand2
+  Wand2,
+  Square
 } from 'lucide-react';
 
 const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '';
@@ -28,7 +29,10 @@ const RMSAI = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedModel, setSelectedModel] = useState('rms-deepresearch');
   const [copiedCodeIndex, setCopiedCodeIndex] = useState(null);
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   const models = [
     {
@@ -63,7 +67,25 @@ const RMSAI = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingMessage]);
+
+  // Stop streaming function
+  const stopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsStreaming(false);
+    setIsGenerating(false);
+    
+    // Add the partial message if it exists using current state
+    setStreamingMessage(currentStreamingMessage => {
+      if (currentStreamingMessage.trim()) {
+        setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage }]);
+      }
+      return ''; // Clear streaming message
+    });
+  };
 
   const formatMessage = (content) => {
     // Split content into code blocks and text
@@ -181,6 +203,11 @@ const RMSAI = () => {
     setMessages(newMessages);
     setInputValue('');
     setIsGenerating(true);
+    setIsStreaming(true);
+    setStreamingMessage('');
+
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController();
 
     try {
       const currentModel = models.find(m => m.id === selectedModel);
@@ -211,29 +238,119 @@ const RMSAI = () => {
         body: JSON.stringify({
           model: currentModel.model,
           messages: messagesPayload,
-          temperature: 0.7
-        })
+          temperature: 0.7,
+          stream: true // Enable streaming
+        }),
+        signal: abortControllerRef.current.signal
       });
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-      setMessages(prev => [...prev, { role: "assistant", content: aiResponse }]);
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          
+          // Keep the last potentially incomplete line in buffer
+          buffer = lines.pop() || '';
+          
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            if (trimmedLine === '') continue;
+            if (trimmedLine === 'data: [DONE]') {
+              // Stream finished
+              setIsStreaming(false);
+              setIsGenerating(false);
+              
+              // Add the complete message to messages using current state
+              setStreamingMessage(currentStreamingMessage => {
+                if (currentStreamingMessage.trim()) {
+                  setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage }]);
+                }
+                return ''; // Clear streaming message
+              });
+              return;
+            }
+            
+            if (trimmedLine.startsWith('data: ')) {
+              try {
+                const jsonStr = trimmedLine.slice(6); // Remove 'data: ' prefix
+                const data = JSON.parse(jsonStr);
+                
+                if (data.choices && data.choices[0] && data.choices[0].delta) {
+                  const delta = data.choices[0].delta;
+                  
+                  if (delta.content) {
+                    // Append the new content to streaming message
+                    setStreamingMessage(prev => prev + delta.content);
+                  }
+                  
+                  // Check if this is the end of the stream
+                  if (data.choices[0].finish_reason === 'stop') {
+                    setIsStreaming(false);
+                    setIsGenerating(false);
+                    
+                    // Use the current streaming message state to add to messages
+                    setStreamingMessage(currentStreamingMessage => {
+                      const finalMessage = currentStreamingMessage + (delta.content || '');
+                      if (finalMessage.trim()) {
+                        setMessages(prev => [...prev, { role: "assistant", content: finalMessage }]);
+                      }
+                      return ''; // Clear streaming message
+                    });
+                    return;
+                  }
+                }
+              } catch (parseError) {
+                console.error('Error parsing streaming data:', parseError);
+                // Continue processing other lines
+              }
+            }
+          }
+        }
+      } catch (readError) {
+        if (readError.name === 'AbortError') {
+          console.log('Stream aborted by user');
+          return;
+        }
+        throw readError;
+      }
+      
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Request aborted by user');
+        return;
+      }
+      
       console.error('Error getting response:', error);
       toast.error('Error getting response. Please try again.');
       setMessages(prev => prev.slice(0, -1)); // Remove user message on error
     } finally {
       setIsGenerating(false);
+      setIsStreaming(false);
+      setStreamingMessage('');
+      abortControllerRef.current = null;
     }
   };
 
   const clearChat = () => {
+    // Stop any ongoing streaming
+    if (isStreaming) {
+      stopStreaming();
+    }
     setMessages([]);
+    setStreamingMessage('');
     toast.success('Chat cleared successfully!');
   };
 
@@ -297,12 +414,13 @@ const RMSAI = () => {
                         key={model.id}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setSelectedModel(model.id)}
+                        onClick={() => !isGenerating && setSelectedModel(model.id)}
+                        disabled={isGenerating}
                         className={`w-full text-left p-4 rounded-xl border transition-all ${
                           isSelected
                             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                             : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
-                        }`}
+                        } ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-start space-x-3">
                           <div className={`w-10 h-10 bg-gradient-to-br ${model.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
@@ -345,6 +463,25 @@ const RMSAI = () => {
                     <li>• Use <span className="font-medium">RMS Tutor</span> for study doubts</li>
                   </ul>
                 </div>
+
+                {/* Streaming Status */}
+                {isStreaming && (
+                  <div className="mt-6 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-green-700 dark:text-green-400">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                        <span className="text-sm font-medium">Streaming...</span>
+                      </div>
+                      <button
+                        onClick={stopStreaming}
+                        className="text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                        title="Stop streaming"
+                      >
+                        <Square className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -359,7 +496,7 @@ const RMSAI = () => {
                 <div className="flex-1 flex flex-col min-h-[500px]">
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto mb-4 space-y-6">
-                    {messages.length === 0 ? (
+                    {messages.length === 0 && !streamingMessage ? (
                       <div className="flex flex-col items-center justify-center h-full text-center py-12">
                         <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center mb-6">
                           <Bot className="w-12 h-12 text-white" />
@@ -424,33 +561,39 @@ const RMSAI = () => {
                             </div>
                           </motion.div>
                         ))}
+                        
+                        {/* Streaming Message */}
+                        {streamingMessage && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex justify-start"
+                          >
+                            <div className="max-w-[85%] rounded-2xl rounded-tl-none bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200 p-5">
+                              <div className="flex items-center mb-2">
+                                {React.createElement(
+                                  models.find(m => m.id === selectedModel)?.icon || Bot, 
+                                  { className: "w-4 h-4 mr-2" }
+                                )}
+                                <span className="text-xs font-medium opacity-80 flex items-center">
+                                  {models.find(m => m.id === selectedModel)?.name}
+                                  <span className="ml-2 flex items-center">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span className="ml-1 text-green-600 dark:text-green-400">Live</span>
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="prose dark:prose-invert max-w-none">
+                                {formatMessage(streamingMessage)}
+                                {/* Blinking cursor */}
+                                <span className="inline-block w-2 h-5 bg-primary-500 animate-pulse ml-1"></span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
                       </>
                     )}
                     
-                    {isGenerating && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex justify-start"
-                      >
-                        <div className="max-w-[85%] rounded-2xl rounded-tl-none bg-secondary-100 dark:bg-secondary-800 p-5">
-                          <div className="flex items-center mb-2">
-                            {React.createElement(
-                              models.find(m => m.id === selectedModel)?.icon || Bot, 
-                              { className: "w-4 h-4 mr-2" }
-                            )}
-                            <span className="text-xs font-medium text-secondary-500 dark:text-secondary-400">
-                              {models.find(m => m.id === selectedModel)?.name} is typing...
-                            </span>
-                          </div>
-                          <div className="flex space-x-2">
-                            <div className="w-2 h-2 bg-secondary-400 dark:bg-secondary-500 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-secondary-400 dark:bg-secondary-500 rounded-full animate-bounce delay-100"></div>
-                            <div className="w-2 h-2 bg-secondary-400 dark:bg-secondary-500 rounded-full animate-bounce delay-200"></div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
                     <div ref={messagesEndRef} />
                   </div>
 
@@ -461,24 +604,36 @@ const RMSAI = () => {
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={`Ask anything... (Currently using ${models.find(m => m.id === selectedModel)?.name})`}
+                        placeholder={`Ask anything... (Currently using ${models.find(m => m.id === selectedModel)?.name}) ${isStreaming ? '- Streaming...' : ''}`}
                         className="flex-1 px-5 py-4 border border-secondary-300 dark:border-secondary-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white"
                         disabled={isGenerating}
                       />
-                      <button
-                        type="submit"
-                        disabled={!inputValue.trim() || isGenerating}
-                        className="p-4 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
-                      >
-                        {isGenerating ? (
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                          <Send className="w-5 h-5" />
-                        )}
-                      </button>
+                      {isStreaming ? (
+                        <button
+                          type="button"
+                          onClick={stopStreaming}
+                          className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all flex items-center justify-center"
+                          title="Stop streaming"
+                        >
+                          <Square className="w-5 h-5" />
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={!inputValue.trim() || isGenerating}
+                          className="p-4 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                        >
+                          {isGenerating ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Send className="w-5 h-5" />
+                          )}
+                        </button>
+                      )}
                     </div>
                     <p className="text-xs text-center text-secondary-500 dark:text-secondary-400 mt-3">
-                      RMS AI can make mistakes. Consider checking important information.
+                      RMS AI can make mistakes. Consider checking important information. 
+                      {isStreaming && <span className="text-green-600 dark:text-green-400 ml-2">● Streaming live responses</span>}
                     </p>
                   </form>
                 </div>
