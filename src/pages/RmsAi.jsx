@@ -18,7 +18,7 @@ import {
   Wand2
 } from 'lucide-react';
 
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '';
 const YOUR_SITE_URL = process.env.REACT_APP_SITE_URL || 'http://localhost:3000';
 const YOUR_SITE_NAME = process.env.REACT_APP_SITE_NAME || 'RMS Study Assistant';
 
