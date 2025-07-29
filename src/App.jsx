@@ -11,6 +11,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import SubjectResource from './pages/SubjectResource';
 import { ThemeProvider } from './context/ThemeContext';
+import RmsAi from './pages/RmsAi';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +48,7 @@ function App() {
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/RMS-AI" element={<RmsAi />} />
             <Route path="/subjects" element={<Subjects />} />
             <Route path="/ai-summarizer" element={<AISummarizer />} />
             <Route path="/test-generator" element={<TestGenerator />} />

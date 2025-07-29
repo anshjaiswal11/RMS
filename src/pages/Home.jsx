@@ -113,10 +113,10 @@ const Home = () => {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/subjects"
+                  to="/RMS-AI"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
-                  Browse Subjects
+                  RMS-AI
                 </Link>
               </div>
             </motion.div>

@@ -45,17 +45,17 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email',
-      value: 'support@rmslpu.xyz',
+      value: 'anshjaiswal1804@gmail.com',
       description: 'Send us an email anytime',
       color: 'from-blue-500 to-cyan-500'
     },
-    {
-      icon: Phone,
-      title: 'Phone',
-      value: '+91 98765 43210',
-      description: 'Call us during business hours',
-      color: 'from-green-500 to-emerald-500'
-    },
+    // {
+    //   icon: Phone,
+    //   title: 'Phone',
+    //   value: '+91 98765 43210',
+    //   description: 'Call us during business hours',
+    //   color: 'from-green-500 to-emerald-500'
+    // },
     {
       icon: MapPin,
       title: 'Location',
@@ -319,11 +319,11 @@ const Contact = () => {
                 Connect with other students, share resources, and stay updated with the latest features.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="btn-primary bg-white text-secondary-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
+                {/* <button className="btn-primary bg-white text-secondary-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
                   Join Discord
-                </button>
-                <button className="btn-secondary bg-white/20 hover:bg-white/30 text-white border-white/30 px-8 py-4 text-lg">
-                  Follow on GitHub
+                </button> */}
+                <button className="btn-secondary bg-white/20 hover:bg-white/30 text-white border-white/30 px-8 py-4 text-lg" onClick={() => window.open('https://www.instagram.com/buildwithansh/', '_blank')}>
+                  Follow on Instagram
                 </button>
               </div>
             </div>
