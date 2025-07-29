@@ -44,8 +44,8 @@ const Home = () => {
   ];
 
   const stats = [
-    { number: '1000+', label: 'Students Helped', icon: Users },
-    { number: '50+', label: 'Subjects Covered', icon: BookOpen },
+    { number: '2000+', label: 'Students Helped', icon: Users },
+    { number: '20+', label: 'Subjects Covered', icon: BookOpen },
     { number: '95%', label: 'Success Rate', icon: TrendingUp },
     { number: '24/7', label: 'Available', icon: Shield }
   ];
@@ -94,9 +94,10 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
+              {/* text-gradient bg-gradient-to-r from-yellow-400 to-orange-500 */}
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
                 Modern
-                <span className="block text-gradient bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                <span className="block text-white bg-clip-text text-transparent">
                   Study Assistant
                 </span>
               </h1>

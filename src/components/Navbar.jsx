@@ -11,7 +11,8 @@ import {
   FileText, 
   FolderOpen, 
   MessageCircle, 
-  Shield 
+  Shield,
+  Bot
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -32,6 +33,7 @@ const Navbar = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: BookOpen },
+    // { path: '/RMS-AI', label: 'RmsAi', icon: Bot },
     { path: '/subjects', label: 'Subjects', icon: FolderOpen },
     { path: '/ai-summarizer', label: 'AI Summarizer', icon: Brain },
     { path: '/test-generator', label: 'Test Generator', icon: FileText },
