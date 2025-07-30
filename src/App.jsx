@@ -12,6 +12,9 @@ import Privacy from './pages/Privacy';
 import SubjectResource from './pages/SubjectResource';
 import { ThemeProvider } from './context/ThemeContext';
 import RmsAi from './pages/RmsAi';
+import Terms from './pages/Terms';
+import RefundPolicy from './pages/RefundPolicy';
+import { Youtube } from 'lucide-react';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +51,10 @@ function App() {
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/refund" element={<RefundPolicy />} />
+            {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/youtube_summary" element={<Youtube />} />
             <Route path="/RMS-AI" element={<RmsAi />} />
             <Route path="/subjects" element={<Subjects />} />
             <Route path="/ai-summarizer" element={<AISummarizer />} />
