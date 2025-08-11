@@ -46,7 +46,7 @@ const RMSAI = () => {
     {
       id: 'rms-coder',
       name: 'RMS Coder',
-      model: 'qwen/qwen3-coder:free',
+      model: 'openai/gpt-oss-20b:free',
       description: 'Specialized in programming, debugging, and code explanations',
       icon: Code,
       color: 'from-green-500 to-emerald-500'
