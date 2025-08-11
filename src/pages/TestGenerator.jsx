@@ -23,8 +23,8 @@ import {
 } from 'lucide-react';
 
 const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY ;
-const YOUR_SITE_URL = process.env.REACT_APP_SITE_URL || 'http://localhost:3000';
-const YOUR_SITE_NAME = process.env.REACT_APP_SITE_NAME || 'RMS Study Assistant';
+const YOUR_SITE_URL =  'www.rmslpu.xyz';
+const YOUR_SITE_NAME =  'RMS Study Assistant';
 
 const TestGenerator = () => {
   const [file, setFile] = useState(null);
@@ -128,7 +128,7 @@ const TestGenerator = () => {
   // Parse AI response into structured test data
   // Replace the parseTestResponse function with this improved version:
 const parseTestResponse = (text) => {
-  console.log("Raw AI Response:", text); // Debug log
+  // console.log("Raw AI Response:", text); // Debug log
   
   const questions = [];
   const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -206,7 +206,7 @@ const parseTestResponse = (text) => {
     questions.push(currentQuestion);
   }
   
-  console.log("Parsed Questions:", questions); // Debug log
+  // console.log("Parsed Questions:", questions); // Debug log
   return { questions };
 };
 
@@ -264,7 +264,7 @@ const generateTest = async (level) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemma-3n-e2b-it:free",
+        model: "openai/gpt-oss-20b:free",
         messages: messagesPayload,
         temperature: 0.7,
         max_tokens: 4000
@@ -274,7 +274,7 @@ const generateTest = async (level) => {
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
-
+    
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
 
