@@ -125,6 +125,12 @@ const Home = () => {
                 >
                   <span>Interview Prep Pro</span>
                 </Link>
+                <Link
+                  to="/youtube_summary"
+                  className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
+                >
+                  <span>YouTube Summary</span>
+                </Link>
               </div>
             </motion.div>
           </div>
