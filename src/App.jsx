@@ -14,6 +14,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import RmsAi from './pages/RmsAi';
 import Terms from './pages/Terms';
 import RefundPolicy from './pages/RefundPolicy';
+import InterviewPrep from './pages/Interview';
 import { Youtube } from 'lucide-react';
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/refund" element={<RefundPolicy />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
+            <Route path="/interview-prep" element={<InterviewPrep />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/youtube_summary" element={<Youtube />} />
             <Route path="/RMS-AI" element={<RmsAi />} />
