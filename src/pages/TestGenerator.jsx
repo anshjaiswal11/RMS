@@ -264,7 +264,7 @@ const generateTest = async (level) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        model: "google/gemma-3n-e2b-it:free",
         messages: messagesPayload,
         temperature: 0.7,
         max_tokens: 4000
