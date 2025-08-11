@@ -3,28 +3,24 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
-import { 
-  FileText, 
-  Clock, 
-  Users, 
-  Star, 
-  Zap, 
+import {
+  FileText,
+  Clock,
   Brain,
   CheckCircle,
-  ArrowRight,
-  Sparkles,
   Upload,
   Loader2,
   FileQuestion,
   BarChart3,
   Trophy,
   BookOpen,
-  Lightbulb
+  Lightbulb,
+  Zap
 } from 'lucide-react';
 
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY ;
-const YOUR_SITE_URL =  'www.rmslpu.xyz';
-const YOUR_SITE_NAME =  'RMS Study Assistant';
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
+const YOUR_SITE_URL = 'www.rmslpu.xyz';
+const YOUR_SITE_NAME = 'RMS Study Assistant';
 
 const TestGenerator = () => {
   const [file, setFile] = useState(null);
@@ -74,162 +70,167 @@ const TestGenerator = () => {
   // Handle file drop
   const onDrop = useCallback((acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
-    if (uploadedFile && uploadedFile.type === 'application/pdf') {
+    if (uploadedFile && (uploadedFile.type === 'application/pdf' || uploadedFile.name.endsWith('.docx'))) {
       setFile(uploadedFile);
-      toast.success('PDF uploaded successfully!');
+      toast.success('File uploaded successfully!');
     } else {
-      toast.error('Please upload a valid PDF file.');
+      toast.error('Please upload a valid PDF or DOCX file.');
     }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf']
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     multiple: false
   });
 
-  // Extract text from PDF using the API
+  // **UPDATED FUNCTION TO USE POLLING**
   const extractTextFromPDF = async (file) => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("File is too large. Please upload a PDF smaller than 10MB.");
+      toast.error("File is too large. Please upload a file smaller than 10MB.");
       return Promise.reject(new Error("File size exceeds limit"));
     }
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-      const response = await fetch("https://python-api-totg.onrender.com/api/extract-text", {
+    try {
+      // STEP 1: Start the extraction job and get a job ID
+      const startResponse = await fetch("https://python-api-totg.onrender.com/api/start-extraction", {
         method: "POST",
-        body: formData
+        body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+      if (startResponse.status !== 202) {
+        const errorData = await startResponse.json();
+        throw new Error(errorData.error || `Failed to start job. Status: ${startResponse.status}`);
       }
 
-      const data = await response.json();
-      
-      if (!data.text) {
-        throw new Error("Failed to extract text from PDF");
-      }
+      const { job_id } = await startResponse.json();
+      toast.success("Processing started! This may take a moment for large files.");
 
-      return data.text;
+      // STEP 2: Poll for the result using the job ID
+      return new Promise((resolve, reject) => {
+        const intervalId = setInterval(async () => {
+          try {
+            const statusResponse = await fetch(`https://python-api-totg.onrender.com/api/extraction-status/${job_id}`);
+
+            if (!statusResponse.ok) {
+              // Stop polling if the status check fails
+              clearInterval(intervalId);
+              reject(new Error(`Failed to get job status. Status: ${statusResponse.status}`));
+              return;
+            }
+
+            const data = await statusResponse.json();
+
+            if (data.status === 'complete') {
+              clearInterval(intervalId);
+              if (data.text) {
+                resolve(data.text);
+              } else {
+                reject(new Error("Extraction completed but no text was returned."));
+              }
+            } else if (data.status === 'failed') {
+              clearInterval(intervalId);
+              reject(new Error(data.error || "File processing failed on the server."));
+            }
+            // If status is 'processing', do nothing and let the interval continue.
+
+          } catch (error) {
+            clearInterval(intervalId);
+            reject(error);
+          }
+        }, 3000); // Poll every 3 seconds
+      });
+
     } catch (error) {
-      console.error("Error extracting text from PDF:", error);
-      toast.error("Failed to process PDF. Please try again.");
+      console.error("Error in extraction process:", error);
+      toast.error(error.message || "Failed to process the file. Please try again.");
       throw error;
     }
   };
 
-  // Parse AI response into structured test data
-  // Replace the parseTestResponse function with this improved version:
-const parseTestResponse = (text) => {
-  // console.log("Raw AI Response:", text); // Debug log
-  
-  const questions = [];
-  const lines = text.split('\n').filter(line => line.trim() !== '');
-  
-  let currentQuestion = null;
-  let inExplanation = false;
-  
-  lines.forEach(line => {
-    const trimmedLine = line.trim();
-    
-    // Match question pattern (more flexible)
-    if (trimmedLine.match(/^Question\s*\d+[:.]/i)) {
-      // Save previous question if valid
-      if (currentQuestion && 
-          currentQuestion.text && 
-          currentQuestion.options.length >= 2 && 
-          currentQuestion.correctAnswer) {
-        questions.push(currentQuestion);
+
+  const parseTestResponse = (text) => {
+    const questions = [];
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    let currentQuestion = null;
+    let inExplanation = false;
+
+    lines.forEach(line => {
+      const trimmedLine = line.trim();
+      if (trimmedLine.match(/^Question\s*\d+[:.]/i)) {
+        if (currentQuestion && currentQuestion.text && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
+          questions.push(currentQuestion);
+        }
+        const questionText = trimmedLine.replace(/^Question\s*\d+[:.]\s*/i, '').trim();
+        currentQuestion = {
+          text: questionText || "Unknown question",
+          options: [],
+          correctAnswer: '',
+          explanation: ''
+        };
+        inExplanation = false;
       }
-      
-      // Extract question text more robustly
-      const questionText = trimmedLine.replace(/^Question\s*\d+[:.]\s*/i, '').trim();
-      currentQuestion = {
-        text: questionText || "Unknown question",
-        options: [],
-        correctAnswer: '',
-        explanation: ''
-      };
-      inExplanation = false;
-    } 
-    // Match option pattern (more flexible)
-    else if (currentQuestion && trimmedLine.match(/^[A-D][\).]\s+/i)) {
-      // Handle options
-      if (currentQuestion.options.length < 4) {
-        const option = trimmedLine.replace(/^[A-D][\).]\s+/i, '').trim();
-        if (option) {
-          currentQuestion.options.push(option);
+      else if (currentQuestion && trimmedLine.match(/^[A-D][\).]\s+/i)) {
+        if (currentQuestion.options.length < 4) {
+          const option = trimmedLine.replace(/^[A-D][\).]\s+/i, '').trim();
+          if (option) {
+            currentQuestion.options.push(option);
+          }
         }
       }
-    } 
-    // Match correct answer pattern
-    else if (currentQuestion && trimmedLine.match(/^Correct\s+Answer[:.]\s*[A-D]/i)) {
-      const answerMatch = trimmedLine.match(/[A-D]/i);
-      if (answerMatch) {
-        currentQuestion.correctAnswer = answerMatch[0].toUpperCase();
-      }
-    } 
-    // Match explanation start
-    else if (currentQuestion && trimmedLine.match(/^Explanation[:.]/i)) {
-      currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').trim();
-      inExplanation = true;
-    } 
-    // Continue explanation or add to current content
-    else if (currentQuestion) {
-      if (inExplanation && trimmedLine) {
-        currentQuestion.explanation += ' ' + trimmedLine;
-      }
-      // Handle unstructured content that might be part of question/explanation
-      else if (!inExplanation && !currentQuestion.correctAnswer && trimmedLine && 
-               currentQuestion.options.length < 4) {
-        // This might be part of the question text or stray content
-        if (currentQuestion.text === "Unknown question") {
-          currentQuestion.text = trimmedLine;
+      else if (currentQuestion && trimmedLine.match(/^Correct\s+Answer[:.]\s*[A-D]/i)) {
+        const answerMatch = trimmedLine.match(/[A-D]/i);
+        if (answerMatch) {
+          currentQuestion.correctAnswer = answerMatch[0].toUpperCase();
         }
       }
+      else if (currentQuestion && trimmedLine.match(/^Explanation[:.]/i)) {
+        currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').trim();
+        inExplanation = true;
+      }
+      else if (currentQuestion) {
+        if (inExplanation && trimmedLine) {
+          currentQuestion.explanation += ' ' + trimmedLine;
+        }
+        else if (!inExplanation && !currentQuestion.correctAnswer && trimmedLine && currentQuestion.options.length < 4) {
+          if (currentQuestion.text === "Unknown question") {
+            currentQuestion.text = trimmedLine;
+          }
+        }
+      }
+    });
+
+    if (currentQuestion && currentQuestion.text && currentQuestion.text !== "Unknown question" && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
+      questions.push(currentQuestion);
     }
-  });
-  
-  // Add the last question if valid
-  if (currentQuestion && 
-      currentQuestion.text && 
-      currentQuestion.text !== "Unknown question" &&
-      currentQuestion.options.length >= 2 && 
-      currentQuestion.correctAnswer) {
-    questions.push(currentQuestion);
-  }
-  
-  // console.log("Parsed Questions:", questions); // Debug log
-  return { questions };
-};
+    return { questions };
+  };
 
-// Also update the generateTest function with better error handling:
-const generateTest = async (level) => {
-  if (!file) {
-    toast.error('Please upload a PDF file first.');
-    return;
-  }
+  const generateTest = async (level) => {
+    if (!file) {
+      toast.error('Please upload a file first.');
+      return;
+    }
 
-  setIsProcessing(true);
-  setUploadProgress(0);
-  setTestResults(null);
-  setIsSubmitted(false);
-  setUserAnswers({});
+    setIsProcessing(true);
+    setUploadProgress(0);
+    setTestResults(null);
+    setIsSubmitted(false);
+    setUserAnswers({});
 
-  try {
-    // Show progress
-    setUploadProgress(30);
-    const pdfContent = await extractTextFromPDF(file);
-    setUploadProgress(70);
+    try {
+      setUploadProgress(30);
+      const pdfContent = await extractTextFromPDF(file);
+      setUploadProgress(70);
 
-    const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
+      const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
     
     Requirements:
     - Generate exactly ${level === 'basic' ? 15 : level === 'medium' ? 20 : 50} questions
@@ -250,56 +251,53 @@ const generateTest = async (level) => {
     - Put each element on its own line
     - Do not add extra text or comments`;
 
-    const messagesPayload = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: `Generate a ${level} level test based on:\n\n${pdfContent.substring(0, 3000)}` } // Limit content to prevent overload
-    ];
+      const messagesPayload = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Generate a ${level} level test based on:\n\n${pdfContent.substring(0, 3000)}` }
+      ];
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": YOUR_SITE_URL,
-        "X-Title": YOUR_SITE_NAME,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
-        messages: messagesPayload,
-        temperature: 0.7,
-        max_tokens: 4000
-      })
-    });
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": YOUR_SITE_URL,
+          "X-Title": YOUR_SITE_NAME,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-3.5-turbo",
+          messages: messagesPayload,
+          temperature: 0.7,
+          max_tokens: 4000
+        })
+      });
 
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+
+      const parsedTest = parseTestResponse(aiResponse);
+
+      if (parsedTest.questions && parsedTest.questions.length > 0) {
+        setTests(prev => ({ ...prev, [level]: parsedTest }));
+        setActiveTest(parsedTest);
+        setUploadProgress(100);
+        toast.success(`Test generated successfully! ${parsedTest.questions.length} questions created.`);
+      } else {
+        console.error("No valid questions parsed from response:", aiResponse);
+        throw new Error("The AI response didn't contain properly formatted questions. Please try again with a different document.");
+      }
+    } catch (error) {
+      console.error('Error generating test:', error);
+      toast.error(error.message || 'Error generating test. Please try again with a different document.');
+    } finally {
+      setIsProcessing(false);
     }
-    
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+  };
 
-    // Parse the AI response into questions
-    const parsedTest = parseTestResponse(aiResponse);
-    
-    // More lenient validation - accept even 1 valid question
-    if (parsedTest.questions && parsedTest.questions.length > 0) {
-      setTests(prev => ({ ...prev, [level]: parsedTest }));
-      setActiveTest(parsedTest);
-      setUploadProgress(100);
-      toast.success(`Test generated successfully! ${parsedTest.questions.length} questions created.`);
-    } else {
-      console.error("No valid questions parsed from response:", aiResponse);
-      throw new Error("The AI response didn't contain properly formatted questions. Please try again with a different document.");
-    }
-  } catch (error) {
-    console.error('Error generating test:', error);
-    toast.error(error.message || 'Error generating test. Please try again with a different document.');
-  } finally {
-    setIsProcessing(false);
-  }
-};
-
-  // Handle answer selection
   const handleAnswerSelect = (questionIndex, option) => {
     if (isSubmitted) return;
     setUserAnswers(prev => ({
@@ -308,21 +306,20 @@ const generateTest = async (level) => {
     }));
   };
 
-  // Submit test for evaluation
   const submitTest = async () => {
     if (!activeTest) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const totalQuestions = activeTest.questions.length;
       let correctAnswers = 0;
       const results = [];
-      
+
       activeTest.questions.forEach((question, index) => {
         const isCorrect = userAnswers[index] === question.correctAnswer;
         if (isCorrect) correctAnswers++;
-        
+
         results.push({
           question: question.text,
           userAnswer: userAnswers[index] || 'Not answered',
@@ -331,16 +328,16 @@ const generateTest = async (level) => {
           isCorrect
         });
       });
-      
+
       const score = Math.round((correctAnswers / totalQuestions) * 100);
-      
+
       setTestResults({
         score,
         correct: correctAnswers,
         total: totalQuestions,
         results
       });
-      
+
       setIsSubmitted(true);
       toast.success(`Test submitted! Your score: ${score}%`);
     } catch (error) {
@@ -351,7 +348,6 @@ const generateTest = async (level) => {
     }
   };
 
-  // Reset test state
   const resetTest = () => {
     setActiveTest(null);
     setUserAnswers({});
@@ -359,7 +355,6 @@ const generateTest = async (level) => {
     setIsSubmitted(false);
   };
 
-  // Render test questions
   const renderTest = () => {
     if (!activeTest) {
       return (
@@ -371,7 +366,7 @@ const generateTest = async (level) => {
             Generate Your Practice Test
           </h3>
           <p className="text-secondary-600 dark:text-secondary-400 mb-8 max-w-2xl mx-auto">
-            Upload a PDF document to create personalized multiple-choice questions. 
+            Upload a PDF document to create personalized multiple-choice questions.
             Our AI will generate tests tailored to your study material and knowledge level.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -403,7 +398,7 @@ const generateTest = async (level) => {
         </div>
       );
     }
-    
+
     if (!activeTest.questions || activeTest.questions.length === 0) {
       return (
         <div className="text-center py-16">
@@ -421,7 +416,7 @@ const generateTest = async (level) => {
             <li>• Try a different test difficulty level</li>
             <li>• Ensure your PDF contains sufficient educational content</li>
           </ul>
-          <button 
+          <button
             onClick={resetTest}
             className="btn-primary"
           >
@@ -430,7 +425,7 @@ const generateTest = async (level) => {
         </div>
       );
     }
-    
+
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center">
@@ -438,7 +433,7 @@ const generateTest = async (level) => {
             {testLevels.find(t => t.id === testLevel)?.name}
           </h3>
           {!isSubmitted && (
-            <button 
+            <button
               onClick={submitTest}
               disabled={isSubmitting || Object.keys(userAnswers).length === 0}
               className="btn-primary flex items-center space-x-2 disabled:opacity-50"
@@ -457,14 +452,13 @@ const generateTest = async (level) => {
             </button>
           )}
         </div>
-        
+
         <div className="space-y-6">
           {activeTest.questions.map((question, index) => {
-            // Validate question before rendering
             if (!question || !question.text || !question.options || question.options.length < 2) {
               return null;
             }
-            
+
             return (
               <motion.div
                 key={index}
@@ -476,7 +470,7 @@ const generateTest = async (level) => {
                 <h4 className="font-semibold text-lg mb-4 text-secondary-900 dark:text-white">
                   {index + 1}. {question.text}
                 </h4>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {question.options.map((option, optIndex) => {
                     const optionLetter = String.fromCharCode(65 + optIndex);
@@ -484,15 +478,14 @@ const generateTest = async (level) => {
                     const isCorrect = question.correctAnswer === optionLetter;
                     const showCorrect = isSubmitted && isCorrect;
                     const showIncorrect = isSubmitted && isSelected && !isCorrect;
-                    
+
                     return (
                       <button
                         key={optIndex}
                         onClick={() => handleAnswerSelect(index, optionLetter)}
                         disabled={isSubmitted}
-                        className={`p-4 text-left rounded-lg border transition-all ${
-                          isSelected 
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                        className={`p-4 text-left rounded-lg border transition-all ${isSelected
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                             : isSubmitted
                               ? showCorrect
                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
@@ -500,7 +493,7 @@ const generateTest = async (level) => {
                                   ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                                   : 'border-secondary-200 dark:border-secondary-700'
                               : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center">
                           <span className="font-medium mr-3">{optionLetter})</span>
@@ -516,7 +509,7 @@ const generateTest = async (level) => {
                     );
                   })}
                 </div>
-                
+
                 {isSubmitted && question.explanation && (
                   <div className="mt-4 p-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
                     <p className="font-medium text-secondary-700 dark:text-secondary-300">
@@ -528,7 +521,7 @@ const generateTest = async (level) => {
             );
           })}
         </div>
-        
+
         {isSubmitted && testResults && (
           <div className="card p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
             <div className="text-center">
@@ -544,15 +537,15 @@ const generateTest = async (level) => {
               <p className="text-lg text-secondary-700 dark:text-secondary-300">
                 You answered {testResults.correct} out of {testResults.total} questions correctly
               </p>
-              
+
               <div className="flex justify-center space-x-4 mt-6">
-                <button 
+                <button
                   onClick={resetTest}
                   className="btn-primary"
                 >
                   Generate New Test
                 </button>
-                <button 
+                <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="btn-secondary"
                 >
@@ -575,7 +568,6 @@ const generateTest = async (level) => {
 
       <div className="pt-16 min-h-screen bg-secondary-50 dark:bg-secondary-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -596,7 +588,6 @@ const generateTest = async (level) => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Upload Section */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -605,30 +596,29 @@ const generateTest = async (level) => {
             >
               <div className="card sticky top-24">
                 <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-6">
-                  Upload Your PDF
+                  Upload Your File
                 </h2>
 
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
-                    isDragActive
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
-                  }`}
+                    }`}
                 >
                   <input {...getInputProps()} />
                   <Upload className="w-12 h-12 text-secondary-400 mx-auto mb-4" />
                   {isDragActive ? (
                     <p className="text-primary-600 dark:text-primary-400 font-medium">
-                      Drop the PDF here...
+                      Drop the file here...
                     </p>
                   ) : (
                     <div>
                       <p className="text-secondary-600 dark:text-secondary-400 mb-2">
-                        Drag & drop a PDF file here, or click to select
+                        Drag & drop a file here, or click to select
                       </p>
                       <p className="text-sm text-secondary-500 dark:text-secondary-500">
-                        Supports PDF files up to 10MB
+                        Supports PDF and DOCX files up to 10MB
                       </p>
                     </div>
                   )}
@@ -679,7 +669,6 @@ const generateTest = async (level) => {
                   </motion.div>
                 )}
 
-                {/* Test Level Selection */}
                 <div className="mt-8">
                   <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
                     Select Test Level
@@ -692,11 +681,10 @@ const generateTest = async (level) => {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setTestLevel(level.id)}
                         disabled={isProcessing}
-                        className={`w-full text-left p-4 rounded-lg border transition-all ${
-                          testLevel === level.id
+                        className={`w-full text-left p-4 rounded-lg border transition-all ${testLevel === level.id
                             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                             : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
-                        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex justify-between items-start">
                           <div>
@@ -718,7 +706,6 @@ const generateTest = async (level) => {
                   </div>
                 </div>
 
-                {/* Generate Button */}
                 <div className="mt-8">
                   <button
                     onClick={() => generateTest(testLevel)}
@@ -739,7 +726,6 @@ const generateTest = async (level) => {
                   </button>
                 </div>
 
-                {/* Features */}
                 <div className="mt-8">
                   <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
                     Features
@@ -768,7 +754,6 @@ const generateTest = async (level) => {
               </div>
             </motion.div>
 
-            {/* Test Area */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}

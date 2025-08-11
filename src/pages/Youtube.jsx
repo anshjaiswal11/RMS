@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Youtube, 
-  Brain, 
-  Download, 
-  Copy, 
+import {
+  Youtube,
+  Brain,
+  Download,
+  Copy,
   Loader2,
   Sparkles,
   CheckCircle,
@@ -69,7 +69,7 @@ const YouTubeSummarizer = () => {
     try {
       const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
       if (!response.ok) throw new Error('Video not found or unavailable');
-      
+
       const data = await response.json();
       return {
         title: data.title,
@@ -83,70 +83,74 @@ const YouTubeSummarizer = () => {
     }
   };
 
-  // Get video transcript using YouTube Transcript API
-  const getVideoTranscript = async (videoId) => {
-    try {
-      setCurrentStep('Fetching transcript...');
-      
-      // Using youtube-transcript-api via a CORS proxy
-      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch video page');
-      }
-      
-      const data = await response.json();
-      const html = data.contents;
-      
-      // Extract captions from YouTube page
-      const captionsMatch = html.match(/"captions":({.+?}),"/);
-      if (!captionsMatch) {
-        throw new Error('No captions available for this video. Please try a video with captions/subtitles enabled.');
-      }
-      
-      const captionsData = JSON.parse(captionsMatch[1]);
-      const tracks = captionsData?.playerCaptionsTracklistRenderer?.captionTracks;
-      
-      if (!tracks || tracks.length === 0) {
-        throw new Error('No caption tracks found for this video.');
-      }
-      
-      // Get the first available caption track (usually auto-generated or first language)
-      const captionTrack = tracks[0];
-      const captionUrl = captionTrack.baseUrl;
-      
-      // Fetch the caption content
-      const captionResponse = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(captionUrl)}`);
-      if (!captionResponse.ok) {
-        throw new Error('Failed to fetch caption data');
-      }
-      
-      const captionData = await captionResponse.json();
-      const captionXml = captionData.contents;
-      
-      // Parse XML to extract text
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(captionXml, 'text/xml');
-      const textElements = xmlDoc.getElementsByTagName('text');
-      
-      let transcript = '';
-      for (let i = 0; i < textElements.length; i++) {
-        const textContent = textElements[i].textContent || textElements[i].innerText || '';
-        transcript += textContent.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ' ';
-      }
-      
-      if (!transcript.trim()) {
-        throw new Error('Could not extract transcript content from video.');
-      }
-      
-      return transcript.trim();
-      
-    } catch (error) {
-      console.error("Error fetching transcript:", error);
-      throw error;
-    }
-  };
+  // Get video transcript
+// Get video transcript
+// Get video transcript
 
+const getVideoTranscript = async (videoId) => {
+  try {
+    setCurrentStep('Fetching transcript...');
+    
+    // Switched to a different, more reliable CORS proxy
+    const proxyUrl = 'https://corsproxy.io/?';
+    const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch video page: ${response.status} ${response.statusText}`);
+    }
+    const html = await response.text();
+
+    // Find the ytInitialPlayerResponse object
+    const ytInitialPlayerResponseMatch = html.match(/ytInitialPlayerResponse\s*=\s*({.+?});/);
+    if (!ytInitialPlayerResponseMatch || !ytInitialPlayerResponseMatch[1]) {
+        throw new Error('Could not find player response data. The video might be private or the page structure has changed.');
+    }
+    const ytInitialPlayerResponse = JSON.parse(ytInitialPlayerResponseMatch[1]);
+    const captionTracks = ytInitialPlayerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+
+    if (!captionTracks || captionTracks.length === 0) {
+      throw new Error('No caption tracks found for this video. Please try a video with captions/subtitles enabled.');
+    }
+
+    // Find the English caption track, or default to the first one
+    let captionTrack = captionTracks.find(track => track.languageCode === 'en' || track.languageCode.startsWith('en-'));
+    if (!captionTrack) {
+      captionTrack = captionTracks[0];
+    }
+
+    const captionUrl = captionTrack.baseUrl;
+
+    const captionResponse = await fetch(`${proxyUrl}${encodeURIComponent(captionUrl)}`);
+    if (!captionResponse.ok) {
+      throw new Error(`Failed to fetch caption data: ${captionResponse.status} ${captionResponse.statusText}`);
+    }
+
+    const captionXml = await captionResponse.text();
+
+    // Parse XML to extract text
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(captionXml, "text/xml");
+    const textElements = xmlDoc.getElementsByTagName("text");
+
+    let transcript = "";
+    for (let i = 0; i < textElements.length; i++) {
+      const textContent = textElements[i].textContent || textElements[i].innerText || "";
+      transcript += textContent.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") + " ";
+    }
+
+    if (!transcript.trim()) {
+      throw new Error("Could not extract transcript content from the caption file.");
+    }
+
+    return transcript.trim();
+
+  } catch (error) {
+    console.error("Error fetching transcript:", error);
+    // Ensure the final error message thrown is clean and informative
+    throw new Error(error.message || "An unknown error occurred while fetching the transcript.");
+  }
+};
   // Call OpenRouter API
   const callOpenRouterAPI = async (messages, systemPrompt = '') => {
     if (!openRouterApiKey.trim()) {
@@ -202,7 +206,7 @@ const YouTubeSummarizer = () => {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             if (data === '[DONE]') continue;
-            
+
             try {
               const parsed = JSON.parse(data);
               const content = parsed.choices?.[0]?.delta?.content;
@@ -228,7 +232,7 @@ const YouTubeSummarizer = () => {
     const questions = [];
     const lines = text.split('\n').map(line => line.trim()).filter(line => line);
     let currentQuestion = null;
-    
+
     for (let line of lines) {
       if (line.match(/^\d+\./) || line.match(/^Question \d+:/i)) {
         if (currentQuestion && currentQuestion.options.length > 0) {
@@ -256,11 +260,11 @@ const YouTubeSummarizer = () => {
         currentQuestion.question += ' ' + line;
       }
     }
-    
+
     if (currentQuestion && currentQuestion.options.length > 0) {
       questions.push(currentQuestion);
     }
-    
+
     return questions.filter(q => q.options.length >= 4);
   };
 
@@ -341,7 +345,7 @@ Please make the summary educational and well-structured for study purposes.`;
           setSummary(fullContent);
           setMessages(prev => [...prev, { role: "assistant", content: fullContent, type: "summary" }]);
           setStreamingMessage('');
-          
+
           // Start MCQ generation
           setTimeout(() => generateMCQQuestions(videoTranscript), 1000);
         }
@@ -367,7 +371,7 @@ Please make the summary educational and well-structured for study purposes.`;
 Format each question EXACTLY as follows:
 1. [Question text]
 A. [Option A]
-B. [Option B]  
+B. [Option B]
 C. [Option C]
 D. [Option D]
 Answer: [Correct letter]
@@ -466,7 +470,7 @@ Lecture Transcript: ${transcript}`;
     setIsStreaming(false);
     setIsProcessing(false);
     setIsChatLoading(false);
-    
+
     if (streamingMessage.trim()) {
       if (streamingType === 'summary') {
         setSummary(streamingMessage);
@@ -485,10 +489,10 @@ Lecture Transcript: ${transcript}`;
 
   const handleCopySummary = async () => {
     try {
-      const content = `${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) => 
+      const content = `${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) =>
         `${i + 1}. ${q.question}\nA. ${q.options[0]}\nB. ${q.options[1]}\nC. ${q.options[2]}\nD. ${q.options[3]}\nAnswer: ${q.correctAnswer}\n`
       ).join('\n')}`;
-      
+
       await navigator.clipboard.writeText(content);
       showToast('Content copied to clipboard!');
     } catch (err) {
@@ -498,10 +502,10 @@ Lecture Transcript: ${transcript}`;
   };
 
   const handleDownloadSummary = () => {
-    const content = `# YouTube Lecture Summary\n\n${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) => 
+    const content = `# YouTube Lecture Summary\n\n${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) =>
       `${i + 1}. ${q.question}\nA. ${q.options[0]}\nB. ${q.options[1]}\nC. ${q.options[2]}\nD. ${q.options[3]}\nAnswer: ${q.correctAnswer}\n`
     ).join('\n')}`;
-    
+
     const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -525,7 +529,7 @@ Lecture Transcript: ${transcript}`;
             </h1>
           );
         }
-        
+
         if (line.startsWith('## ')) {
           return (
             <h2 key={i} className="text-xl font-bold mt-6 mb-3 text-gray-800">
@@ -533,7 +537,7 @@ Lecture Transcript: ${transcript}`;
             </h2>
           );
         }
-        
+
         if (line.startsWith('### ')) {
           return (
             <h3 key={i} className="text-lg font-bold mt-5 mb-2 text-gray-700">
@@ -541,7 +545,7 @@ Lecture Transcript: ${transcript}`;
             </h3>
           );
         }
-        
+
         if (line.startsWith('- ')) {
           return (
             <li key={i} className="ml-6 mb-2 text-gray-700 pl-2 border-l-2 border-blue-100">
@@ -549,7 +553,7 @@ Lecture Transcript: ${transcript}`;
             </li>
           );
         }
-        
+
         if (line.match(/^\d+\./)) {
           return (
             <li key={i} className="ml-6 mb-2 text-gray-700 pl-2 border-l-2 border-blue-100">
@@ -557,22 +561,22 @@ Lecture Transcript: ${transcript}`;
             </li>
           );
         }
-        
+
         if (line.includes('**')) {
           const parts = line.split('**');
           return (
             <p key={i} className="my-3 text-gray-700 leading-relaxed">
-              {parts.map((part, idx) => 
+              {parts.map((part, idx) =>
                 idx % 2 === 1 ? <strong key={idx}>{part}</strong> : part
               )}
             </p>
           );
         }
-        
+
         if (line.trim() === '') {
           return <div key={i} className="my-3"></div>;
         }
-        
+
         return (
           <p key={i} className="my-3 text-gray-700 leading-relaxed">
             {line}
@@ -636,7 +640,7 @@ Lecture Transcript: ${transcript}`;
                   Setup & URL
                 </h2>
                 {(summary || streamingMessage || videoData) && (
-                  <button 
+                  <button
                     onClick={clearAll}
                     className="text-sm text-gray-500 hover:text-blue-500"
                   >
@@ -655,7 +659,7 @@ Lecture Transcript: ${transcript}`;
                     type="password"
                     value={openRouterApiKey}
                     onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                    placeholder="Enter your OpenRouter API key..."
+                    placeholder="Enter your RMS API key..."
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
                     disabled={isProcessing}
                   />
@@ -682,8 +686,8 @@ Lecture Transcript: ${transcript}`;
                 {videoData && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-start space-x-4">
-                      <img 
-                        src={videoData.thumbnail} 
+                      <img
+                        src={videoData.thumbnail}
                         alt="Video thumbnail"
                         className="w-24 h-18 object-cover rounded"
                       />
@@ -739,27 +743,23 @@ Lecture Transcript: ${transcript}`;
                       {currentStep}
                     </span>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <div className={`flex items-center space-x-2 text-sm ${
-                      currentStep.includes('summary') ? 'text-blue-600' : 
-                      summary ? 'text-green-600' : 'text-gray-500'
-                    }`}>
-                      <div className={`w-4 h-4 rounded-full ${
-                        currentStep.includes('summary') ? 'bg-blue-500 animate-pulse' :
-                        summary ? 'bg-green-500' : 'bg-gray-300'
-                      }`}></div>
+                    <div className={`flex items-center space-x-2 text-sm ${currentStep.includes('summary') ? 'text-blue-600' :
+                        summary ? 'text-green-600' : 'text-gray-500'
+                      }`}>
+                      <div className={`w-4 h-4 rounded-full ${currentStep.includes('summary') ? 'bg-blue-500 animate-pulse' :
+                          summary ? 'bg-green-500' : 'bg-gray-300'
+                        }`}></div>
                       <span>Summary Generation</span>
                     </div>
-                    
-                    <div className={`flex items-center space-x-2 text-sm ${
-                      currentStep.includes('questions') ? 'text-blue-600' : 
-                      mcqQuestions.length > 0 ? 'text-green-600' : 'text-gray-500'
-                    }`}>
-                      <div className={`w-4 h-4 rounded-full ${
-                        currentStep.includes('questions') ? 'bg-blue-500 animate-pulse' :
-                        mcqQuestions.length > 0 ? 'bg-green-500' : 'bg-gray-300'
-                      }`}></div>
+
+                    <div className={`flex items-center space-x-2 text-sm ${currentStep.includes('questions') ? 'text-blue-600' :
+                        mcqQuestions.length > 0 ? 'text-green-600' : 'text-gray-500'
+                      }`}>
+                      <div className={`w-4 h-4 rounded-full ${currentStep.includes('questions') ? 'bg-blue-500 animate-pulse' :
+                          mcqQuestions.length > 0 ? 'bg-green-500' : 'bg-gray-300'
+                        }`}></div>
                       <span>MCQ Questions (10)</span>
                     </div>
                   </div>
@@ -774,8 +774,8 @@ Lecture Transcript: ${transcript}`;
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
                       <span className="text-sm font-medium">
                         {streamingType === 'summary' ? 'Streaming Summary...' :
-                         streamingType === 'mcq' ? 'Generating MCQ Questions...' :
-                         streamingType === 'chat' ? 'Streaming Response...' : 'Processing...'}
+                          streamingType === 'mcq' ? 'Generating MCQ Questions...' :
+                            streamingType === 'chat' ? 'Streaming Response...' : 'Processing...'}
                       </span>
                     </div>
                     <button
@@ -850,9 +850,9 @@ Lecture Transcript: ${transcript}`;
                           key={index}
                           className={`mb-6 ${message.role === 'user' ? 'text-right' : ''}`}
                         >
-                          <div className={`inline-block max-w-[95%] rounded-lg p-4 ${message.role === 'user' 
-                            ? 'bg-blue-500 text-white ml-auto' 
-                            : 'bg-gray-100 text-gray-800'}`}
+                          <div className={`inline-block max-w-[95%] rounded-lg p-4 ${message.role === 'user'
+                              ? 'bg-blue-500 text-white ml-auto'
+                              : 'bg-gray-100 text-gray-800'}`}
                           >
                             {/* Message Header */}
                             <div className="flex items-center mb-3">
@@ -861,14 +861,14 @@ Lecture Transcript: ${transcript}`;
                               ) : (
                                 <>
                                   {message.type === 'summary' ? <FileText className="w-4 h-4 mr-2" /> :
-                                   message.type === 'mcq' ? <HelpCircle className="w-4 h-4 mr-2" /> :
-                                   <Bot className="w-4 h-4 mr-2" />}
+                                    message.type === 'mcq' ? <HelpCircle className="w-4 h-4 mr-2" /> :
+                                      <Bot className="w-4 h-4 mr-2" />}
                                 </>
                               )}
                               <span className="text-xs font-medium opacity-80">
-                                {message.role === 'user' ? 'You' : 
-                                 message.type === 'summary' ? 'Summary Generated' :
-                                 message.type === 'mcq' ? 'MCQ Questions' : 'AI Assistant'}
+                                {message.role === 'user' ? 'You' :
+                                  message.type === 'summary' ? 'Summary Generated' :
+                                    message.type === 'mcq' ? 'MCQ Questions' : 'AI Assistant'}
                               </span>
                             </div>
 
@@ -909,18 +909,18 @@ Lecture Transcript: ${transcript}`;
                           </div>
                         </div>
                       ))}
-                      
+
                       {/* Streaming Message */}
                       {streamingMessage && (
                         <div className="mb-6">
                           <div className="inline-block max-w-[95%] rounded-lg p-4 bg-gray-100 text-gray-800">
                             <div className="flex items-center mb-3">
                               {streamingType === 'summary' ? <FileText className="w-4 h-4 mr-2" /> :
-                               streamingType === 'mcq' ? <HelpCircle className="w-4 h-4 mr-2" /> :
-                               <Bot className="w-4 h-4 mr-2" />}
+                                streamingType === 'mcq' ? <HelpCircle className="w-4 h-4 mr-2" /> :
+                                  <Bot className="w-4 h-4 mr-2" />}
                               <span className="text-xs font-medium opacity-80 flex items-center">
                                 {streamingType === 'summary' ? 'Generating Summary' :
-                                 streamingType === 'mcq' ? 'Creating MCQ Questions' : 'AI Assistant'}
+                                  streamingType === 'mcq' ? 'Creating MCQ Questions' : 'AI Assistant'}
                                 <span className="ml-2 flex items-center">
                                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                                   <span className="ml-1 text-green-600">Live</span>
@@ -935,7 +935,7 @@ Lecture Transcript: ${transcript}`;
                           </div>
                         </div>
                       )}
-                      
+
                       {isChatLoading && !streamingMessage && (
                         <div className="inline-block bg-gray-100 rounded-lg p-4">
                           <div className="flex items-center space-x-2">
@@ -996,7 +996,7 @@ Lecture Transcript: ${transcript}`;
                     <p className="text-gray-600 mb-6">
                       Add your RMS API key and YouTube URL to extract real transcripts and generate AI-powered study materials.
                     </p>
-                    
+
                     <div className="grid grid-cols-1 gap-4 w-full max-w-md">
                       <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
                         <FileText className="w-5 h-5 text-blue-500" />
@@ -1029,7 +1029,7 @@ Lecture Transcript: ${transcript}`;
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="mt-6 text-sm text-gray-500">
                       <p>💡 <span className="font-medium">Requirements:</span></p>
                       <ul className="text-left mt-2 space-y-1">
@@ -1087,4 +1087,4 @@ Lecture Transcript: ${transcript}`;
   );
 };
 
-export default YouTubeSummarizer;
+export default YouTubeSummarizer; 
