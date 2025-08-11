@@ -120,7 +120,7 @@ const Home = () => {
                   RMS-AI
                 </Link>
                 <Link
-                  to="/interview-prep-pro"
+                  to="/interview-prep"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
                   <span>Interview Prep Pro</span>

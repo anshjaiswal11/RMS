@@ -15,7 +15,9 @@ import RmsAi from './pages/RmsAi';
 import Terms from './pages/Terms';
 import RefundPolicy from './pages/RefundPolicy';
 import InterviewPrep from './pages/Interview';
-import { Youtube } from 'lucide-react';
+// import { Youtube } from 'lucide-react';
+import Youtube from './pages/Youtube';
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);

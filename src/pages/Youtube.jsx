@@ -18,12 +18,14 @@ import {
   FileText,
   HelpCircle,
   Link,
-  Zap
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 
 const YouTubeSummarizer = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [videoData, setVideoData] = useState(null);
+  const [transcript, setTranscript] = useState('');
   const [summary, setSummary] = useState('');
   const [mcqQuestions, setMcqQuestions] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,6 +36,8 @@ const YouTubeSummarizer = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingType, setStreamingType] = useState('');
   const [currentStep, setCurrentStep] = useState('');
+  const [error, setError] = useState('');
+  const [openRouterApiKey, setOpenRouterApiKey] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -44,10 +48,13 @@ const YouTubeSummarizer = () => {
     scrollToBottom();
   }, [messages, streamingMessage]);
 
-  // Mock toast notifications
+  // Toast notifications
   const showToast = (message, type = 'success') => {
     console.log(`Toast (${type}): ${message}`);
-    // In a real app, you'd use a proper toast library
+    if (type === 'error') {
+      setError(message);
+      setTimeout(() => setError(''), 5000);
+    }
   };
 
   // Extract video ID from YouTube URL
@@ -57,50 +64,161 @@ const YouTubeSummarizer = () => {
     return match ? match[1] : null;
   };
 
-  // Get YouTube video data (mock implementation)
+  // Get YouTube video data using YouTube oEmbed API
   const getVideoData = async (videoId) => {
-    return {
-      title: "Machine Learning Fundamentals - Complete Course",
-      duration: "45:30",
-      channel: "AI Education Hub",
-      thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-      videoId: videoId
-    };
+    try {
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (!response.ok) throw new Error('Video not found or unavailable');
+      
+      const data = await response.json();
+      return {
+        title: data.title,
+        channel: data.author_name,
+        thumbnail: data.thumbnail_url,
+        videoId: videoId
+      };
+    } catch (error) {
+      console.error('Error fetching video data:', error);
+      throw new Error('Failed to fetch video information. Please check if the video exists and is public.');
+    }
   };
 
-  // Get video transcript (mock implementation)
+  // Get video transcript using YouTube Transcript API
   const getVideoTranscript = async (videoId) => {
     try {
-      showToast('Fetching video transcript... This may take a moment', 'loading');
+      setCurrentStep('Fetching transcript...');
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Using youtube-transcript-api via a CORS proxy
+      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`);
       
-      return `Welcome to today's lecture on machine learning fundamentals. 
-      In this comprehensive session, we'll explore the key concepts that form the foundation of artificial intelligence and machine learning.
+      if (!response.ok) {
+        throw new Error('Failed to fetch video page');
+      }
       
-      First, let's understand what machine learning really means. Machine learning is a subset of artificial intelligence that focuses on creating algorithms that can learn and improve from experience without being explicitly programmed for every scenario.
+      const data = await response.json();
+      const html = data.contents;
       
-      There are three main types of machine learning: supervised learning, unsupervised learning, and reinforcement learning.
+      // Extract captions from YouTube page
+      const captionsMatch = html.match(/"captions":({.+?}),"/);
+      if (!captionsMatch) {
+        throw new Error('No captions available for this video. Please try a video with captions/subtitles enabled.');
+      }
       
-      Supervised learning involves training algorithms on labeled datasets where we know the correct answers. Examples include image classification, spam detection, and price prediction.
+      const captionsData = JSON.parse(captionsMatch[1]);
+      const tracks = captionsData?.playerCaptionsTracklistRenderer?.captionTracks;
       
-      Unsupervised learning works with unlabeled data to find hidden patterns. Common techniques include clustering, association rules, and dimensionality reduction.
+      if (!tracks || tracks.length === 0) {
+        throw new Error('No caption tracks found for this video.');
+      }
       
-      Reinforcement learning is about training agents to make decisions in an environment to maximize rewards. It's widely used in game playing, robotics, and autonomous systems.
+      // Get the first available caption track (usually auto-generated or first language)
+      const captionTrack = tracks[0];
+      const captionUrl = captionTrack.baseUrl;
       
-      Key algorithms we'll discuss include linear regression, decision trees, random forests, support vector machines, and neural networks.
+      // Fetch the caption content
+      const captionResponse = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(captionUrl)}`);
+      if (!captionResponse.ok) {
+        throw new Error('Failed to fetch caption data');
+      }
       
-      The machine learning pipeline typically involves data collection, data preprocessing, feature selection, model training, evaluation, and deployment.
+      const captionData = await captionResponse.json();
+      const captionXml = captionData.contents;
       
-      Important considerations include overfitting, underfitting, bias-variance tradeoff, and cross-validation techniques.
+      // Parse XML to extract text
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(captionXml, 'text/xml');
+      const textElements = xmlDoc.getElementsByTagName('text');
       
-      Real-world applications span across healthcare, finance, technology, transportation, and many other industries.
+      let transcript = '';
+      for (let i = 0; i < textElements.length; i++) {
+        const textContent = textElements[i].textContent || textElements[i].innerText || '';
+        transcript += textContent.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') + ' ';
+      }
       
-      Thank you for joining this session. Make sure to practice with the provided exercises and explore the additional resources mentioned in the description.`;
+      if (!transcript.trim()) {
+        throw new Error('Could not extract transcript content from video.');
+      }
+      
+      return transcript.trim();
+      
     } catch (error) {
       console.error("Error fetching transcript:", error);
-      showToast("Failed to fetch video transcript. Please try again.", 'error');
+      throw error;
+    }
+  };
+
+  // Call OpenRouter API
+  const callOpenRouterAPI = async (messages, systemPrompt = '') => {
+    if (!openRouterApiKey.trim()) {
+      throw new Error('RMS API key is required. Please add your API key.');
+    }
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openRouterApiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'YouTube Lecture Analyzer'
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-20b:free',
+        messages: [
+          ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+          ...messages
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 4000
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response;
+  };
+
+  // Stream response from OpenRouter
+  const streamOpenRouterResponse = async (messages, systemPrompt, onToken, onComplete) => {
+    try {
+      const response = await callOpenRouterAPI(messages, systemPrompt);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                fullContent += content;
+                onToken(content);
+              }
+            } catch (e) {
+              // Ignore parsing errors for malformed chunks
+            }
+          }
+        }
+      }
+
+      onComplete(fullContent);
+    } catch (error) {
       throw error;
     }
   };
@@ -108,29 +226,34 @@ const YouTubeSummarizer = () => {
   // Parse MCQ questions from text
   const parseMCQFromText = (text) => {
     const questions = [];
-    const lines = text.split('\n');
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
     let currentQuestion = null;
     
     for (let line of lines) {
-      line = line.trim();
-      if (line.match(/^\d+\./)) {
-        if (currentQuestion) {
+      if (line.match(/^\d+\./) || line.match(/^Question \d+:/i)) {
+        if (currentQuestion && currentQuestion.options.length > 0) {
           questions.push(currentQuestion);
         }
         currentQuestion = {
-          question: line.replace(/^\d+\.\s*/, ''),
+          question: line.replace(/^\d+\.\s*/, '').replace(/^Question \d+:\s*/i, ''),
           options: [],
           correctAnswer: ''
         };
-      } else if (line.match(/^[A-D]\)/)) {
+      } else if (line.match(/^[A-D][\.\)]/)) {
         if (currentQuestion) {
           const optionText = line.substring(2).trim();
           currentQuestion.options.push(optionText);
-          if (line.startsWith('A)')) currentQuestion.correctAnswer = 'A';
-          else if (line.startsWith('B)')) currentQuestion.correctAnswer = 'B';
-          else if (line.startsWith('C)')) currentQuestion.correctAnswer = 'C';
-          else if (line.startsWith('D)')) currentQuestion.correctAnswer = 'D';
         }
+      } else if (line.toLowerCase().startsWith('answer:') || line.toLowerCase().startsWith('correct answer:')) {
+        if (currentQuestion) {
+          const answerMatch = line.match(/[A-D]/);
+          if (answerMatch) {
+            currentQuestion.correctAnswer = answerMatch[0];
+          }
+        }
+      } else if (currentQuestion && !currentQuestion.question.includes(line) && line.length > 10) {
+        // This might be a continuation of the question
+        currentQuestion.question += ' ' + line;
       }
     }
     
@@ -138,29 +261,17 @@ const YouTubeSummarizer = () => {
       questions.push(currentQuestion);
     }
     
-    return questions;
-  };
-
-  // Mock streaming API call
-  const simulateStreamingAPI = async (content, onToken, onComplete) => {
-    const words = content.split(' ');
-    let streamedContent = '';
-    
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i] + ' ';
-      streamedContent += word;
-      onToken(word);
-      
-      // Simulate streaming delay
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    
-    onComplete(streamedContent.trim());
+    return questions.filter(q => q.options.length >= 4);
   };
 
   const handleAnalyzeVideo = async () => {
     if (!youtubeUrl.trim()) {
       showToast('Please enter a YouTube URL.', 'error');
+      return;
+    }
+
+    if (!openRouterApiKey.trim()) {
+      showToast('Please enter your RMS API key.', 'error');
       return;
     }
 
@@ -173,58 +284,56 @@ const YouTubeSummarizer = () => {
     setIsProcessing(true);
     setIsStreaming(true);
     setStreamingType('summary');
-    setCurrentStep('summary');
+    setCurrentStep('Initializing...');
     setSummary('');
     setMcqQuestions([]);
     setMessages([]);
     setStreamingMessage('');
+    setError('');
+    setTranscript('');
 
     try {
       // Get video data
+      setCurrentStep('Fetching video information...');
       const videoInfo = await getVideoData(videoId);
       setVideoData(videoInfo);
 
       // Get transcript
-      const transcript = await getVideoTranscript(videoId);
+      setCurrentStep('Extracting transcript...');
+      const videoTranscript = await getVideoTranscript(videoId);
+      setTranscript(videoTranscript);
 
       // Generate summary with streaming
-      const summaryContent = `# Lecture Summary: Machine Learning Fundamentals
+      setCurrentStep('Generating summary...');
+      const summaryPrompt = `You are an expert educational content analyzer. Please create a comprehensive summary of this YouTube lecture transcript.
+
+Create a detailed summary with the following structure:
+# Lecture Summary: [Extract and use the main topic]
 
 ## Key Learning Objectives
-- Understand the core concepts of machine learning and artificial intelligence
-- Differentiate between supervised, unsupervised, and reinforcement learning
-- Learn about key algorithms and their applications
-- Understand the machine learning pipeline and best practices
-- Explore real-world applications across various industries
+- List 4-6 main learning objectives from the content
 
-## Core Concepts (200-300 words)
-Machine learning represents a paradigm shift in how we approach problem-solving in computer science. Rather than explicitly programming solutions, we create systems that can learn patterns from data and make predictions or decisions. This field sits at the intersection of statistics, computer science, and domain expertise.
-
-The three primary categories of machine learning each serve different purposes. Supervised learning uses labeled training data to predict outcomes for new inputs. Unsupervised learning discovers hidden structures in unlabeled data. Reinforcement learning optimizes decision-making through trial and error in dynamic environments.
+## Core Concepts (300-500 words)
+Provide a detailed explanation of the main concepts covered in the lecture. Make it comprehensive but accessible.
 
 ## Important Definitions
-- **Machine Learning**: A subset of AI focused on algorithms that improve through experience
-- **Supervised Learning**: Learning with labeled training examples
-- **Unsupervised Learning**: Finding patterns in data without labeled examples
-- **Reinforcement Learning**: Learning through interaction with an environment
-- **Overfitting**: When a model performs well on training data but poorly on new data
-- **Cross-validation**: Technique to assess model performance and generalizability
+List and define key terms and concepts mentioned in the lecture.
 
 ## Key Points & Takeaways
-- Machine learning is about pattern recognition and prediction from data
-- Different types of learning (supervised, unsupervised, reinforcement) solve different problems
-- The choice of algorithm depends on the problem type and data characteristics
-- Proper validation techniques are crucial for building robust models
-- Real-world applications span healthcare, finance, technology, and more
+- List the most important points students should remember
+- Include any formulas, processes, or methodologies mentioned
 
 ## Study Notes
-Focus on understanding the fundamental differences between learning paradigms rather than memorizing algorithm details. Practice implementing simple examples of each type. Pay attention to the importance of data quality and preprocessing in the machine learning pipeline.
+Provide specific study recommendations and areas students should focus on.
 
 ## Recommended Follow-up
-Practice with hands-on coding exercises, explore datasets in your area of interest, and study specific algorithms in depth based on your application needs.`;
+Suggest next steps for learning and additional topics to explore.
 
-      await simulateStreamingAPI(
-        summaryContent,
+Please make the summary educational and well-structured for study purposes.`;
+
+      await streamOpenRouterResponse(
+        [{ role: 'user', content: `${summaryPrompt}\n\nTranscript:\n${videoTranscript}` }],
+        'You are an expert educational content analyzer specializing in creating comprehensive study materials from lecture content.',
         (token) => {
           setStreamingMessage(prev => prev + token);
         },
@@ -234,86 +343,48 @@ Practice with hands-on coding exercises, explore datasets in your area of intere
           setStreamingMessage('');
           
           // Start MCQ generation
-          setTimeout(() => generateMCQQuestions(transcript), 1000);
+          setTimeout(() => generateMCQQuestions(videoTranscript), 1000);
         }
       );
 
     } catch (error) {
       console.error('Error analyzing video:', error);
-      showToast('Error analyzing video. Please try again.', 'error');
+      showToast(error.message || 'Error analyzing video. Please try again.', 'error');
       setIsProcessing(false);
       setIsStreaming(false);
+      setCurrentStep('');
     }
   };
 
   const generateMCQQuestions = async (transcript) => {
     setStreamingType('mcq');
-    setCurrentStep('mcq');
+    setCurrentStep('Generating practice questions...');
     setStreamingMessage('');
 
     try {
-      const mcqContent = `1. What is machine learning primarily focused on?
-A) Explicitly programming solutions for every scenario
-B) Creating algorithms that learn from experience without explicit programming
-C) Only working with labeled datasets
-D) Replacing human decision-making entirely
+      const mcqPrompt = `Based on the following lecture transcript, create exactly 10 multiple choice questions for student practice.
 
-2. Which type of learning uses labeled training data?
-A) Unsupervised learning
-B) Reinforcement learning
-C) Supervised learning
-D) Deep learning
+Format each question EXACTLY as follows:
+1. [Question text]
+A. [Option A]
+B. [Option B]  
+C. [Option C]
+D. [Option D]
+Answer: [Correct letter]
 
-3. What is the main characteristic of unsupervised learning?
-A) It requires labeled examples
-B) It works with unlabeled data to find patterns
-C) It only works with numerical data
-D) It cannot be used for clustering
+Make sure questions:
+- Test understanding of key concepts
+- Are clearly worded and unambiguous
+- Have 4 distinct options
+- Cover different aspects of the lecture
+- Include both factual and conceptual questions
+- Are appropriate for the academic level of the content
 
-4. Reinforcement learning is primarily used for:
-A) Image classification only
-B) Training agents to make decisions in environments
-C) Finding hidden patterns in static data
-D) Preprocessing data
+Transcript: ${transcript}`;
 
-5. Which of the following is NOT mentioned as a key algorithm?
-A) Linear regression
-B) Decision trees
-C) Quantum computing
-D) Neural networks
-
-6. What does overfitting refer to?
-A) Using too much training data
-B) When a model performs well on training data but poorly on new data
-C) When a model is too simple
-D) When data preprocessing takes too long
-
-7. The machine learning pipeline typically includes:
-A) Only model training
-B) Data collection, preprocessing, training, and evaluation
-C) Just data collection and results
-D) Only feature selection
-
-8. Cross-validation is important for:
-A) Data collection
-B) Assessing model performance and generalizability
-C) Choosing programming languages
-D) Hardware optimization
-
-9. Which industries are mentioned as having ML applications?
-A) Only technology
-B) Healthcare, finance, technology, and transportation
-C) Just healthcare and finance
-D) Only academic research
-
-10. What is emphasized as crucial for building robust models?
-A) Using the most complex algorithms
-B) Having the largest dataset possible
-C) Proper validation techniques
-D) The fastest hardware`;
-
-      await simulateStreamingAPI(
-        mcqContent,
+      await streamOpenRouterResponse(
+        [{ role: 'user', content: mcqPrompt }],
+        'You are an expert educational assessment creator. Generate high-quality multiple choice questions that effectively test student understanding.',
         (token) => {
           setStreamingMessage(prev => prev + token);
         },
@@ -322,25 +393,31 @@ D) The fastest hardware`;
           setMcqQuestions(questions);
           setMessages(prev => [...prev, { role: "assistant", content: fullContent, type: "mcq" }]);
           setStreamingMessage('');
-          setCurrentStep('complete');
+          setCurrentStep('Analysis complete!');
           setIsStreaming(false);
           setIsProcessing(false);
           setStreamingType('');
-          showToast('Analysis complete! Summary and MCQ questions generated.');
+          showToast(`Analysis complete! Generated summary and ${questions.length} MCQ questions.`);
         }
       );
 
     } catch (error) {
       console.error('Error generating MCQ questions:', error);
-      showToast('Error generating MCQ questions. Please try again.', 'error');
+      showToast(error.message || 'Error generating MCQ questions. Please try again.', 'error');
       setIsProcessing(false);
       setIsStreaming(false);
+      setCurrentStep('');
     }
   };
 
   const handleAskQuestion = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || isChatLoading) return;
+    if (!inputValue.trim() || isChatLoading || !transcript) return;
+
+    if (!openRouterApiKey.trim()) {
+      showToast(' RMS API key is required for chat functionality.', 'error');
+      return;
+    }
 
     const userMessage = { role: "user", content: inputValue };
     const newMessages = [...messages, userMessage];
@@ -352,20 +429,17 @@ D) The fastest hardware`;
     setStreamingMessage('');
 
     try {
-      const responseContent = `Based on the lecture content, here's my response to your question about "${inputValue}":
+      const chatPrompt = `You are an AI tutor helping students understand lecture content. Answer the student's question based on the lecture transcript provided.
 
-The machine learning fundamentals covered in this lecture provide a comprehensive foundation for understanding AI systems. Your question touches on important concepts that were discussed.
+Be helpful, educational, and accurate. If the question isn't directly covered in the transcript, acknowledge this and provide general educational guidance.
 
-Key points to remember:
-- Machine learning algorithms learn from data patterns
-- Different learning types serve different purposes
-- Proper validation is essential for model success
-- Real-world applications are diverse and growing
+Student Question: ${inputValue}
 
-Would you like me to elaborate on any specific aspect of machine learning from the lecture?`;
+Lecture Transcript: ${transcript}`;
 
-      await simulateStreamingAPI(
-        responseContent,
+      await streamOpenRouterResponse(
+        [{ role: 'user', content: chatPrompt }],
+        'You are a helpful AI tutor specializing in explaining lecture content to students.',
         (token) => {
           setStreamingMessage(prev => prev + token);
         },
@@ -380,10 +454,11 @@ Would you like me to elaborate on any specific aspect of machine learning from t
 
     } catch (error) {
       console.error('Error getting chat response:', error);
-      showToast('Error getting response. Please try again.', 'error');
+      showToast(error.message || 'Error getting response. Please try again.', 'error');
       setMessages(prev => prev.slice(0, -1));
       setIsChatLoading(false);
       setIsStreaming(false);
+      setStreamingType('');
     }
   };
 
@@ -405,12 +480,17 @@ Would you like me to elaborate on any specific aspect of machine learning from t
     }
     setStreamingMessage('');
     setStreamingType('');
+    setCurrentStep('Stopped by user');
   };
 
   const handleCopySummary = async () => {
     try {
-      await navigator.clipboard.writeText(summary);
-      showToast('Summary copied to clipboard!');
+      const content = `${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) => 
+        `${i + 1}. ${q.question}\nA. ${q.options[0]}\nB. ${q.options[1]}\nC. ${q.options[2]}\nD. ${q.options[3]}\nAnswer: ${q.correctAnswer}\n`
+      ).join('\n')}`;
+      
+      await navigator.clipboard.writeText(content);
+      showToast('Content copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy: ', err);
       showToast('Failed to copy to clipboard', 'error');
@@ -419,14 +499,14 @@ Would you like me to elaborate on any specific aspect of machine learning from t
 
   const handleDownloadSummary = () => {
     const content = `# YouTube Lecture Summary\n\n${summary}\n\n## MCQ Questions\n\n${mcqQuestions.map((q, i) => 
-      `${i + 1}. ${q.question}\nA) ${q.options[0]}\nB) ${q.options[1]}\nC) ${q.options[2]}\nD) ${q.options[3]}\n`
+      `${i + 1}. ${q.question}\nA. ${q.options[0]}\nB. ${q.options[1]}\nC. ${q.options[2]}\nD. ${q.options[3]}\nAnswer: ${q.correctAnswer}\n`
     ).join('\n')}`;
     
     const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `youtube_summary_${Date.now()}.md`;
+    a.download = `youtube_summary_${videoData?.title?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -510,8 +590,10 @@ Would you like me to elaborate on any specific aspect of machine learning from t
     setMcqQuestions([]);
     setVideoData(null);
     setYoutubeUrl('');
+    setTranscript('');
     setStreamingMessage('');
     setCurrentStep('');
+    setError('');
     showToast('All content cleared successfully!');
   };
 
@@ -529,9 +611,20 @@ Would you like me to elaborate on any specific aspect of machine learning from t
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Analyze YouTube lectures, get comprehensive summaries, practice with MCQ questions, and chat with AI about the content.
+            Real YouTube transcript analysis with AI-powered summaries and practice questions using RMS API.
           </p>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-3">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+            <div>
+              <p className="text-red-800 font-medium">Error</p>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Input Section */}
@@ -540,7 +633,7 @@ Would you like me to elaborate on any specific aspect of machine learning from t
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                   <Link className="w-6 h-6 mr-2" />
-                  YouTube URL
+                  Setup & URL
                 </h2>
                 {(summary || streamingMessage || videoData) && (
                   <button 
@@ -553,7 +646,29 @@ Would you like me to elaborate on any specific aspect of machine learning from t
               </div>
 
               <div className="space-y-4">
+                {/* API Key Input */}
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    RMS API Key
+                  </label>
+                  <input
+                    type="password"
+                    value={openRouterApiKey}
+                    onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                    placeholder="Enter your OpenRouter API key..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                    disabled={isProcessing}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Get your RMS API key at <a href="#" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Contact us</a>
+                  </p>
+                </div>
+
+                {/* YouTube URL Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    YouTube URL
+                  </label>
                   <input
                     type="url"
                     value={youtubeUrl}
@@ -577,10 +692,6 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                           {videoData.title}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-green-600">
-                          <span className="flex items-center">
-                            <Clock className="w-4 h-4 mr-1" />
-                            {videoData.duration}
-                          </span>
                           <span>{videoData.channel}</span>
                         </div>
                       </div>
@@ -599,7 +710,7 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                 ) : (
                   <button
                     onClick={handleAnalyzeVideo}
-                    disabled={!youtubeUrl.trim() || isProcessing}
+                    disabled={!youtubeUrl.trim() || !openRouterApiKey.trim() || isProcessing}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isProcessing ? (
@@ -625,29 +736,28 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                       Analysis Progress
                     </span>
                     <span className="text-sm text-gray-500">
-                      {currentStep === 'summary' ? 'Generating Summary...' : 
-                       currentStep === 'mcq' ? 'Creating MCQ Questions...' : 'Processing...'}
+                      {currentStep}
                     </span>
                   </div>
                   
                   <div className="space-y-2">
                     <div className={`flex items-center space-x-2 text-sm ${
-                      currentStep === 'summary' ? 'text-blue-600' : 
+                      currentStep.includes('summary') ? 'text-blue-600' : 
                       summary ? 'text-green-600' : 'text-gray-500'
                     }`}>
                       <div className={`w-4 h-4 rounded-full ${
-                        currentStep === 'summary' ? 'bg-blue-500 animate-pulse' :
+                        currentStep.includes('summary') ? 'bg-blue-500 animate-pulse' :
                         summary ? 'bg-green-500' : 'bg-gray-300'
                       }`}></div>
                       <span>Summary Generation</span>
                     </div>
                     
                     <div className={`flex items-center space-x-2 text-sm ${
-                      currentStep === 'mcq' ? 'text-blue-600' : 
+                      currentStep.includes('questions') ? 'text-blue-600' : 
                       mcqQuestions.length > 0 ? 'text-green-600' : 'text-gray-500'
                     }`}>
                       <div className={`w-4 h-4 rounded-full ${
-                        currentStep === 'mcq' ? 'bg-blue-500 animate-pulse' :
+                        currentStep.includes('questions') ? 'bg-blue-500 animate-pulse' :
                         mcqQuestions.length > 0 ? 'bg-green-500' : 'bg-gray-300'
                       }`}></div>
                       <span>MCQ Questions (10)</span>
@@ -683,13 +793,14 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                 <h3 className="font-semibold text-gray-900">Features:</h3>
                 <div className="space-y-3">
                   {[
-                    'Real-time streaming analysis',
-                    'Comprehensive lecture summaries',
+                    'Real YouTube transcript extraction',
+                    'AI-powered comprehensive summaries',
                     '10 MCQ practice questions',
-                    'Interactive AI chat support',
-                    'Key concepts extraction',
+                    'Interactive AI chat about content',
+                    'Key concepts and definitions',
                     'Study recommendations',
-                    'Download summaries & questions'
+                    'Download summaries & questions',
+                    'Copy content to clipboard',
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -764,7 +875,7 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                             {/* Message Content */}
                             {message.type === 'mcq' ? (
                               <div className="space-y-4">
-                                <h3 className="font-bold text-lg mb-4">Practice Questions</h3>
+                                <h3 className="font-bold text-lg mb-4">Practice Questions ({mcqQuestions.length})</h3>
                                 {mcqQuestions.map((question, qIndex) => (
                                   <div key={qIndex} className="bg-white p-4 rounded-lg border">
                                     <h4 className="font-semibold mb-3">
@@ -772,14 +883,21 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                                     </h4>
                                     <div className="space-y-2">
                                       {question.options.map((option, oIndex) => (
-                                        <div key={oIndex} className="flex items-center space-x-2">
-                                          <span className="font-medium min-w-[20px]">
-                                            {String.fromCharCode(65 + oIndex)})
+                                        <div key={oIndex} className="flex items-start space-x-2">
+                                          <span className="font-medium min-w-[20px] mt-0.5">
+                                            {String.fromCharCode(65 + oIndex)}.
                                           </span>
                                           <span>{option}</span>
                                         </div>
                                       ))}
                                     </div>
+                                    {question.correctAnswer && (
+                                      <div className="mt-3 pt-2 border-t text-sm">
+                                        <span className="font-medium text-green-700">
+                                          Answer: {question.correctAnswer}
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -830,7 +948,7 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                     </div>
 
                     {/* Chat Input */}
-                    {summary && (
+                    {transcript && (
                       <form onSubmit={handleAskQuestion} className="flex space-x-2">
                         <input
                           type="text"
@@ -873,17 +991,23 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                   <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-8 text-center">
                     <Youtube className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                      YouTube Lecture Analyzer
+                      Real YouTube Transcript Analysis
                     </h3>
                     <p className="text-gray-600 mb-6">
-                      Enter a YouTube URL to get comprehensive analysis with summary and practice questions.
+                      Add your RMS API key and YouTube URL to extract real transcripts and generate AI-powered study materials.
                     </p>
                     
                     <div className="grid grid-cols-1 gap-4 w-full max-w-md">
                       <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
                         <FileText className="w-5 h-5 text-blue-500" />
                         <span className="text-sm text-gray-700">
-                          Detailed lecture summary
+                          Real transcript extraction
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                        <Brain className="w-5 h-5 text-blue-500" />
+                        <span className="text-sm text-gray-700">
+                          AI-powered comprehensive summary
                         </span>
                       </div>
                       <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
@@ -907,16 +1031,53 @@ Would you like me to elaborate on any specific aspect of machine learning from t
                     </div>
                     
                     <div className="mt-6 text-sm text-gray-500">
-                      <p>💡 <span className="font-medium">Tips:</span></p>
+                      <p>💡 <span className="font-medium">Requirements:</span></p>
                       <ul className="text-left mt-2 space-y-1">
-                        <li>• Works best with educational/lecture videos</li>
-                        <li>• Supports videos with subtitles/captions</li>
-                        <li>• Ask specific questions about concepts</li>
-                        <li>• Use MCQ questions for self-assessment</li>
+                        <li>• RMS key (Mail us for access:- anshjaiswal1804@gmail.com)</li>
+                        <li>• YouTube videos with captions/subtitles</li>
+                        <li>• Public videos (not private or restricted)</li>
+                        <li>• Educational content works best</li>
                       </ul>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="mt-12 bg-white rounded-xl shadow-lg p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">How It Works</h3>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <span className="text-blue-600 font-bold">1</span>
+                </div>
+                <h4 className="font-medium text-gray-900 mb-2">Extract Transcript</h4>
+                <p className="text-sm text-gray-600">Automatically extracts real captions from YouTube videos</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <span className="text-blue-600 font-bold">2</span>
+                </div>
+                <h4 className="font-medium text-gray-900 mb-2">AI Analysis</h4>
+                <p className="text-sm text-gray-600">Uses RMS API to analyze content with GPT models</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <span className="text-blue-600 font-bold">3</span>
+                </div>
+                <h4 className="font-medium text-gray-900 mb-2">Generate Content</h4>
+                <p className="text-sm text-gray-600">Creates summaries and practice questions in real-time</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <span className="text-blue-600 font-bold">4</span>
+                </div>
+                <h4 className="font-medium text-gray-900 mb-2">Interactive Chat</h4>
+                <p className="text-sm text-gray-600">Chat with AI about the lecture content for deeper understanding</p>
               </div>
             </div>
           </div>
