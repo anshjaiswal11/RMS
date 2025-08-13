@@ -84,73 +84,80 @@ const YouTubeSummarizer = () => {
   };
 
   // Get video transcript
-// Get video transcript
-// Get video transcript
+  const getVideoTranscript = async (videoId) => {
+    const proxies = [
+      'https://api.allorigins.win/raw?url=',
+      'https://corsproxy.io/?',
+    ];
 
-const getVideoTranscript = async (videoId) => {
-  try {
-    setCurrentStep('Fetching transcript...');
-    
-    // Switched to a different, more reliable CORS proxy
-    const proxyUrl = 'https://corsproxy.io/?';
-    const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+    let lastError = null;
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch video page: ${response.status} ${response.statusText}`);
+    for (const proxyUrl of proxies) {
+      try {
+        setCurrentStep(`Fetching transcript via proxy...`);
+        const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+
+        if (!response.ok) {
+          throw new Error(`Proxy fetch failed with status: ${response.status}`);
+        }
+
+        const html = await response.text();
+        
+        // A more robust way to find the player response JSON
+        const playerResponseScript = html.split('var ytInitialPlayerResponse = ')[1];
+        if (!playerResponseScript) {
+            throw new Error('Could not find player response script. The page structure may have changed.');
+        }
+        
+        const playerResponseJson = playerResponseScript.split(';</script>')[0];
+        const ytInitialPlayerResponse = JSON.parse(playerResponseJson);
+
+        const captionTracks = ytInitialPlayerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+
+        if (!captionTracks || captionTracks.length === 0) {
+          throw new Error('No caption tracks found for this video. Please try a video with captions/subtitles enabled.');
+        }
+
+        let captionTrack = captionTracks.find(track => track.languageCode === 'en' || track.languageCode.startsWith('en-'));
+        if (!captionTrack) {
+          captionTrack = captionTracks[0];
+        }
+
+        const captionUrl = captionTrack.baseUrl;
+        const captionResponse = await fetch(`${proxyUrl}${encodeURIComponent(captionUrl)}`);
+        
+        if (!captionResponse.ok) {
+          throw new Error(`Failed to fetch caption data: ${captionResponse.status} ${captionResponse.statusText}`);
+        }
+
+        const captionXml = await captionResponse.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(captionXml, "text/xml");
+        const textElements = xmlDoc.getElementsByTagName("text");
+
+        let transcript = "";
+        for (let i = 0; i < textElements.length; i++) {
+          const textContent = textElements[i].textContent || textElements[i].innerText || "";
+          transcript += textContent.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") + " ";
+        }
+
+        if (!transcript.trim()) {
+          throw new Error("Could not extract transcript content from the caption file.");
+        }
+
+        return transcript.trim(); // Success! Exit the loop.
+
+      } catch (error) {
+        console.error(`Attempt with proxy ${proxyUrl} failed:`, error);
+        lastError = error; // Save the error and try the next proxy
+      }
     }
-    const html = await response.text();
 
-    // Find the ytInitialPlayerResponse object
-    const ytInitialPlayerResponseMatch = html.match(/ytInitialPlayerResponse\s*=\s*({.+?});/);
-    if (!ytInitialPlayerResponseMatch || !ytInitialPlayerResponseMatch[1]) {
-        throw new Error('Could not find player response data. The video might be private or the page structure has changed.');
-    }
-    const ytInitialPlayerResponse = JSON.parse(ytInitialPlayerResponseMatch[1]);
-    const captionTracks = ytInitialPlayerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+    // If all proxies fail, throw the last recorded error
+    throw new Error(lastError.message || "All attempts to fetch the transcript failed.");
+  };
 
-    if (!captionTracks || captionTracks.length === 0) {
-      throw new Error('No caption tracks found for this video. Please try a video with captions/subtitles enabled.');
-    }
-
-    // Find the English caption track, or default to the first one
-    let captionTrack = captionTracks.find(track => track.languageCode === 'en' || track.languageCode.startsWith('en-'));
-    if (!captionTrack) {
-      captionTrack = captionTracks[0];
-    }
-
-    const captionUrl = captionTrack.baseUrl;
-
-    const captionResponse = await fetch(`${proxyUrl}${encodeURIComponent(captionUrl)}`);
-    if (!captionResponse.ok) {
-      throw new Error(`Failed to fetch caption data: ${captionResponse.status} ${captionResponse.statusText}`);
-    }
-
-    const captionXml = await captionResponse.text();
-
-    // Parse XML to extract text
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(captionXml, "text/xml");
-    const textElements = xmlDoc.getElementsByTagName("text");
-
-    let transcript = "";
-    for (let i = 0; i < textElements.length; i++) {
-      const textContent = textElements[i].textContent || textElements[i].innerText || "";
-      transcript += textContent.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") + " ";
-    }
-
-    if (!transcript.trim()) {
-      throw new Error("Could not extract transcript content from the caption file.");
-    }
-
-    return transcript.trim();
-
-  } catch (error) {
-    console.error("Error fetching transcript:", error);
-    // Ensure the final error message thrown is clean and informative
-    throw new Error(error.message || "An unknown error occurred while fetching the transcript.");
-  }
-};
   // Call OpenRouter API
   const callOpenRouterAPI = async (messages, systemPrompt = '') => {
     if (!openRouterApiKey.trim()) {
@@ -664,7 +671,7 @@ Lecture Transcript: ${transcript}`;
                     disabled={isProcessing}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Get your RMS API key at <a href="#" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Contact us</a>
+                    Get your RMS API key at <a href="/GetRMSKey" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">GetRMSKey</a>
                   </p>
                 </div>
 
@@ -1087,4 +1094,4 @@ Lecture Transcript: ${transcript}`;
   );
 };
 
-export default YouTubeSummarizer; 
+export default YouTubeSummarizer;

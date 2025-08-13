@@ -17,6 +17,9 @@ import RefundPolicy from './pages/RefundPolicy';
 import InterviewPrep from './pages/Interview';
 // import { Youtube } from 'lucide-react';
 import Youtube from './pages/Youtube';
+import GetRMSKey from './pages/Getkey';
+import Admin from './pages/Admin';
+import Freetest from './pages/Freetest';
 
 
 function App() {
@@ -55,7 +58,10 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/GetRMSKey" element={<GetRMSKey />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
+            <Route path="/freetest" element={<Freetest />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/interview-prep" element={<InterviewPrep />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/youtube_summary" element={<Youtube />} />

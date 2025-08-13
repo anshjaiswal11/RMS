@@ -141,7 +141,7 @@ const Resources = () => {
       name: 'Academic Calendar',
       description: 'Important dates and deadlines',
       icon: GraduationCap,
-      link: '#',
+      link: 'https://drive.google.com/file/d/1mDptTjJ-J4jJodrtHxYSWLI5lclyZ5Hj/view?usp=sharing',
       color: 'from-green-500 to-teal-500'
     },
     {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, 
@@ -11,7 +11,10 @@ import {
   Clock,
   Users
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
+
+// Define the base URL for your API
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -33,12 +36,33 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    toast.success('Message sent successfully! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setIsSubmitting(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        // If the server responds with an error, throw it to be caught by the catch block
+        throw new Error(data.message || 'Something went wrong. Please try again.');
+      }
+
+      // Handle success
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+
+    } catch (error) {
+      // Handle errors from the fetch call or the server
+      toast.error(`Error: ${error.message}`);
+    } finally {
+      // This will run whether the submission was successful or not
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -49,13 +73,6 @@ const Contact = () => {
       description: 'Send us an email anytime',
       color: 'from-blue-500 to-cyan-500'
     },
-    // {
-    //   icon: Phone,
-    //   title: 'Phone',
-    //   value: '+91 98765 43210',
-    //   description: 'Call us during business hours',
-    //   color: 'from-green-500 to-emerald-500'
-    // },
     {
       icon: MapPin,
       title: 'Location',
@@ -92,11 +109,12 @@ const Contact = () => {
   ];
 
   return (
-    <>
+    <HelmetProvider>
       <Helmet>
         <title>Contact Us | RMS - Get in Touch</title>
         <meta name="description" content="Get in touch with the RMS team. We're here to help with your questions, feedback, and support needs." />
       </Helmet>
+      <Toaster position="top-center" />
 
       <div className="pt-16 min-h-screen bg-secondary-50 dark:bg-secondary-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -319,9 +337,6 @@ const Contact = () => {
                 Connect with other students, share resources, and stay updated with the latest features.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                {/* <button className="btn-primary bg-white text-secondary-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-                  Join Discord
-                </button> */}
                 <button className="btn-secondary bg-white/20 hover:bg-white/30 text-white border-white/30 px-8 py-4 text-lg" onClick={() => window.open('https://www.instagram.com/buildwithansh/', '_blank')}>
                   Follow on Instagram
                 </button>
@@ -330,8 +345,8 @@ const Contact = () => {
           </motion.div>
         </div>
       </div>
-    </>
+    </HelmetProvider>
   );
 };
 
-export default Contact; 
+export default Contact;

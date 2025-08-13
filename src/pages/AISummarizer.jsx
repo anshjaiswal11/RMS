@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import {
   Upload,
   FileText,
@@ -18,12 +18,16 @@ import {
   BookOpen,
   Square,
   Bot,
-  User
+  User,
+  KeyRound,
+  X
 } from 'lucide-react';
 
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '';
-const YOUR_SITE_URL = process.env.REACT_APP_SITE_URL || 'http://localhost:3000';
-const YOUR_SITE_NAME = process.env.REACT_APP_SITE_NAME || 'RMS Study Assistant';
+// It's recommended to store API keys in environment variables for security
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
+const YOUR_SITE_URL = 'https://www.rmslpu.xyz';
+const YOUR_SITE_NAME = 'RMS Study Assistant';
+const BACKEND_API_BASE_URL = 'https://rms-backend-taupe.vercel.app/api';
 
 const AISummarizer = () => {
   const [file, setFile] = useState(null);
@@ -39,6 +43,89 @@ const AISummarizer = () => {
   const messagesEndRef = useRef(null);
   const abortControllerRef = useRef(null);
 
+  // --- STATE FOR USAGE LIMITS AND VERIFICATION ---
+  const [usageCount, setUsageCount] = useState({ summaries: 0, chats: 0 });
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [rmsKey, setRmsKey] = useState('');
+  const [verifiedKey, setVerifiedKey] = useState(null);
+  const [isVerifyingKey, setIsVerifyingKey] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const FREE_LIMIT = 2;
+
+  // Load usage data from localStorage on initial render
+  useEffect(() => {
+    const premiumStatus = localStorage.getItem('isPremiumSummarizer') === 'true';
+    const storedKey = localStorage.getItem('verifiedRmsKeySummarizer');
+    
+    if (premiumStatus && storedKey) {
+        setIsPremium(true);
+        setVerifiedKey(storedKey);
+    } else if (!premiumStatus) {
+        const storedUsage = localStorage.getItem('summarizerUsageCount');
+        if (storedUsage) {
+            setUsageCount(JSON.parse(storedUsage));
+        }
+    }
+  }, []);
+
+  const handleVerifyKey = async (e) => {
+    e.preventDefault();
+    if (!rmsKey || rmsKey.length !== 6) {
+      toast.error("Please enter a valid 6-digit key.");
+      return;
+    }
+    setIsVerifyingKey(true);
+    try {
+      const response = await fetch(`${BACKEND_API_BASE_URL}/user/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userCode: rmsKey })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed.');
+      }
+      toast.success('Verification Successful! You now have unlimited access.');
+      setIsPremium(true);
+      setVerifiedKey(rmsKey);
+      localStorage.setItem('isPremiumSummarizer', 'true');
+      localStorage.setItem('verifiedRmsKeySummarizer', rmsKey);
+      localStorage.removeItem('summarizerUsageCount');
+      setIsBlocked(false);
+      setRmsKey('');
+    } catch (error) {
+      toast.error(`Verification Failed: ${error.message}`);
+    } finally {
+      setIsVerifyingKey(false);
+    }
+  };
+  
+  const revalidateKey = async () => {
+    if (!verifiedKey) return false;
+    try {
+        const response = await fetch(`${BACKEND_API_BASE_URL}/user/check-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userCode: verifiedKey })
+        });
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error("Key re-validation failed:", error);
+        return false;
+    }
+  };
+  
+  const revokePremiumAccess = () => {
+    toast.error("Your key has expired. Please enter a new one.");
+    setIsPremium(false);
+    setVerifiedKey(null);
+    localStorage.removeItem('isPremiumSummarizer');
+    localStorage.removeItem('verifiedRmsKeySummarizer');
+    setIsBlocked(true);
+  };
+
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -47,7 +134,6 @@ const AISummarizer = () => {
     scrollToBottom();
   }, [messages, streamingMessage]);
 
-  // Stop streaming function
   const stopStreaming = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -57,7 +143,6 @@ const AISummarizer = () => {
     setIsProcessing(false);
     setIsChatLoading(false);
 
-    // Add the partial message if it exists using current state
     setStreamingMessage(currentStreamingMessage => {
       if (currentStreamingMessage.trim()) {
         if (streamingType === 'summary') {
@@ -67,7 +152,7 @@ const AISummarizer = () => {
           setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage }]);
         }
       }
-      return ''; // Clear streaming message
+      return '';
     });
     setStreamingType('');
   };
@@ -91,7 +176,6 @@ const AISummarizer = () => {
     multiple: false
   });
 
-  // **UPDATED FUNCTION TO USE POLLING**
   const extractTextFromPDF = async (file) => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
@@ -103,7 +187,6 @@ const AISummarizer = () => {
     formData.append('file', file);
 
     try {
-      // STEP 1: Start the extraction job and get a job ID
       const startResponse = await fetch("https://python-api-totg.onrender.com/api/start-extraction", {
         method: "POST",
         body: formData,
@@ -117,14 +200,12 @@ const AISummarizer = () => {
       const { job_id } = await startResponse.json();
       toast.success("Processing started! This may take a moment for large files.");
 
-      // STEP 2: Poll for the result using the job ID
       return new Promise((resolve, reject) => {
         const intervalId = setInterval(async () => {
           try {
             const statusResponse = await fetch(`https://python-api-totg.onrender.com/api/extraction-status/${job_id}`);
 
             if (!statusResponse.ok) {
-              // Stop polling if the status check fails
               clearInterval(intervalId);
               reject(new Error(`Failed to get job status. Status: ${statusResponse.status}`));
               return;
@@ -143,13 +224,11 @@ const AISummarizer = () => {
               clearInterval(intervalId);
               reject(new Error(data.error || "File processing failed on the server."));
             }
-            // If status is 'processing', do nothing and let the interval continue.
-
           } catch (error) {
             clearInterval(intervalId);
             reject(error);
           }
-        }, 3000); // Poll every 3 seconds
+        }, 3000);
       });
 
     } catch (error) {
@@ -165,6 +244,18 @@ const AISummarizer = () => {
       toast.error('Please upload a PDF file first.');
       return;
     }
+    
+    if (isPremium) {
+        const isKeyStillValid = await revalidateKey();
+        if (!isKeyStillValid) {
+            revokePremiumAccess();
+            return;
+        }
+    } else if (usageCount.summaries >= FREE_LIMIT) {
+        toast.error("You've reached your free summary limit.");
+        setIsBlocked(true);
+        return;
+    }
 
     setIsProcessing(true);
     setIsStreaming(true);
@@ -176,67 +267,55 @@ const AISummarizer = () => {
 
     abortControllerRef.current = new AbortController();
 
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
     try {
       const pdfContent = await extractTextFromPDF(file);
 
-      const systemPrompt = `You are an intelligent academic assistant specialized in analyzing student-uploaded notes (PDFs, images, text). Your goal is to:
+      const systemPrompt = `You are an expert academic tutor and study assistant. Your task is to analyze the provided document content and generate a long, detailed, and comprehensive educational breakdown. Do not just summarize; explain the concepts as if you are teaching them to a student.
 
-Identify and understand the main subject or topic of the uploaded material.
+      Your output MUST follow this exact markdown structure:
+      
+      # In-Depth Analysis of [Auto-Detected Topic]
+      
+      ## 📝 Executive Summary
+      (Provide a concise overview of the document's main themes and purpose in about 150-200 words. Mention the key takeaways.)
+      
+      ---
+      
+      ## 🧠 Core Concepts Explained
+      (This is the most important section. Identify 3-5 main topics from the document. For each topic, provide a detailed explanation. If it's a technical or coding topic, break down the code, explain what each part does, and discuss its purpose and potential outputs. Use examples.)
+      
+      ### 📌 Topic 1: [Name of the First Main Topic]
+      - **Definition:** Clearly define the concept.
+      - **Detailed Explanation:** Elaborate on the topic with sufficient detail. Use bullet points for clarity.
+      - **Example/Code Breakdown:** Provide a concrete example or code snippet from the text and explain it line-by-line.
+      
+      (Continue for all major topics identified...)
+      
+      ---
+      
+      ## 🔑 Key Terms and Definitions
+      (List and define at least 5-10 important keywords or jargon from the document.)
+      - **Term 1:** Definition.
+      - **Term 2:** Definition.
+      
+      ---
+      
+      ## 💡 Study Recommendations & Potential Questions
+      - **Focus Areas:** Advise the student on which sections or topics are most critical to study from this document.
+      - **Potential Exam Questions:** Generate 3-4 potential exam questions (e.g., MCQ, short answer) based on the content to help the student prepare.
+      
+      ---
+      
+      ## 📚 Study Resource Links
+      (Provide 3-5 high-quality, relevant external links for further study. Use Wikipedia, reputable educational websites, or high-quality YouTube tutorials. Format them EXACTLY like this:)
+      - [Link Title 1](https://example.com/resource1)
+      - [Link Title 2](https://example.com/resource2)
 
-Ignore or filter out irrelevant, noisy, or unrelated content (e.g., watermarks, ads, page numbers, generic website footers, repeated headers, unrelated doodles).
-
-Extract only educational content that aligns with what the student needs to study.
-
-Automatically detect if the content is from handwritten or printed notes, and adapt your parsing accordingly.
-
-Present the summary in a clean markdown format using the structure below.
-
-Summary of [Document Name / Topic Auto-Detected]
-Key Points (100–200 words):
-Briefly outline the main arguments, concepts, or findings
-
-Mention any diagrams, formulas, or case studies involved
-
-Focus only on the core learning content
-
-Detailed Description (300–400 words):
-📌 Concept 1: [Topic]
-Explain in simple academic language
-
-Add formulas/examples if necessary
-
-📌 Concept 2: [Topic]
-Continue explaining with structure
-
-💡 Use bullets and short paragraphs for clarity
-
-Important Definitions:
-Term: Definition
-Another Term: Explanation
-
-Study Recommendations:
-Focus on these key sections while revising
-
-Suggested exam question types (MCQ, short answer, long form)
-
-Mnemonics, tricks, or concept maps if applicable
-
-Notes:
-Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems incomplete," or "Content refers to a diagram not included")`;
+      Filter out any irrelevant noise like page numbers, headers, or footers from the source text. Your entire response should be focused on providing educational value.`;
 
       const messagesPayload = [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Please provide a comprehensive summary of the following academic document:\n\n${pdfContent}` }
+        { role: "user", content: `Please provide a comprehensive educational breakdown of the following document:\n\n${pdfContent}` }
       ];
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -263,112 +342,71 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let finalMessage = '';
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-
-            if (trimmedLine === '') continue;
-            if (trimmedLine === 'data: [DONE]') {
-              setIsStreaming(false);
-              setIsProcessing(false);
-              setUploadProgress(100);
-
-              setStreamingMessage(currentStreamingMessage => {
-                if (currentStreamingMessage.trim()) {
-                  setSummary(currentStreamingMessage);
-                  setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage, type: "summary" }]);
-                }
-                return '';
-              });
-
-              toast.success('Summary generated successfully!');
-              return;
-            }
-
-            if (trimmedLine.startsWith('data: ')) {
-              try {
-                const jsonStr = trimmedLine.slice(6);
-                const data = JSON.parse(jsonStr);
-
-                if (data.choices && data.choices[0] && data.choices[0].delta) {
-                  const delta = data.choices[0].delta;
-
-                  if (delta.content) {
-                    setStreamingMessage(prev => prev + delta.content);
-                  }
-
-                  if (data.choices[0].finish_reason === 'stop') {
-                    setIsStreaming(false);
-                    setIsProcessing(false);
-                    setUploadProgress(100);
-
-                    setStreamingMessage(currentStreamingMessage => {
-                      const finalMessage = currentStreamingMessage + (delta.content || '');
-                      if (finalMessage.trim()) {
-                        setSummary(finalMessage);
-                        setMessages(prev => [...prev, { role: "assistant", content: finalMessage, type: "summary" }]);
-                      }
-                      return '';
-                    });
-
-                    toast.success('Summary generated successfully!');
-                    return;
-                  }
-                }
-              } catch (parseError) {
-                console.error('Error parsing streaming data:', parseError);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine === '' || trimmedLine === 'data: [DONE]') continue;
+          if (trimmedLine.startsWith('data: ')) {
+            try {
+              const jsonStr = trimmedLine.slice(6);
+              const data = JSON.parse(jsonStr);
+              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                const chunk = data.choices[0].delta.content;
+                finalMessage += chunk;
+                setStreamingMessage(prev => prev + chunk);
               }
+            } catch (parseError) {
+              console.error('Error parsing streaming data:', parseError);
             }
           }
         }
-      } catch (readError) {
-        if (readError.name === 'AbortError') {
-          console.log('Stream aborted by user');
-          return;
-        }
-        throw readError;
-      } finally {
-        setStreamingMessage(currentStreamingMessage => {
-          if (currentStreamingMessage.trim()) {
-            setSummary(currentStreamingMessage);
-            setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage, type: "summary" }]);
-          }
-          return '';
-        });
       }
+      
+      setSummary(finalMessage);
+      setMessages([{ role: "assistant", content: finalMessage, type: "summary" }]);
+      if (!isPremium) {
+          const newCount = { ...usageCount, summaries: usageCount.summaries + 1 };
+          setUsageCount(newCount);
+          localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
+      }
+      toast.success('Summary generated successfully!');
 
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Request aborted by user');
-        return;
+      if (error.name !== 'AbortError') {
+        console.error('Error generating summary:', error);
+        toast.error('Error generating summary. Please try again.');
       }
-
-      console.error('Error generating summary:', error);
-      toast.error('Error generating summary. Please try again.');
     } finally {
-      setIsProcessing(false);
-      setIsStreaming(false);
-      setStreamingMessage('');
-      setStreamingType('');
-      abortControllerRef.current = null;
-      clearInterval(progressInterval);
+        setIsProcessing(false);
+        setIsStreaming(false);
+        setStreamingMessage('');
+        setStreamingType('');
+        abortControllerRef.current = null;
     }
   };
 
   const handleAskQuestion = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || isChatLoading) return;
+    
+    if (isPremium) {
+        const isKeyStillValid = await revalidateKey();
+        if (!isKeyStillValid) {
+            revokePremiumAccess();
+            return;
+        }
+    } else if (usageCount.chats >= FREE_LIMIT) {
+        toast.error("You've reached your free chat limit.");
+        setIsBlocked(true);
+        return;
+    }
 
     const userMessage = { role: "user", content: inputValue };
     const newMessages = [...messages, userMessage];
@@ -378,14 +416,10 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
     setIsStreaming(true);
     setStreamingType('chat');
     setStreamingMessage('');
-
     abortControllerRef.current = new AbortController();
 
     try {
-      const systemPrompt = `You are an expert academic assistant helping students with their study materials.
-      Use markdown formatting for clear, structured responses.
-      Keep explanations clear and educational.`;
-
+      const systemPrompt = `You are an expert academic assistant helping students with their study materials. Use markdown formatting for clear, structured responses. Keep explanations clear and educational.`;
       const messagesPayload = [
         { role: "system", content: systemPrompt },
         ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
@@ -415,97 +449,52 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let finalMessage = '';
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-
-            if (trimmedLine === '') continue;
-            if (trimmedLine === 'data: [DONE]') {
-              setIsStreaming(false);
-              setIsChatLoading(false);
-
-              setStreamingMessage(currentStreamingMessage => {
-                if (currentStreamingMessage.trim()) {
-                  setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage }]);
-                }
-                return '';
-              });
-              return;
-            }
-
-            if (trimmedLine.startsWith('data: ')) {
-              try {
-                const jsonStr = trimmedLine.slice(6);
-                const data = JSON.parse(jsonStr);
-
-                if (data.choices && data.choices[0] && data.choices[0].delta) {
-                  const delta = data.choices[0].delta;
-
-                  if (delta.content) {
-                    setStreamingMessage(prev => prev + delta.content);
-                  }
-
-                  if (data.choices[0].finish_reason === 'stop') {
-                    setIsStreaming(false);
-                    setIsChatLoading(false);
-
-                    setStreamingMessage(currentStreamingMessage => {
-                      const finalMessage = currentStreamingMessage + (delta.content || '');
-                      if (finalMessage.trim()) {
-                        setMessages(prev => [...prev, { role: "assistant", content: finalMessage }]);
-                      }
-                      return '';
-                    });
-                    return;
-                  }
-                }
-              } catch (parseError) {
-                console.error('Error parsing streaming data:', parseError);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine === '' || trimmedLine === 'data: [DONE]') continue;
+          if (trimmedLine.startsWith('data: ')) {
+            try {
+              const jsonStr = trimmedLine.slice(6);
+              const data = JSON.parse(jsonStr);
+              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                const chunk = data.choices[0].delta.content;
+                finalMessage += chunk;
+                setStreamingMessage(prev => prev + chunk);
               }
+            } catch (parseError) {
+              console.error('Error parsing streaming data:', parseError);
             }
           }
         }
-      } catch (readError) {
-        if (readError.name === 'AbortError') {
-          console.log('Stream aborted by user');
-          return;
-        }
-        throw readError;
-      } finally {
-        setStreamingMessage(currentStreamingMessage => {
-          if (currentStreamingMessage.trim()) {
-            setMessages(prev => [...prev, { role: "assistant", content: currentStreamingMessage }]);
-          }
-          return '';
-        });
+      }
+      
+      setMessages(prev => [...prev, { role: "assistant", content: finalMessage }]);
+       if (!isPremium) {
+          const newCount = { ...usageCount, chats: usageCount.chats + 1 };
+          setUsageCount(newCount);
+          localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
       }
 
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Request aborted by user');
-        return;
-      }
-
-      console.error('Error getting response:', error);
-      toast.error('Error getting response. Please try again.');
-      setMessages(prev => prev.slice(0, -1));
+        if (error.name !== 'AbortError') {
+            console.error('Error getting response:', error);
+            toast.error('Error getting response. Please try again.');
+            setMessages(prev => prev.slice(0, -1)); // Remove the user's message on failure
+        }
     } finally {
-      setIsChatLoading(false);
-      setIsStreaming(false);
-      setStreamingMessage('');
-      setStreamingType('');
-      abortControllerRef.current = null;
+        setIsChatLoading(false);
+        setIsStreaming(false);
+        setStreamingMessage('');
+        setStreamingType('');
+        abortControllerRef.current = null;
     }
   };
 
@@ -528,81 +517,69 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
   };
 
   const renderMarkdown = (content) => {
-    return content
-      .split('\n')
-      .map((line, i) => {
-        if (line.startsWith('# ')) {
-          return (
-            <h1
-              key={i}
-              className="text-2xl font-bold mt-8 mb-4 text-primary-800 dark:text-primary-200 border-b border-secondary-200 dark:border-secondary-700 pb-2"
-            >
-              {line.substring(2)}
-            </h1>
-          );
-        }
-        if (line.startsWith('## ')) {
-          return (
-            <h2
-              key={i}
-              className="text-xl font-bold mt-6 mb-3 text-secondary-800 dark:text-secondary-200"
-            >
-              {line.substring(3)}
-            </h2>
-          );
-        }
-        if (line.startsWith('### ')) {
-          return (
-            <h3
-              key={i}
-              className="text-lg font-bold mt-5 mb-2 text-secondary-700 dark:text-secondary-300"
-            >
-              {line.substring(4)}
-            </h3>
-          );
-        }
-        if (line.startsWith('- ')) {
-          return (
-            <li
-              key={i}
-              className="ml-6 mb-2 text-secondary-700 dark:text-secondary-300 pl-2 border-l-2 border-primary-100 dark:border-primary-900"
-            >
-              {line.substring(2)}
-            </li>
-          );
-        }
-        if (line.match(/^\d+\./)) {
-          return (
-            <li
-              key={i}
-              className="ml-6 mb-2 text-secondary-700 dark:text-secondary-300 pl-2 border-l-2 border-primary-100 dark:border-primary-900"
-            >
-              {line.replace(/^\d+\.\s*/, '')}
-            </li>
-          );
-        }
-        if (line.startsWith('> ')) {
-          return (
-            <blockquote
-              key={i}
-              className="border-l-4 border-primary-400 dark:border-primary-600 pl-4 py-2 my-4 bg-primary-50 dark:bg-primary-900/20 rounded-r text-secondary-700 dark:text-secondary-300 italic"
-            >
-              {line.substring(2)}
-            </blockquote>
-          );
-        }
-        if (line.trim() === '') {
-          return <div key={i} className="my-3"></div>;
-        }
+    const noBoldContent = content.replace(/\*\*/g, ''); // Remove bold markdown
+    const parts = noBoldContent.split(/(```[\s\S]*?```)/g);
+  
+    const renderLineWithLinks = (line, key) => {
+      const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+      const lineParts = line.split(linkRegex);
+  
+      return (
+        <>
+          {lineParts.map((part, index) => {
+            if (index % 3 === 1) { // Link text
+              const url = lineParts[index + 1];
+              return (
+                <a key={`${key}-${index}`} href={url} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
+                  {part}
+                </a>
+              );
+            }
+            if (index % 3 === 2) { // URL, skip
+              return null;
+            }
+            return part; // Regular text
+          })}
+        </>
+      );
+    };
+  
+    return parts.map((part, i) => {
+      if (part.startsWith('```')) {
+        const code = part.replace(/```(\w*\n)?/g, '').replace(/```$/, '').trim();
         return (
-          <p
-            key={i}
-            className="my-3 text-secondary-700 dark:text-secondary-300 leading-relaxed"
-          >
-            {line}
-          </p>
+          <pre key={i} className="bg-gray-800 text-white font-mono text-sm p-4 my-3 rounded-md overflow-x-auto">
+            <code>{code}</code>
+          </pre>
         );
-      });
+      } else {
+        return part.split('\n').map((line, j) => {
+          const key = `${i}-${j}`;
+          if (line.startsWith('# ')) {
+            return <h1 key={key} className="text-2xl font-bold mt-8 mb-4 text-primary-800 dark:text-primary-200 border-b border-secondary-200 dark:border-secondary-700 pb-2">{renderLineWithLinks(line.substring(2), key)}</h1>;
+          }
+          if (line.startsWith('## ')) {
+            return <h2 key={key} className="text-xl font-bold mt-6 mb-3 text-secondary-800 dark:text-secondary-200">{renderLineWithLinks(line.substring(3), key)}</h2>;
+          }
+          if (line.startsWith('### ')) {
+            return <h3 key={key} className="text-lg font-bold mt-5 mb-2 text-secondary-700 dark:text-secondary-300">{renderLineWithLinks(line.substring(4), key)}</h3>;
+          }
+          if (line.startsWith('- ')) {
+            return <li key={key} className="ml-6 mb-2 text-secondary-700 dark:text-secondary-300 pl-2 border-l-2 border-primary-100 dark:border-primary-900">{renderLineWithLinks(line.substring(2), key)}</li>;
+          }
+          if (line.match(/^\d+\./)) {
+            return <li key={key} className="ml-6 mb-2 text-secondary-700 dark:text-secondary-300 pl-2 border-l-2 border-primary-100 dark:border-primary-900">{renderLineWithLinks(line.replace(/^\d+\.\s*/, ''), key)}</li>;
+          }
+          if (line.startsWith('> ')) {
+            return <blockquote key={key} className="border-l-4 border-primary-400 dark:border-primary-600 pl-4 py-2 my-4 bg-primary-50 dark:bg-primary-900/20 rounded-r text-secondary-700 dark:text-secondary-300 italic">{renderLineWithLinks(line.substring(2), key)}</blockquote>;
+          }
+          if (line.trim() === '') {
+            return <div key={key} className="my-3"></div>;
+          }
+          return <p key={key} className="my-3 text-secondary-700 dark:text-secondary-300 leading-relaxed">{renderLineWithLinks(line, key)}</p>;
+        });
+      }
+    });
   };
 
   const clearChat = () => {
@@ -615,15 +592,71 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
     toast.success('Chat cleared successfully!');
   };
 
+  const VerificationModal = () => (
+    <AnimatePresence>
+        {isBlocked && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-white dark:bg-secondary-800 rounded-2xl p-8 shadow-xl max-w-md w-full relative"
+                >
+                    <button onClick={() => setIsBlocked(false)} className="absolute top-4 right-4 text-secondary-400 hover:text-secondary-600">
+                        <X size={24} />
+                    </button>
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <KeyRound className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">Free Limit Reached</h2>
+                        <p className="text-secondary-600 dark:text-secondary-400 mt-2 mb-6">
+                            Please enter your RMS Key for unlimited access.
+                        </p>
+                        <form onSubmit={handleVerifyKey} className="space-y-4">
+                            <input
+                                type="text"
+                                value={rmsKey}
+                                onChange={(e) => setRmsKey(e.target.value.replace(/\D/g, ''))}
+                                maxLength="6"
+                                className="w-full text-center text-xl font-mono tracking-widest px-4 py-2 bg-secondary-100 dark:bg-secondary-700 border-2 border-secondary-200 dark:border-secondary-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                placeholder="_ _ _ _ _ _"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                disabled={isVerifyingKey}
+                                className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50"
+                            >
+                                {isVerifyingKey ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Unlock Now</span>}
+                            </button>
+                        </form>
+                        <p className="text-xs text-center text-secondary-500 mt-4">
+                            Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
+                        </p>
+                    </div>
+                </motion.div>
+            </motion.div>
+        )}
+    </AnimatePresence>
+  );
+
   return (
-    <>
+    <HelmetProvider>
       <Helmet>
         <title>AI PDF Summarizer | RMS - Intelligent Study Assistant</title>
         <meta name="description" content="Upload your PDF notes and get intelligent summaries with interactive Q&A using our advanced AI technology." />
       </Helmet>
+      <Toaster position="top-center" reverseOrder={false} />
+      <VerificationModal />
 
       <div className="pt-16 min-h-screen bg-secondary-50 dark:bg-secondary-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -643,13 +676,14 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-4 gap-8">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
+              className="lg:col-span-1"
             >
-              <div className="card">
+              <div className="card sticky top-24">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
                     Upload Your File
@@ -763,6 +797,12 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
                     </button>
                   )}
                 </div>
+                 {!isPremium && (
+                    <div className="mt-4 text-center text-sm text-secondary-500 dark:text-secondary-400">
+                        <p>Summaries left: {Math.max(0, FREE_LIMIT - usageCount.summaries)}</p>
+                        <p>Chats left: {Math.max(0, FREE_LIMIT - usageCount.chats)}</p>
+                    </div>
+                )}
                 <div className="mt-8 space-y-4">
                   <h3 className="font-semibold text-secondary-900 dark:text-white">
                     Features:
@@ -790,6 +830,7 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
+              className="lg:col-span-3"
             >
               <div className="card flex flex-col h-full">
                 <div className="flex items-center justify-between mb-6">
@@ -816,10 +857,10 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
                   )}
                 </div>
 
-                <div className="flex-1 flex flex-col min-h-[500px]">
-                  {summary || streamingMessage ? (
+                <div className="flex-1 flex flex-col min-h-[70vh]">
+                  {summary || streamingMessage || messages.length > 0 ? (
                     <div className="flex-1 flex flex-col">
-                      <div className="flex-1 overflow-y-auto mb-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4 max-h-96">
+                      <div className="flex-1 overflow-y-auto mb-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4">
                         <AnimatePresence>
                           {messages.map((message, index) => (
                             <motion.div
@@ -843,15 +884,9 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
                                     {message.role === 'user' ? 'You' : 'AI Assistant'}
                                   </span>
                                 </div>
-                                {message.type === 'summary' ? (
-                                  <div className="prose dark:prose-invert max-w-none">
-                                    {renderMarkdown(message.content)}
-                                  </div>
-                                ) : (
-                                  <div className="prose dark:prose-invert max-w-none">
-                                    {renderMarkdown(message.content)}
-                                  </div>
-                                )}
+                                <div className="prose dark:prose-invert max-w-none">
+                                  {renderMarkdown(message.content)}
+                                </div>
                               </div>
                             </motion.div>
                           ))}
@@ -922,12 +957,6 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
                           </button>
                         )}
                       </form>
-                      {isStreaming && streamingType === 'chat' && (
-                        <div className="mt-2 text-xs text-center text-green-600 dark:text-green-400 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-1"></div>
-                          Streaming live response...
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center bg-secondary-50 dark:bg-secondary-800 rounded-lg p-8 text-center">
@@ -966,7 +995,7 @@ Any assumptions, skipped sections (and why), or context (e.g., "Chapter seems in
           </div>
         </div>
       </div>
-    </>
+    </HelmetProvider>
   );
 };
 

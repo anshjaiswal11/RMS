@@ -1,9 +1,8 @@
-import React from 'react';
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import {
   Clock,
   Brain,
@@ -16,24 +15,15 @@ import {
   BookOpen,
   Lightbulb,
   Zap,
-  XCircle,
-  KeyRound,
-  ArrowRight
+  XCircle
 } from 'lucide-react';
 
 // It's recommended to store API keys in environment variables for security
 const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
 const YOUR_SITE_URL = 'www.rmslpu.xyz';
 const YOUR_SITE_NAME = 'RMS Study Assistant';
-const BACKEND_API_BASE_URL = 'https://rms-backend-taupe.vercel.app/api'; // Your backend URL
 
 const TestGenerator = () => {
-  // --- STATE FOR VERIFICATION ---
-  const [isVerified, setIsVerified] = useState(false);
-  const [userCode, setUserCode] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
-  
-  // --- EXISTING STATE ---
   const [file, setFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -52,40 +42,33 @@ const TestGenerator = () => {
   ];
 
   const features = [
-    { icon: Brain, title: 'AI-Powered Questions', description: 'Intelligent question generation based on your study materials and beyond.', color: 'from-purple-500 to-pink-500' },
-    { icon: Clock, title: 'Timed Practice Tests', description: 'Simulate real exam conditions with customizable time limits.', color: 'from-blue-500 to-cyan-500' },
-    { icon: BarChart3, title: 'Detailed Analytics', description: 'Get insights into your performance with explanations for each answer.', color: 'from-green-500 to-emerald-500' },
-    { icon: Lightbulb, title: 'Learning Enhancement', description: 'Advanced questions that expand your knowledge beyond the PDF.', color: 'from-orange-500 to-red-500' }
+    {
+      icon: Brain,
+      title: 'AI-Powered Questions',
+      description: 'Intelligent question generation based on your study materials and beyond.',
+      color: 'from-purple-500 to-pink-500'
+    },
+    {
+      icon: Clock,
+      title: 'Timed Practice Tests',
+      description: 'Simulate real exam conditions with customizable time limits.',
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      icon: BarChart3,
+      title: 'Detailed Analytics',
+      description: 'Get insights into your performance with explanations for each answer.',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: Lightbulb,
+      title: 'Learning Enhancement',
+      description: 'Advanced questions that expand your knowledge beyond the PDF.',
+      color: 'from-orange-500 to-red-500'
+    }
   ];
-  
-  // --- VERIFICATION HANDLER ---
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
-    if (!userCode || userCode.length !== 6) {
-        toast.error("Please enter a valid 6-digit key.");
-        return;
-    }
-    setIsVerifying(true);
-    try {
-        const response = await fetch(`${BACKEND_API_BASE_URL}/user/verify-code`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userCode })
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Verification failed.');
-        }
-        toast.success('Verification Successful! Access granted.');
-        setIsVerified(true);
-    } catch (error) {
-        toast.error(`Error: ${error.message}`);
-    } finally {
-        setIsVerifying(false);
-    }
-  };
 
-
+  // Handle file drop
   const onDrop = useCallback((acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
     if (uploadedFile && (uploadedFile.type === 'application/pdf' || uploadedFile.name.endsWith('.docx'))) {
@@ -105,6 +88,7 @@ const TestGenerator = () => {
     multiple: false
   });
 
+  // **UPDATED FUNCTION TO USE POLLING**
   const extractTextFromPDF = async (file) => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
@@ -116,6 +100,7 @@ const TestGenerator = () => {
     formData.append('file', file);
 
     try {
+      // STEP 1: Start the extraction job and get a job ID
       const startResponse = await fetch("https://python-api-totg.onrender.com/api/start-extraction", {
         method: "POST",
         body: formData,
@@ -129,12 +114,14 @@ const TestGenerator = () => {
       const { job_id } = await startResponse.json();
       toast.success("Processing started! This may take a moment for large files.");
 
+      // STEP 2: Poll for the result using the job ID
       return new Promise((resolve, reject) => {
         const intervalId = setInterval(async () => {
           try {
             const statusResponse = await fetch(`https://python-api-totg.onrender.com/api/extraction-status/${job_id}`);
 
             if (!statusResponse.ok) {
+              // Stop polling if the status check fails
               clearInterval(intervalId);
               reject(new Error(`Failed to get job status. Status: ${statusResponse.status}`));
               return;
@@ -153,11 +140,13 @@ const TestGenerator = () => {
               clearInterval(intervalId);
               reject(new Error(data.error || "File processing failed on the server."));
             }
+            // If status is 'processing', do nothing and let the interval continue.
+
           } catch (error) {
             clearInterval(intervalId);
             reject(error);
           }
-        }, 3000);
+        }, 3000); // Poll every 3 seconds
       });
 
     } catch (error) {
@@ -167,34 +156,51 @@ const TestGenerator = () => {
     }
   };
 
+  // **FIXED PARSING LOGIC**
   const parseTestResponse = (text) => {
     const questions = [];
+    // Split by "Question \d" but keep the delimiter
     const questionBlocks = text.split(/(?=Question\s*\d|Q\s*\d+|\d+\.|^\*\*\d+\.)/i).filter(b => b.trim() !== '');
 
-    console.log('Raw AI Response:', text);
+    console.log('Raw AI Response:', text); // Debug: see full response
 
     questionBlocks.forEach(block => {
-        let currentQuestion = { text: '', options: [], correctAnswer: '', explanation: '' };
+        let currentQuestion = {
+            text: '',
+            options: [],
+            correctAnswer: '',
+            explanation: ''
+        };
+
         const lines = block.split('\n').filter(line => line.trim() !== '');
         let inExplanation = false;
         let questionTextParts = [];
 
         lines.forEach(line => {
             const trimmedLine = line.trim();
+
             if (trimmedLine.match(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]/i) && !currentQuestion.text) {
-                let questionText = trimmedLine.replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '').replace(/^\*\*|\*\*$/g, '').trim();
+                let questionText = trimmedLine
+                    .replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '')
+                    .replace(/^\*\*|\*\*$/g, '')
+                    .trim();
                 questionTextParts.push(questionText);
             } else if (trimmedLine.match(/^(\*\*)?[A-D][\).\]:]/i)) {
                 inExplanation = false;
                 const optionMatch = trimmedLine.match(/^(\*\*)?([A-D])[\).\]:]/i);
                 if (optionMatch && currentQuestion.options.length < 4) {
                     const optionLetter = optionMatch[2].toUpperCase();
-                    let optionText = trimmedLine.replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '').replace(/\*\*/g, '').trim();
+                    let optionText = trimmedLine
+                        .replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '')
+                        .replace(/\*\*/g, '')
+                        .trim();
+                    
                     const isMarkedCorrect = trimmedLine.toLowerCase().includes('correct') || trimmedLine.includes('✓') || trimmedLine.includes('[CORRECT]');
                     if (isMarkedCorrect) {
                         currentQuestion.correctAnswer = optionLetter;
                         optionText = optionText.replace(/\s*\(?correct\)?/i, '').replace('✓', '').replace('[CORRECT]', '').trim();
                     }
+                    
                     const expectedIndex = optionLetter.charCodeAt(0) - 65;
                     while (currentQuestion.options.length <= expectedIndex) {
                         currentQuestion.options.push('');
@@ -210,11 +216,15 @@ const TestGenerator = () => {
                     currentQuestion.correctAnswer = answerMatch[1].toUpperCase();
                 }
             } else if (trimmedLine.match(/^Explanation[:.]/i)) {
-                currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').replace(/\*\*/g, '').trim();
+                currentQuestion.explanation = trimmedLine
+                    .replace(/^Explanation[:.]\s*/i, '')
+                    .replace(/\*\*/g, '')
+                    .trim();
                 inExplanation = true;
             } else if (inExplanation) {
                 currentQuestion.explanation += ' ' + trimmedLine.replace(/\*\*/g, '');
             } else if (!currentQuestion.text || currentQuestion.options.length === 0) {
+                // This captures multi-line questions or code blocks before options start
                 questionTextParts.push(trimmedLine);
             }
         });
@@ -232,8 +242,8 @@ const TestGenerator = () => {
   };
 
   const generateTest = async (level) => {
-    if (!file || !isVerified) {
-      toast.error('Please upload a file and verify your key first.');
+    if (!file) {
+      toast.error('Please upload a file first.');
       return;
     }
 
@@ -248,7 +258,9 @@ const TestGenerator = () => {
       const pdfContent = await extractTextFromPDF(file);
       setUploadProgress(70);
 
+      // --- MODIFIED PROMPT ---
       const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
+    
       Requirements:
       - Generate exactly ${level === 'basic' ? 15 : level === 'medium' ? 20 : 50} questions.
       - Use EXACTLY this format for each question (no variations):
@@ -378,6 +390,7 @@ const TestGenerator = () => {
     setIsSubmitted(false);
   };
 
+  // --- NEW HELPER FUNCTION TO RENDER CODE SNIPPETS ---
   const renderQuestionWithCode = (text) => {
     if (typeof text !== 'string' || !text.includes('```')) {
       return text;
@@ -510,6 +523,7 @@ const TestGenerator = () => {
                 transition={{ delay: index * 0.05 }}
                 className="card p-6"
               >
+                {/* --- MODIFIED TO RENDER CODE --- */}
                 <div className="font-semibold text-lg mb-4 text-secondary-900 dark:text-white">
                   <span className="mr-2">{index + 1}.</span>
                   {renderQuestionWithCode(question.text)}
@@ -610,7 +624,6 @@ const TestGenerator = () => {
           <title>AI Test Generator | RMS - Intelligent Practice Tests</title>
           <meta name="description" content="Generate AI-powered practice tests from your study materials. Upload your PDF notes and get personalized MCQ tests with detailed performance analysis." />
         </Helmet>
-        <Toaster position="top-center" reverseOrder={false} />
 
         <div className="pt-16 min-h-screen bg-secondary-50 dark:bg-secondary-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -640,106 +653,84 @@ const TestGenerator = () => {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="lg:col-span-1"
               >
-                <div className="card sticky top-24 space-y-8">
-                  <div>
-                    <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-                      Step 1: Upload File
-                    </h2>
-                    <div
-                      {...getRootProps()}
-                      className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
-                        }`}
-                    >
-                      <input {...getInputProps()} />
-                      <Upload className="w-12 h-12 text-secondary-400 mx-auto mb-4" />
-                      {isDragActive ? (
-                        <p className="text-primary-600 dark:text-primary-400 font-medium">
-                          Drop the file here...
-                        </p>
-                      ) : (
-                        <div>
-                          <p className="text-secondary-600 dark:text-secondary-400 mb-2">
-                            Drag & drop a file here, or click to select
-                          </p>
-                          <p className="text-sm text-secondary-500 dark:text-secondary-500">
-                            Supports PDF and DOCX files up to 10MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                <div className="card sticky top-24">
+                  <h2 className="text-2xl font-bold text-secondary-900 dark:text-white mb-6">
+                    Upload Your File
+                  </h2>
 
-                    {file && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <div>
-                            <p className="font-medium text-green-800 dark:text-green-200">
-                              {file.name}
-                            </p>
-                            <p className="text-sm text-green-600 dark:text-green-400">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
+                  <div
+                    {...getRootProps()}
+                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                      }`}
+                  >
+                    <input {...getInputProps()} />
+                    <Upload className="w-12 h-12 text-secondary-400 mx-auto mb-4" />
+                    {isDragActive ? (
+                      <p className="text-primary-600 dark:text-primary-400 font-medium">
+                        Drop the file here...
+                      </p>
+                    ) : (
+                      <div>
+                        <p className="text-secondary-600 dark:text-secondary-400 mb-2">
+                          Drag & drop a file here, or click to select
+                        </p>
+                        <p className="text-sm text-secondary-500 dark:text-secondary-500">
+                          Supports PDF and DOCX files up to 10MB
+                        </p>
+                      </div>
                     )}
                   </div>
 
-                  <div>
-                     <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-                        Step 2: Verify Key
-                     </h3>
-                     {isVerified ? (
-                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center space-x-3">
-                            <CheckCircle className="w-5 h-5 text-green-500" />
-                            <p className="font-medium text-green-800 dark:text-green-200">
-                                Key Verified! You can now generate a test.
-                            </p>
+                  {file && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <div>
+                          <p className="font-medium text-green-800 dark:text-green-200">
+                            {file.name}
+                          </p>
+                          <p className="text-sm text-green-600 dark:text-green-400">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
                         </div>
-                     ) : (
-                        <form onSubmit={handleVerifyCode} className="space-y-3">
-                            <div className="relative">
-                                <KeyRound className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400" />
-                                <input
-                                    type="text"
-                                    value={userCode}
-                                    onChange={(e) => setUserCode(e.target.value.replace(/\D/g, ''))}
-                                    maxLength="6"
-                                    className="w-full pl-10 pr-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                    placeholder="Enter 6-digit key"
-                                    required
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={isVerifying}
-                                className="w-full btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50"
-                            >
-                                {isVerifying ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span>Verifying...</span>
-                                    </>
-                                ) : (
-                                    <span>Verify Key</span>
-                                )}
-                            </button>
-                            <p className="text-xs text-center text-secondary-500">
-                                Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
-                            </p>
-                        </form>
-                     )}
-                  </div>
+                      </div>
+                    </motion.div>
+                  )}
 
-                  <div>
-                    <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-                      Step 3: Generate Test
+                  {isProcessing && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-6"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                          Generating test...
+                        </span>
+                        <span className="text-sm text-secondary-500 dark:text-secondary-500">
+                          {uploadProgress}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+                        <motion.div
+                          className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${uploadProgress}%` }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <div className="mt-8">
+                    <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
+                      Select Test Level
                     </h3>
                     <div className="space-y-3">
                       {testLevels.map((level) => (
@@ -763,19 +754,27 @@ const TestGenerator = () => {
                                 {level.questions} questions • {level.time}
                               </p>
                             </div>
+                            <div className="text-right">
+                              <span className="text-xs px-2 py-1 bg-secondary-100 dark:bg-secondary-800 rounded-full text-secondary-700 dark:text-secondary-300">
+                                {level.description}
+                              </span>
+                            </div>
                           </div>
                         </motion.button>
                       ))}
                     </div>
-                     <button
+                  </div>
+
+                  <div className="mt-8">
+                    <button
                       onClick={() => generateTest(testLevel)}
-                      disabled={!file || isProcessing || !isVerified}
-                      className="w-full mt-4 btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!file || isProcessing}
+                      className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isProcessing ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>Generating...</span>
+                          <span>Generating Test...</span>
                         </>
                       ) : (
                         <>
@@ -785,7 +784,7 @@ const TestGenerator = () => {
                       )}
                     </button>
                   </div>
-                  
+
                   <div className="mt-8">
                     <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
                       Features
@@ -811,7 +810,6 @@ const TestGenerator = () => {
                       })}
                     </div>
                   </div>
-
                 </div>
               </motion.div>
 
@@ -832,18 +830,5 @@ const TestGenerator = () => {
     </HelmetProvider>
   );
 };
-
-// You might need to add these CSS classes to your global stylesheet for the buttons
-/*
-.btn-primary {
-  @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:scale-105;
-}
-.btn-secondary {
-  @apply bg-secondary-200 dark:bg-secondary-700 text-secondary-800 dark:text-secondary-200 font-semibold py-3 px-6 rounded-lg hover:bg-secondary-300 dark:hover:bg-secondary-600 transition-all;
-}
-.card {
-  @apply bg-white dark:bg-secondary-800 p-8 rounded-2xl shadow-lg border border-secondary-200 dark:border-secondary-700;
-}
-*/
 
 export default TestGenerator;

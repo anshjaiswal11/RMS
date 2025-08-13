@@ -1,7 +1,7 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // Removed to fix the error
 import { 
   Brain, 
   FileText, 
@@ -12,8 +12,117 @@ import {
   ArrowRight,
   CheckCircle,
   Star,
-  TrendingUp
+  TrendingUp,
+  Twitter, // For Footer
+  Github,  // For Footer
+  Linkedin // For Footer
 } from 'lucide-react';
+
+// --- NEW FOOTER COMPONENT ---
+const Footer = () => {
+  const mainLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Subjects', path: '/subjects' },
+    { name: 'Resources', path: '/resources' },
+    { name: 'Contact', path: '/contact' },
+  ];
+
+  const aiToolsLinks = [
+    { name: 'AI Summarizer', path: '/ai-summarizer' },
+    { name: 'Test Generator', path: '/test-generator' },
+    { name: 'RMS-AI', path: '/RMS-AI' },
+    { name: 'Interview Prep', path: '/interview-prep' },
+    { name: 'YouTube Summary', path: '/youtube_summary' },
+  ];
+
+  const supportLinks = [
+    { name: 'Get RMS Key', path: '/GetRMSKey' },
+    { name: 'Free Test', path: '/freetest' },
+  ];
+
+  const legalLinks = [
+    { name: 'Terms & Conditions', path: '/terms' },
+    { name: 'Privacy Policy', path: '/privacy' },
+    { name: 'Refund Policy', path: '/refund' },
+  ];
+
+  const socialLinks = [
+    { icon: Twitter, href: '#' },
+    { icon: Github, href: '#' },
+    { icon: Linkedin, href: '#' },
+  ];
+
+  return (
+    <footer className="bg-white dark:bg-secondary-900 border-t border-secondary-200 dark:border-secondary-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <div className="col-span-2 lg:col-span-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-secondary-900 dark:text-white">RMS</span>
+            </div>
+            <p className="mt-4 text-secondary-600 dark:text-secondary-400">
+              Your AI-powered study assistant for acing reappear exams.
+            </p>
+          </div>
+
+          {/* Link Columns */}
+          <div className="col-span-1">
+            <h3 className="font-semibold text-secondary-900 dark:text-white">Main</h3>
+            <ul className="mt-4 space-y-2">
+              {mainLinks.map(link => (
+                <li key={link.name}><a href={link.path} className="text-secondary-600 dark:text-secondary-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">{link.name}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-span-1">
+            <h3 className="font-semibold text-secondary-900 dark:text-white">AI Tools</h3>
+            <ul className="mt-4 space-y-2">
+              {aiToolsLinks.map(link => (
+                <li key={link.name}><a href={link.path} className="text-secondary-600 dark:text-secondary-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">{link.name}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-span-1">
+            <h3 className="font-semibold text-secondary-900 dark:text-white">Support</h3>
+            <ul className="mt-4 space-y-2">
+              {supportLinks.map(link => (
+                <li key={link.name}><a href={link.path} className="text-secondary-600 dark:text-secondary-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">{link.name}</a></li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-span-1">
+            <h3 className="font-semibold text-secondary-900 dark:text-white">Legal</h3>
+            <ul className="mt-4 space-y-2">
+              {legalLinks.map(link => (
+                <li key={link.name}><a href={link.path} className="text-secondary-600 dark:text-secondary-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">{link.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-secondary-200 dark:border-secondary-800 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-secondary-600 dark:text-secondary-400 text-sm">
+            &copy; {new Date().getFullYear()} RMS. All Rights Reserved.
+          </p>
+          <div className="flex space-x-4 mt-4 sm:mt-0">
+            {socialLinks.map((social, index) => {
+                const Icon = social.icon;
+                return (
+                    <a key={index} href={social.href} className="text-secondary-500 hover:text-primary-500 transition-colors">
+                        <Icon className="w-5 h-5" />
+                    </a>
+                )
+            })}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
 
 const Home = () => {
   const features = [
@@ -62,7 +171,7 @@ const Home = () => {
   ];
 
   return (
-    <>
+    <HelmetProvider>
       <Helmet>
         <title>RMS - Modern Reappear Management System | AI-Powered Study Assistant</title>
         <meta name="description" content="Transform your exam preparation with RMS - the modern reappear management system. AI-powered PDF summarization, auto note collection, and comprehensive study resources for students." />
@@ -94,7 +203,6 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              {/* text-gradient bg-gradient-to-r from-yellow-400 to-orange-500 */}
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
                 Modern
                 <span className="block text-white bg-clip-text text-transparent">
@@ -106,31 +214,31 @@ const Home = () => {
                 and generate personalized tests to ace your reappear exams.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/ai-summarizer"
+                <a
+                  href="/ai-summarizer"
                   className="btn-primary text-lg px-8 py-4 flex items-center justify-center space-x-2 group"
                 >
                   <span>Try AI Summarizer</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to="/RMS-AI"
+                </a>
+                <a
+                  href="/RMS-AI"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
                   RMS-AI
-                </Link>
-                <Link
-                  to="/interview-prep"
+                </a>
+                <a
+                  href="/interview-prep"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
                   <span>Interview Prep Pro</span>
-                </Link>
-                <Link
-                  to="/youtube_summary"
+                </a>
+                <a
+                  href="/youtube_summary"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
                   <span>YouTube Summary</span>
-                </Link>
+                </a>
               </div>
             </motion.div>
           </div>
@@ -282,19 +390,20 @@ const Home = () => {
               <p className="text-xl text-white/90 mb-8">
                 Join thousands of students who are already using RMS to ace their exams.
               </p>
-              <Link
-                to="/ai-summarizer"
+              <a
+                href="/ai-summarizer"
                 className="btn-primary text-lg px-8 py-4 bg-white text-primary-600 hover:bg-gray-100 inline-flex items-center space-x-2"
               >
                 <span>Get Started Now</span>
                 <ArrowRight className="w-5 h-5" />
-              </Link>
+              </a>
             </motion.div>
           </div>
         </section>
       </div>
-    </>
+      <Footer />
+    </HelmetProvider>
   );
 };
 
-export default Home; 
+export default Home;

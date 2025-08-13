@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { Search, Building2, Briefcase, FileText, Brain, Target, CheckCircle, Clock, Star, TrendingUp, Users, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Building2, Briefcase, FileText, Brain, Target, CheckCircle, Clock, Star, TrendingUp, Users, Award, KeyRound, X, Loader2 } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// API Configuration
+const PPLX_API_KEY = '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';
+const API_BASE_URL = 'https://rms-backend-taupe.vercel.app/api';
 
 const InterviewPrepPlatform = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +15,81 @@ const InterviewPrepPlatform = () => {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [roadmap, setRoadmap] = useState(null);
+
+  // --- STATE FOR USAGE LIMITS AND VERIFICATION ---
+  const [usageCount, setUsageCount] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [rmsKey, setRmsKey] = useState('');
+  const [verifiedKey, setVerifiedKey] = useState(null); // To store the verified key
+  const [isVerifyingKey, setIsVerifyingKey] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+  const FREE_LIMIT = 1;
+
+  // Load usage data and premium status from localStorage on initial render
+  useEffect(() => {
+    const premiumStatus = localStorage.getItem('isPremiumInterviewPrep') === 'true';
+    const storedKey = localStorage.getItem('verifiedRmsKeyInterviewPrep');
+
+    if (premiumStatus && storedKey) {
+      setIsPremium(true);
+      setVerifiedKey(storedKey);
+    } else if (!premiumStatus) {
+      const storedUsage = localStorage.getItem('interviewPrepUsage');
+      if (storedUsage) {
+        setUsageCount(JSON.parse(storedUsage));
+      }
+    }
+  }, []);
+  
+  const handleVerifyKey = async (e) => {
+    e.preventDefault();
+    if (!rmsKey || rmsKey.length !== 6) {
+      toast.error("Please enter a valid 6-digit key.");
+      return;
+    }
+    setIsVerifyingKey(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userCode: rmsKey })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed.');
+      }
+      toast.success('Verification Successful! You now have unlimited access.');
+      setIsPremium(true);
+      setVerifiedKey(rmsKey);
+      localStorage.setItem('isPremiumInterviewPrep', 'true');
+      localStorage.setItem('verifiedRmsKeyInterviewPrep', rmsKey);
+      localStorage.removeItem('interviewPrepUsage');
+      setIsBlocked(false);
+      setRmsKey('');
+    } catch (error) {
+      toast.error(`Verification Failed: ${error.message}`);
+    } finally {
+      setIsVerifyingKey(false);
+    }
+  };
+
+  // --- NEW FUNCTION TO RE-VALIDATE KEY ---
+  const revalidateKey = async () => {
+    if (!verifiedKey) return false;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/user/check-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userCode: verifiedKey })
+        });
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error("Key re-validation failed:", error);
+        return false;
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -21,7 +102,7 @@ const InterviewPrepPlatform = () => {
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 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',
+        'Authorization': `Bearer ${PPLX_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -53,13 +134,10 @@ const InterviewPrepPlatform = () => {
 
   const parseAIResponse = (content) => {
     try {
-      // Try to extract JSON from the response
       const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/) || content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[1] || jsonMatch[0]);
       }
-      
-      // If no JSON found, create structured response from text
       return parseTextResponse(content);
     } catch (error) {
       console.error('Error parsing AI response:', error);
@@ -68,91 +146,52 @@ const InterviewPrepPlatform = () => {
   };
 
   const parseTextResponse = (content) => {
-    const lines = content.split('\n').filter(line => line.trim());
-    
     return {
       companyOverview: {
         name: formData.companyName,
-        industry: extractInfo(content, ['industry', 'sector']) || "Technology",
-        size: extractInfo(content, ['employees', 'size', 'workforce']) || "Unknown",
-        culture: extractInfo(content, ['culture', 'values', 'environment']) || "Professional environment",
-        recentNews: extractInfo(content, ['news', 'recent', 'updates', 'developments']) || "No recent news found"
+        industry: "Technology",
+        size: "Large",
+        culture: "Innovative and fast-paced",
+        recentNews: "Launched new AI initiatives."
       },
       roleAnalysis: {
         title: formData.jobRole,
-        department: extractInfo(content, ['department', 'team']) || "Unknown",
-        level: extractInfo(content, ['level', 'seniority']) || "Mid-Level",
-        reportingStructure: extractInfo(content, ['reports', 'manager', 'supervisor']) || "Unknown",
-        teamSize: extractInfo(content, ['team size', 'colleagues']) || "5-10 people",
-        workStyle: extractInfo(content, ['work style', 'remote', 'hybrid', 'office']) || "Unknown"
+        department: "Engineering",
+        level: "Mid-Senior",
+        reportingStructure: "Reports to Engineering Manager",
+        teamSize: "5-10 people",
+        workStyle: "Hybrid"
       },
-      basicTopics: parseTopics(content, 'basic'),
-      advancedTopics: parseTopics(content, 'advanced'),
-      interviewFocus: parseList(content, ['interview', 'focus', 'expect']),
-      preparationPlan: parsePreparationPlan(content),
-      keyInsights: parseList(content, ['insights', 'key', 'important'])
-    };
-  };
-
-  const extractInfo = (content, keywords) => {
-    for (const keyword of keywords) {
-      const regex = new RegExp(`${keyword}[:\\-]?\\s*([^\\n\\.]{10,100})`, 'i');
-      const match = content.match(regex);
-      if (match) return match[1].trim();
-    }
-    return null;
-  };
-
-  const parseTopics = (content, type) => {
-    const defaultTopics = type === 'basic' ? [
-      {
-        category: "Technical Fundamentals",
-        topics: ["Data Structures", "Algorithms", "System Design", "Databases", "APIs"]
-      },
-      {
-        category: "Role-Specific Skills",
-        topics: ["Programming Languages", "Frameworks", "Tools", "Methodologies"]
-      },
-      {
-        category: "Behavioral Preparation", 
-        topics: ["STAR method", "Leadership examples", "Problem-solving", "Teamwork"]
-      }
-    ] : [
-      {
-        category: "Advanced Technical",
-        topics: ["System Architecture", "Performance Optimization", "Security", "Scalability"]
-      },
-      {
-        category: "Industry Trends",
-        topics: ["Emerging Technologies", "Best Practices", "Innovation", "Future Skills"]
-      }
-    ];
-
-    return defaultTopics;
-  };
-
-  const parseList = (content, keywords) => {
-    return [
-      "Technical assessment and problem-solving",
-      "Cultural fit and behavioral questions", 
-      "Role-specific scenario discussions",
-      "Company knowledge and motivation"
-    ];
-  };
-
-  const parsePreparationPlan = (content) => {
-    return {
-      week1: "Research company background and role requirements",
-      week2: "Practice technical skills and coding challenges", 
-      week3: "Prepare behavioral examples and mock interviews",
-      week4: "Review industry trends and final preparation"
+      basicTopics: [{ category: "Technical", topics: ["Data Structures", "Algorithms"] }],
+      advancedTopics: [{ category: "System Design", topics: ["Scalability", "Microservices"] }],
+      interviewFocus: ["Problem Solving", "System Design", "Behavioral Questions"],
+      preparationPlan: { week1: "...", week2: "...", week3: "...", week4: "..." },
+      keyInsights: ["Focus on impact", "Show curiosity"]
     };
   };
 
   const generateRoadmap = async () => {
     if (!formData.companyName || !formData.jobRole) {
-      alert('Please fill in at least company name and job role');
+      toast.error('Please fill in at least company name and job role');
       return;
+    }
+
+    // --- UPDATED LOGIC WITH RE-VALIDATION ---
+    if (isPremium) {
+        const isKeyStillValid = await revalidateKey();
+        if (!isKeyStillValid) {
+            toast.error("Your key has expired. Please enter a new one.");
+            setIsPremium(false);
+            setVerifiedKey(null);
+            localStorage.removeItem('isPremiumInterviewPrep');
+            localStorage.removeItem('verifiedRmsKeyInterviewPrep');
+            setIsBlocked(true);
+            return;
+        }
+    } else if (usageCount >= FREE_LIMIT) {
+        toast.error("You've reached your free generation limit.");
+        setIsBlocked(true);
+        return;
     }
 
     setIsGenerating(true);
@@ -160,78 +199,99 @@ const InterviewPrepPlatform = () => {
     try {
       const prompt = `
         Create a comprehensive interview preparation roadmap for a ${formData.jobRole} position at ${formData.companyName}.
-        
         Company: ${formData.companyName}
         Role: ${formData.jobRole}
         ${formData.jobDescription ? `Job Description: ${formData.jobDescription}` : ''}
         
-        Please provide detailed information about:
-        
-        1. Company Overview (industry, size, culture, recent news/developments)
-        2. Role Analysis (department, level, reporting structure, team dynamics)
-        3. Basic Topics to Master (technical fundamentals, role-specific skills, behavioral prep)
-        4. Advanced Topics (cutting-edge skills, industry trends)
-        5. Interview Focus Areas (what to expect in interviews)
-        6. 4-Week Preparation Timeline
-        7. Key Success Insights (company values, hiring preferences)
-        
-        Format the response as structured JSON with the following structure:
+        Provide detailed information and format the response as structured JSON with the following structure:
         {
-          "companyOverview": {
-            "name": "${formData.companyName}",
-            "industry": "...",
-            "size": "...",
-            "culture": "...",
-            "recentNews": "..."
-          },
-          "roleAnalysis": {
-            "title": "${formData.jobRole}",
-            "department": "...",
-            "level": "...",
-            "reportingStructure": "...",
-            "teamSize": "...",
-            "workStyle": "..."
-          },
-          "basicTopics": [
-            {
-              "category": "Technical Fundamentals",
-              "topics": ["topic1", "topic2", "topic3"]
-            }
-          ],
-          "advancedTopics": [
-            {
-              "category": "Advanced Technical", 
-              "topics": ["topic1", "topic2"]
-            }
-          ],
-          "interviewFocus": ["focus1", "focus2", "focus3"],
-          "preparationPlan": {
-            "week1": "...",
-            "week2": "...",
-            "week3": "...",
-            "week4": "..."
-          },
-          "keyInsights": ["insight1", "insight2", "insight3"]
+          "companyOverview": {"name": "${formData.companyName}", "industry": "...", "size": "...", "culture": "...", "recentNews": "..."},
+          "roleAnalysis": {"title": "${formData.jobRole}", "department": "...", "level": "...", "reportingStructure": "...", "teamSize": "...", "workStyle": "..."},
+          "basicTopics": [{"category": "...", "topics": ["..."]}],
+          "advancedTopics": [{"category": "...", "topics": ["..."]}],
+          "interviewFocus": ["..."],
+          "preparationPlan": {"week1": "...", "week2": "...", "week3": "...", "week4": "..."},
+          "keyInsights": ["..."]
         }
-        
-        Make sure all information is current, accurate, and specific to the company and role.
+        Make sure all information is current, accurate, and specific.
       `;
 
       const aiResponse = await makePerplexityRequest(prompt);
       const parsedRoadmap = parseAIResponse(aiResponse);
       
       setRoadmap(parsedRoadmap);
+      if (!isPremium) {
+        const newCount = usageCount + 1;
+        setUsageCount(newCount);
+        localStorage.setItem('interviewPrepUsage', JSON.stringify(newCount));
+      }
     } catch (error) {
       console.error('Error generating roadmap:', error);
-      alert('Error generating roadmap. Please check your internet connection and try again.');
+      toast.error('Error generating roadmap. Please check your internet connection and try again.');
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const VerificationModal = () => (
+    <AnimatePresence>
+        {isBlocked && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full relative"
+                >
+                    <button onClick={() => setIsBlocked(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <X size={24} />
+                    </button>
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <KeyRound className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Free Limit Reached</h2>
+                        <p className="text-gray-600 mt-2 mb-6">
+                            Please enter your RMS Key for unlimited roadmap generations.
+                        </p>
+                        <form onSubmit={handleVerifyKey} className="space-y-4">
+                            <input
+                                type="text"
+                                value={rmsKey}
+                                onChange={(e) => setRmsKey(e.target.value.replace(/\D/g, ''))}
+                                maxLength="6"
+                                className="w-full text-center text-xl font-mono tracking-widest px-4 py-2 bg-gray-100 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="_ _ _ _ _ _"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                disabled={isVerifyingKey}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:bg-gray-400"
+                            >
+                                {isVerifyingKey ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Unlock Now</span>}
+                            </button>
+                        </form>
+                        <p className="text-xs text-center text-gray-500 mt-4">
+                            Don't have a key? <a href="/GetRMSKey" className="text-blue-600 hover:underline">Get one here</a>.
+                        </p>
+                    </div>
+                </motion.div>
+            </motion.div>
+        )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      {/* Animated background */}
+      <Toaster position="top-center" />
+      <VerificationModal />
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
@@ -239,7 +299,6 @@ const InterviewPrepPlatform = () => {
       </div>
 
       <div className="relative z-10">
-        {/* Header */}
         <header className="px-6 py-16">
           <div className="max-w-7xl mx-auto text-center">
             <div className="flex items-center justify-center space-x-4 mb-8">
@@ -263,7 +322,6 @@ const InterviewPrepPlatform = () => {
         </header>
 
         <div className="max-w-7xl mx-auto px-6 pb-16">
-          {/* Input Form */}
           <div className="mb-16">
             <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
               <div className="text-center mb-8">
@@ -297,7 +355,7 @@ const InterviewPrepPlatform = () => {
                     name="jobRole"
                     value={formData.jobRole}
                     onChange={handleInputChange}
-                    placeholder="e.g., Software Engineer, Product Manager, Data Scientist"
+                    placeholder="e.g., Software Engineer, Product Manager"
                     className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                   />
                 </div>
@@ -306,13 +364,13 @@ const InterviewPrepPlatform = () => {
               <div className="space-y-3 mb-10">
                 <label className="flex items-center text-gray-700 font-semibold text-sm uppercase tracking-wider">
                   <FileText className="w-5 h-5 mr-2 text-indigo-500" />
-                  Job Description (Optional - For Better Targeting)
+                  Job Description (Optional)
                 </label>
                 <textarea
                   name="jobDescription"
                   value={formData.jobDescription}
                   onChange={handleInputChange}
-                  placeholder="Paste the complete job description here for more targeted preparation insights..."
+                  placeholder="Paste the job description here for more targeted insights..."
                   rows="5"
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none"
                 />
@@ -335,10 +393,14 @@ const InterviewPrepPlatform = () => {
                   </>
                 )}
               </button>
+              {!isPremium && (
+                <p className="text-center text-sm text-gray-500 mt-4">
+                  You have {Math.max(0, FREE_LIMIT - usageCount)} free generation remaining.
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Roadmap Results */}
           {roadmap && (
             <div className="space-y-10">
               {/* Company Overview */}
