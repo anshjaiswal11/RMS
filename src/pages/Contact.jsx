@@ -14,7 +14,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 
 // Define the base URL for your API
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://rms-backend-taupe.vercel.app/api';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
