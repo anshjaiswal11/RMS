@@ -21,6 +21,7 @@ import {
   Zap,
   AlertTriangle
 } from 'lucide-react';
+import { Supadata } from "@supadata/js";
 
 const YouTubeSummarizer = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -84,78 +85,33 @@ const YouTubeSummarizer = () => {
   };
 
   // Get video transcript
+  const supadata = new Supadata({
+    apiKey: "sd_662cba02300b940f5cb02c328c721f6a",
+  });
+
+  // Updated getVideoTranscript function using Supadata
   const getVideoTranscript = async (videoId) => {
-    const proxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://corsproxy.io/?',
-    ];
+    try {
+      setCurrentStep(`Fetching transcript via Supadata...`);
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      
+      const transcriptResult = await supadata.transcript({
+        url: videoUrl,
+        lang: "en",
+        text: true,
+        mode: "auto"
+      });
 
-    let lastError = null;
-
-    for (const proxyUrl of proxies) {
-      try {
-        setCurrentStep(`Fetching transcript via proxy...`);
-        const targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
-
-        if (!response.ok) {
-          throw new Error(`Proxy fetch failed with status: ${response.status}`);
-        }
-
-        const html = await response.text();
-        
-        // A more robust way to find the player response JSON
-        const playerResponseScript = html.split('var ytInitialPlayerResponse = ')[1];
-        if (!playerResponseScript) {
-            throw new Error('Could not find player response script. The page structure may have changed.');
-        }
-        
-        const playerResponseJson = playerResponseScript.split(';</script>')[0];
-        const ytInitialPlayerResponse = JSON.parse(playerResponseJson);
-
-        const captionTracks = ytInitialPlayerResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-
-        if (!captionTracks || captionTracks.length === 0) {
-          throw new Error('No caption tracks found for this video. Please try a video with captions/subtitles enabled.');
-        }
-
-        let captionTrack = captionTracks.find(track => track.languageCode === 'en' || track.languageCode.startsWith('en-'));
-        if (!captionTrack) {
-          captionTrack = captionTracks[0];
-        }
-
-        const captionUrl = captionTrack.baseUrl;
-        const captionResponse = await fetch(`${proxyUrl}${encodeURIComponent(captionUrl)}`);
-        
-        if (!captionResponse.ok) {
-          throw new Error(`Failed to fetch caption data: ${captionResponse.status} ${captionResponse.statusText}`);
-        }
-
-        const captionXml = await captionResponse.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(captionXml, "text/xml");
-        const textElements = xmlDoc.getElementsByTagName("text");
-
-        let transcript = "";
-        for (let i = 0; i < textElements.length; i++) {
-          const textContent = textElements[i].textContent || textElements[i].innerText || "";
-          transcript += textContent.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") + " ";
-        }
-
-        if (!transcript.trim()) {
-          throw new Error("Could not extract transcript content from the caption file.");
-        }
-
-        return transcript.trim(); // Success! Exit the loop.
-
-      } catch (error) {
-        console.error(`Attempt with proxy ${proxyUrl} failed:`, error);
-        lastError = error; // Save the error and try the next proxy
+      if (!transcriptResult.text?.trim()) {
+        throw new Error('No transcript found for this video. Please try a video with captions/subtitles enabled.');
       }
-    }
 
-    // If all proxies fail, throw the last recorded error
-    throw new Error(lastError.message || "All attempts to fetch the transcript failed.");
+      return transcriptResult.text.trim();
+
+    } catch (error) {
+      console.error('Error fetching transcript:', error);
+      throw new Error(error.message || "Failed to fetch transcript using Supadata API");
+    }
   };
 
   // Call OpenRouter API
