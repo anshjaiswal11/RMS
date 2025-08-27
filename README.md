@@ -1,25 +1,30 @@
-# RMS - Modern Reappear Management System
+# CitewiseAI - Your Comprehensive Study & Career Assistant
 
-A modern, AI-powered study assistant built with React and Tailwind CSS to help students manage their reappear exams and access comprehensive study resources.
+A cutting-edge, AI-powered platform built with React and modern technologies to revolutionize learning, research, and career development.
 
-## 🚀 Features
+## 🚀 Key Features
 
-### Core Features
-- **AI-Powered PDF Summarizer**: Upload PDF notes and get intelligent summaries using advanced AI technology
-- **Auto Note Collection**: Automatically collect and organize study materials from various sources
-- **Comprehensive Subject Management**: Browse and manage subjects with detailed study resources
-- **Smart Test Generator**: Generate personalized practice tests (Coming Soon)
-- **Modern Responsive Design**: Beautiful, mobile-friendly interface with dark/light mode support
+### Learning & Research Tools
+- **AI PDF Summarizer**: Transform lengthy PDFs into concise, intelligent summaries with interactive Q&A capabilities
+- **Theory Platform**: Extract and understand key concepts, definitions, and theories from academic materials
+- **Research Study Assistant**: Streamline research with efficient paper analysis and organization
+- **YouTube Lecture Summary**: Convert video lectures into structured, text-based summaries
+- **Smart Test Generator**: Create personalized practice tests with detailed analytics (Beta)
 
-### Technical Features
-- **React 18** with modern hooks and functional components
-- **Tailwind CSS** for utility-first styling
-- **Framer Motion** for smooth animations
-- **React Router** for client-side routing
-- **React Helmet** for SEO optimization
-- **React Dropzone** for file uploads
-- **React Hot Toast** for notifications
-- **Lucide React** for beautiful icons
+### Career Development
+- **AI Career Platform**: 
+  - Resume optimization with ATS analysis
+  - Tailored interview preparation
+  - Personalized project suggestions
+  - Career path exploration
+  - Market insights and salary guidance
+
+### Core Technology
+- **React 18**: Modern functional components with hooks
+- **Tailwind CSS**: Responsive, utility-first styling
+- **OpenRouter AI**: Advanced language models for intelligent processing
+- **Framer Motion**: Smooth, professional animations
+- **Real-time Processing**: Stream-based AI responses for immediate feedback
 
 ## 🛠️ Installation & Setup
 
@@ -27,77 +32,105 @@ A modern, AI-powered study assistant built with React and Tailwind CSS to help s
 - Node.js (v16 or higher)
 - npm or yarn
 
-### Quick Start
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/rms-react.git
+## 🛠️ Technical Architecture
 
-# Navigate to project directory
-cd rms-react
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
-The application will be available at `http://localhost:3000`
-
-### Build for Production
-```bash
-# Create production build
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-## 📁 Project Structure
-
+### Project Structure
 ```
 src/
-├── components/          # Reusable UI components
-│   └── Navbar.jsx      # Navigation component
-├── context/            # React context providers
-│   └── ThemeContext.jsx # Dark/light theme context
-├── pages/              # Page components
-│   ├── Home.jsx        # Landing page
-│   ├── Subjects.jsx    # Subjects listing
-│   ├── AISummarizer.jsx # AI PDF summarizer
-│   ├── TestGenerator.jsx # Test generator (coming soon)
-│   ├── Resources.jsx   # Study resources
-│   ├── Contact.jsx     # Contact form
-│   └── Privacy.jsx     # Privacy policy
-├── App.jsx             # Main app component
-├── index.js            # App entry point
-└── index.css           # Global styles with Tailwind
+├── components/         # Reusable UI components
+├── context/           # React context (theme, auth)
+├── pages/             # Feature-specific pages
+│   ├── learning/      # Learning tools
+│   ├── career/        # Career development
+│   └── research/      # Research assistance
+├── services/          # API integrations
+└── utils/            # Helper functions
 ```
 
-## 🎨 Design System
+### Key Technologies
+- **Frontend**: React 18, React Router v6
+- **Styling**: Tailwind CSS, Framer Motion
+- **AI Integration**: OpenRouter API
+- **File Handling**: React Dropzone
+- **State Management**: React Context
+- **Notifications**: React Hot Toast
 
-### Colors
-- **Primary**: Blue gradient (`#3b82f6` to `#1d4ed8`)
-- **Secondary**: Gray scale for text and backgrounds
-- **Accent**: Various gradients for different features
+## 💡 Smart Features
+
+### PDF Processing
+- Intelligent text extraction
+- Key concept identification
+- Interactive Q&A system
+- Study material organization
+
+### Career Tools
+- ATS-optimized resume builder
+- Interview question generation
+- Project recommendation engine
+- Career path analysis
+- Market trend insights
+
+### Learning Assistance
+- Smart test generation
+- YouTube lecture analysis
+- Research paper summarization
+- Study progress tracking
+- Custom flashcard creation
+
+## 🎨 UI/UX Design
+
+### Theme System
+- Light/Dark mode support
+- Consistent color palette
+- Responsive design system
+- Smooth animations
+- Modern, clean interfaces
 
 ### Components
-- **Cards**: Consistent card design with hover effects
-- **Buttons**: Primary and secondary button styles
-- **Forms**: Modern form inputs with focus states
-- **Animations**: Smooth transitions and micro-interactions
+- Smart data cards
+- Interactive forms
+- Progress indicators
+- Loading states
+- Toast notifications
 
-## 🔧 Configuration
+## � Getting Started
 
-### Tailwind CSS
-The project uses Tailwind CSS with custom configuration in `tailwind.config.js`:
-- Custom color palette
-- Extended animations
-- Responsive breakpoints
-- Dark mode support
+### Prerequisites
+- Node.js 16+
+- npm/yarn
+- OpenRouter API key
+
+### Installation
+```bash
+# Clone repository
+git clone https://github.com/yourusername/citewise-ai.git
+
+# Install dependencies
+cd citewise-ai
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your API keys to .env
+
+# Start development
+npm run dev
+```
+
+## ⚙️ Configuration
 
 ### Environment Variables
-Create a `.env` file in the root directory:
+```env
+REACT_APP_OPENROUTER_API_KEY=your_api_key
+REACT_APP_SITE_URL=your_site_url
+REACT_APP_SITE_NAME=CitewiseAI
+```
+
+### API Integration
+The platform uses OpenRouter API for AI capabilities:
+- Text generation & analysis
+- Document processing
+- Q&A systems
 ```env
 REACT_APP_API_URL=your_api_url_here
 REACT_APP_AI_SERVICE_KEY=your_ai_service_key
