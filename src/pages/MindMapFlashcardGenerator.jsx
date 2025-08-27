@@ -20,7 +20,7 @@ const MindMapFlashcardGenerator = () => {
     'meta-llama/llama-3.2-3b-instruct:free',
     'qwen/qwen-2.5-7b-instruct:free'
   ];
-  const API_KEY = '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';
+  const API_KEY = process.env.REACT_APP_OPENROUTER_API2_KEY;
 
   const makeAPICall = async (prompt, retryAttempt = 0, modelIndex = 0) => {
     const maxRetries = 3;
