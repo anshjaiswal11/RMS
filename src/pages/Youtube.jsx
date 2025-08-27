@@ -20,6 +20,9 @@ import {
   Link,
   Zap,
   AlertTriangle,
+  Construction,
+  Briefcase,
+  Mail,
   X
 } from 'lucide-react';
 import { Supadata } from "@supadata/js";
