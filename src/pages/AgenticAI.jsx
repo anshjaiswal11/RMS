@@ -481,7 +481,7 @@ Requirements:
           'X-Title': 'Agentic AI Code Generator'
         },
         body: JSON.stringify({
-          model: 'qwen/qwen3-coder',
+          model: 'qwen/qwen3-coder:free',
           messages: [
             { role: 'system', content: 'You are an expert full-stack developer and agentic AI assistant. Always return valid JSON responses only. Create production-ready, complete applications.' },
             { role: 'user', content: prompt }
