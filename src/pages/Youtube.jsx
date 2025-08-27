@@ -24,6 +24,7 @@ import {
 import { Supadata } from "@supadata/js";
 
 const YouTubeSummarizer = () => {
+  const [showDevelopmentPopup, setShowDevelopmentPopup] = useState(true);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [videoData, setVideoData] = useState(null);
   const [transcript, setTranscript] = useState('');
@@ -40,6 +41,74 @@ const YouTubeSummarizer = () => {
   const [error, setError] = useState('');
   const [openRouterApiKey, setOpenRouterApiKey] = useState('');
   const messagesEndRef = useRef(null);
+
+  const DevelopmentPopup = () => {
+    if (!showDevelopmentPopup) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 m-4">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Construction className="w-6 h-6 text-yellow-600" />
+            </div>
+            <button 
+              onClick={() => setShowDevelopmentPopup(false)}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <h3 className="text-xl font-bold text-gray-900 mb-3">
+            🚧 Feature Under Development
+          </h3>
+          
+          <p className="text-gray-600 mb-4">
+            The YouTube Lecture Analysis feature is currently under development. We're working hard to bring you this exciting functionality soon!
+          </p>
+
+          <div className="bg-blue-50 p-4 rounded-lg mb-6">
+            <h4 className="font-medium text-blue-800 mb-2">Try These Available Features:</h4>
+            <div className="space-y-2">
+              <Link to="/ai-summarizer" className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <FileText className="w-4 h-4" />
+                <span>AI PDF Summarizer</span>
+              </Link>
+              <Link to="/test-generator" className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <HelpCircle className="w-4 h-4" />
+                <span>Test Generator</span>
+              </Link>
+              <Link to="/RMS-AI" className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <Bot className="w-4 h-4" />
+                <span>RMS AI Assistant</span>
+              </Link>
+              <Link to="/ai-career-platform" className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <Briefcase className="w-4 h-4" />
+                <span>AI Career Platform</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <a
+              href="mailto:anshjaiswal1804@gmail.com"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Contact for Early Access</span>
+            </a>
+            <button
+              onClick={() => setShowDevelopmentPopup(false)}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors"
+            >
+              Continue Exploring
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
