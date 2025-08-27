@@ -19,7 +19,8 @@ import {
   HelpCircle,
   Link,
   Zap,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 import { Supadata } from "@supadata/js";
 
@@ -45,9 +46,69 @@ const YouTubeSummarizer = () => {
   const DevelopmentPopup = () => {
     if (!showDevelopmentPopup) return null;
 
+    const features = [
+      { name: 'AI PDF Summarizer', path: '/ai-summarizer', icon: FileText, description: 'Summarize PDF documents with AI' },
+      { name: 'Study Assistant', path: '/RMS-AI', icon: Brain, description: 'Get help with your studies' },
+      { name: 'Interview Prep', path: '/interview-prep', icon: MessageSquare, description: 'Prepare for interviews' },
+      { name: 'Career Platform', path: '/ai-career-platform', icon: Zap, description: 'Boost your career growth' },
+      { name: 'Test Generator', path: '/test-generator', icon: HelpCircle, description: 'Create practice tests' }
+    ];
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 m-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 m-4 relative">
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={() => setShowDevelopmentPopup(false)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+              <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature Under Development</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">This feature will be available soon!</p>
+            </div>
+          </div>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            The YouTube summarizer is currently under development. Meanwhile, you can try these other powerful features:
+          </p>
+
+          <div className="grid gap-4 mb-6">
+            {features.map((feature) => (
+              <a
+                key={feature.path}
+                href={feature.path}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="p-2 bg-primary-50 dark:bg-primary-900 rounded-lg">
+                  <feature.icon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white">{feature.name}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{feature.description}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div className="flex flex-col items-center border-t pt-6 border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+              Want early access to this feature?
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Contact Us
+            </a>
+          </div>
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
               <Construction className="w-6 h-6 text-yellow-600" />
