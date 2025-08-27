@@ -20,6 +20,12 @@ import Youtube from './pages/Youtube';
 import GetRMSKey from './pages/Getkey';
 import Admin from './pages/Admin';
 import Freetest from './pages/Freetest';
+import PDFTheoryPlatform from './pages/PDFTheoryPlatform'
+import ResearchStudyAssistant from './pages/ResearchStudyAssistant';
+import AICareerPlatform from './pages/AICareerPlatform';
+import AI from './pages/AgenticAI'
+import MindMapFlashcardGenerator from './pages/MindMapFlashcardGenerator';
+
 
 
 function App() {
@@ -59,6 +65,11 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/GetRMSKey" element={<GetRMSKey />} />
+            <Route path="/ai-pdf-theory" element={<PDFTheoryPlatform />} />
+            <Route path="/research-study-assistant" element={<ResearchStudyAssistant />} />
+            <Route path="/ai-career-platform" element={<AICareerPlatform />} />
+            <Route path="/agentic-ai" element={<AI />} />
+            <Route path="/mind-map-flashcard-generator" element={<MindMapFlashcardGenerator />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
             <Route path="/freetest" element={<Freetest />} />
             <Route path="/admin" element={<Admin />} />

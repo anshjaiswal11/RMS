@@ -15,10 +15,13 @@ import {
   TrendingUp,
   Twitter, // For Footer
   Github,  // For Footer
-  Linkedin // For Footer
+  Linkedin, // For Footer
+  Briefcase, // For AI Career Platform
+  Youtube, // For YouTube Summary
+  Lightbulb // For PDF Theory
 } from 'lucide-react';
 
-// --- NEW FOOTER COMPONENT ---
+// --- UPDATED FOOTER COMPONENT ---
 const Footer = () => {
   const mainLinks = [
     { name: 'Home', path: '/' },
@@ -61,10 +64,10 @@ const Footer = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-secondary-900 dark:text-white">RMS</span>
+              <span className="text-xl font-bold text-secondary-900 dark:text-white">CiteWise</span>
             </div>
             <p className="mt-4 text-secondary-600 dark:text-secondary-400">
-              Your AI-powered study assistant for acing reappear exams.
+              Your AI-powered research and study partner for academic excellence.
             </p>
           </div>
 
@@ -105,7 +108,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-secondary-200 dark:border-secondary-800 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-secondary-600 dark:text-secondary-400 text-sm">
-            &copy; {new Date().getFullYear()} RMS. All Rights Reserved.
+            &copy; {new Date().getFullYear()} CiteWise. All Rights Reserved.
           </p>
           <div className="flex space-x-4 mt-4 sm:mt-0">
             {socialLinks.map((social, index) => {
@@ -152,6 +155,37 @@ const Home = () => {
     }
   ];
 
+  const aiWorkflows = [
+    {
+        icon: Lightbulb,
+        title: 'AI PDF Theory Platform',
+        description: 'Upload PDFs and let our AI extract key theories, definitions, and concepts to help you grasp complex topics faster.',
+        path: '/ai-pdf-theory',
+        color: 'from-indigo-500 to-purple-500'
+    },
+    {
+        icon: BookOpen,
+        title: 'Research Study Assistant',
+        description: 'Streamline your research. Our AI helps find relevant papers, summarize articles, and organize your findings efficiently.',
+        path: '/research-study-assistant',
+        color: 'from-sky-500 to-blue-500'
+    },
+    {
+        icon: Briefcase,
+        title: 'AI Career Platform',
+        description: 'Boost your career with AI-driven interview prep, resume feedback, and personalized career path exploration.',
+        path: '/ai-career-platform',
+        color: 'from-amber-500 to-orange-500'
+    },
+    {
+        icon: Youtube,
+        title: 'YouTube Summary',
+        description: "Don't have time for long video lectures? Paste a YouTube link to get a concise, easy-to-read summary in seconds.",
+        path: '/youtube_summary',
+        color: 'from-red-500 to-rose-500'
+    }
+  ];
+
   const stats = [
     { number: '2000+', label: 'Students Helped', icon: Users },
     { number: '20+', label: 'Subjects Covered', icon: BookOpen },
@@ -173,8 +207,8 @@ const Home = () => {
   return (
     <HelmetProvider>
       <Helmet>
-        <title>RMS - Modern Reappear Management System | AI-Powered Study Assistant</title>
-        <meta name="description" content="Transform your exam preparation with RMS - the modern reappear management system. AI-powered PDF summarization, auto note collection, and comprehensive study resources for students." />
+        <title>CiteWise - Your AI-Powered Research and Study Partner</title>
+        <meta name="description" content="Elevate your studies with CiteWise. Get AI-powered PDF summarization, automated note collection, and comprehensive study resources to achieve academic excellence." />
       </Helmet>
 
       <div className="pt-16">
@@ -204,14 +238,14 @@ const Home = () => {
               transition={{ duration: 0.8 }}
             >
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-                Modern
+                CiteWise
                 <span className="block text-white bg-clip-text text-transparent">
-                  Study Assistant
+                  Your AI Study Partner
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-                Transform your exam preparation with AI-powered tools. Summarize PDFs, collect notes automatically, 
-                and generate personalized tests to ace your reappear exams.
+                Elevate your learning with AI-powered tools. Summarize PDFs, streamline research, 
+                and generate personalized tests to achieve academic excellence.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
@@ -222,22 +256,10 @@ const Home = () => {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </a>
                 <a
-                  href="/RMS-AI"
+                  href="/research-study-assistant"
                   className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
                 >
-                  RMS-AI
-                </a>
-                <a
-                  href="/interview-prep"
-                  className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
-                >
-                  <span>Interview Prep Pro</span>
-                </a>
-                <a
-                  href="/youtube_summary"
-                  className="btn-secondary text-lg px-8 py-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
-                >
-                  <span>YouTube Summary</span>
+                  Research Assistant
                 </a>
               </div>
             </motion.div>
@@ -271,104 +293,77 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* --- NEW AI WORKFLOWS SECTION --- */}
         <section className="py-20 bg-secondary-50 dark:bg-secondary-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white mb-6">
-                Powerful Features
-              </h2>
-              <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
-                Everything you need to excel in your reappear exams, powered by cutting-edge AI technology.
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <motion.div
-                    key={index}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ duration: 0.8 }}
                     viewport={{ once: true }}
-                    className="card group hover:scale-105"
-                  >
-                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                      <Icon className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-3">
-                      {feature.title}
-                    </h3>
-                    <p className="text-secondary-600 dark:text-secondary-400">
-                      {feature.description}
+                    className="text-center mb-16"
+                >
+                    <h2 className="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white mb-6">
+                        Explore Our AI Workflows
+                    </h2>
+                    <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
+                        Discover how CiteWise's specialized AI tools can transform your study and research habits.
                     </p>
-                  </motion.div>
-                );
-              })}
+                </motion.div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {aiWorkflows.map((workflow, index) => {
+                        const Icon = workflow.icon;
+                        return (
+                            <motion.a
+                                key={index}
+                                href={workflow.path}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                viewport={{ once: true }}
+                                className="card group hover:scale-105 block" // Added block to make the whole card clickable
+                            >
+                                <div className={`w-16 h-16 bg-gradient-to-br ${workflow.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                                    <Icon className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-secondary-900 dark:text-white mb-3">
+                                    {workflow.title}
+                                </h3>
+                                <p className="text-secondary-600 dark:text-secondary-400">
+                                    {workflow.description}
+                                </p>
+                            </motion.a>
+                        );
+                    })}
+                </div>
             </div>
-          </div>
         </section>
 
-        {/* Benefits Section */}
+        {/* Benefits Section (Formerly "Why Choose RMS?") */}
         <section className="py-20 bg-white dark:bg-secondary-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-1 gap-12 items-center">
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-4xl font-bold text-secondary-900 dark:text-white mb-6">
-                  Why Choose RMS?
+                <h2 className="text-4xl font-bold text-secondary-900 dark:text-white mb-6 text-center">
+                  Why Choose CiteWise?
                 </h2>
-                <p className="text-lg text-secondary-600 dark:text-secondary-400 mb-8">
+                <p className="text-lg text-secondary-600 dark:text-secondary-400 mb-8 max-w-3xl mx-auto text-center">
                   Our platform combines the power of AI with comprehensive study resources to give you 
-                  the best possible preparation for your reappear exams.
+                  the best possible preparation for your academic journey.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                   {benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                       <span className="text-secondary-700 dark:text-secondary-300">{benefit}</span>
                     </div>
                   ))}
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="relative"
-              >
-                <div className="card bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <Star className="w-6 h-6 text-yellow-300" />
-                    <h3 className="text-2xl font-bold">Coming Soon</h3>
-                  </div>
-                  <p className="text-lg mb-6">
-                    We're working on exciting new features including advanced AI test generation 
-                    and real-time collaboration tools.
-                  </p>
-                  <div className="bg-white/20 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm">Development Progress</span>
-                      <span className="text-sm font-semibold">75%</span>
-                    </div>
-                    <div className="w-full bg-white/30 rounded-full h-2">
-                      <div className="bg-white h-2 rounded-full" style={{ width: '75%' }}></div>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             </div>
@@ -388,7 +383,7 @@ const Home = () => {
                 Ready to Transform Your Study Experience?
               </h2>
               <p className="text-xl text-white/90 mb-8">
-                Join thousands of students who are already using RMS to ace their exams.
+                Join thousands of students who are already using CiteWise to ace their exams.
               </p>
               <a
                 href="/ai-summarizer"
