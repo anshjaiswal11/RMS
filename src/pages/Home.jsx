@@ -18,7 +18,9 @@ import {
   Linkedin, // For Footer
   Briefcase, // For AI Career Platform
   Youtube, // For YouTube Summary
-  Lightbulb // For PDF Theory
+  Lightbulb, // For PDF Theory
+  Code,
+  KeyRound 
 } from 'lucide-react';
 
 // --- UPDATED FOOTER COMPONENT ---
