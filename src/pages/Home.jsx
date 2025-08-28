@@ -155,34 +155,70 @@ const Home = () => {
     }
   ];
 
+  // AI Workflows: All services from Navbar
   const aiWorkflows = [
     {
-        icon: Lightbulb,
-        title: 'AI PDF Theory Platform',
-        description: 'Upload PDFs and let our AI extract key theories, definitions, and concepts to help you grasp complex topics faster.',
-        path: '/ai-pdf-theory',
-        color: 'from-indigo-500 to-purple-500'
+      icon: Brain,
+      title: 'RMS-AI',
+      description: 'Your personal AI assistant for study, coding, and research questions.',
+      path: '/RMS-AI',
+      color: 'from-purple-500 to-indigo-500'
     },
     {
-        icon: BookOpen,
-        title: 'Research Study Assistant',
-        description: 'Streamline your research. Our AI helps find relevant papers, summarize articles, and organize your findings efficiently.',
-        path: '/research-study-assistant',
-        color: 'from-sky-500 to-blue-500'
+      icon: Youtube,
+      title: 'YouTube Summary',
+      description: 'Paste a YouTube link to get a concise, easy-to-read summary in seconds.',
+      path: '/youtube_summary',
+      color: 'from-red-500 to-rose-500'
     },
     {
-        icon: Briefcase,
-        title: 'AI Career Platform',
-        description: 'Boost your career with AI-driven interview prep, resume feedback, and personalized career path exploration.',
-        path: '/ai-career-platform',
-        color: 'from-amber-500 to-orange-500'
+      icon: Users,
+      title: 'Interview Prep',
+      description: 'Practice interview questions and get AI-powered feedback for your career growth.',
+      path: '/interview-prep',
+      color: 'from-blue-500 to-cyan-500'
     },
     {
-        icon: Youtube,
-        title: 'YouTube Summary',
-        description: "Don't have time for long video lectures? Paste a YouTube link to get a concise, easy-to-read summary in seconds.",
-        path: '/youtube_summary',
-        color: 'from-red-500 to-rose-500'
+      icon: KeyRound,
+      title: 'Get RMS Key',
+      description: 'Request your RMS API key for advanced AI features.',
+      path: '/GetRMSKey',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: Lightbulb,
+      title: 'PDF Theory Platform',
+      description: 'Extract key theories, definitions, and concepts from your PDFs.',
+      path: '/ai-pdf-theory',
+      color: 'from-indigo-500 to-purple-500'
+    },
+    {
+      icon: BookOpen,
+      title: 'Research Assistant',
+      description: 'Find relevant papers, summarize articles, and organize your research.',
+      path: '/research-study-assistant',
+      color: 'from-sky-500 to-blue-500'
+    },
+    {
+      icon: Briefcase,
+      title: 'AI Career Platform',
+      description: 'AI-driven interview prep, resume feedback, and personalized career path exploration.',
+      path: '/ai-career-platform',
+      color: 'from-amber-500 to-orange-500'
+    },
+    {
+      icon: Lightbulb,
+      title: 'Mind Map Flashcard Generator',
+      description: 'Generate mind maps and flashcards for efficient learning.',
+      path: '/mind-map-flashcard-generator',
+      color: 'from-pink-500 to-yellow-500'
+    },
+    {
+      icon: Code,
+      title: 'Agentic AI',
+      description: 'Advanced agentic AI for code generation and automation.',
+      path: '/agentic-ai',
+      color: 'from-gray-700 to-gray-900'
     }
   ];
 
