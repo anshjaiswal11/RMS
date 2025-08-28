@@ -327,7 +327,7 @@ const AISummarizer = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+          model: "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",
           messages: messagesPayload,
           temperature: 0.7,
           stream: true
