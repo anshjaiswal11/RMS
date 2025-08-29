@@ -17,10 +17,15 @@ import {
   Square,
   Trash2,
   Plus,
-  Menu
+  Menu,
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle
 } from 'lucide-react';
 
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API3_KEY;
+// IMPORTANT: Replace "YOUR_OPENROUTER_API_KEY" with your actual OpenRouter API key.
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API3_KEY;
 const YOUR_SITE_URL = 'http://localhost:3000';
 const YOUR_SITE_NAME = 'RMS Study Assistant';
 
@@ -35,8 +40,13 @@ const RMSAI = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
   const messagesEndRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const models = [
     {
@@ -67,8 +77,8 @@ const RMSAI = () => {
       id: 'citeWise-imageAi',
       name: 'CiteWise ImageAI',
       model: 'google/gemini-2.5-flash-image-preview:free',
-      description: 'Image generation and editing',
-      icon: Zap,
+      description: 'Image understanding and analysis',
+      icon: ImageIcon,
       color: 'from-yellow-500 to-orange-500'
     },
     {
@@ -76,7 +86,7 @@ const RMSAI = () => {
       name: 'CiteWise FastestAI',
       model: 'google/gemma-3n-e4b-it:free',
       description: 'Fast responses for general queries',
-      icon: MessageSquare,
+      icon: Zap,
       color: 'from-red-500 to-pink-500' 
     },
     {
@@ -84,7 +94,7 @@ const RMSAI = () => {
       name: 'CiteWise HumanFeelingAI',  
       model: 'meta-llama/llama-3.3-70b-instruct:free',
       description: 'Empathetic and conversational AI',
-      icon: Settings,
+      icon: Wand2,
       color: 'from-teal-500 to-cyan-500'
     },
     {
@@ -92,11 +102,16 @@ const RMSAI = () => {
       name: 'CiteWise PromptCreationAI',
       model: 'cognitivecomputations/dolphin3.0-r1-mistral-24b:free',
       description: 'Expert in crafting prompts and instructions',
-      icon: Trash2,
-      color: 'from-purple-500 to-indigo-500'
+      icon: Settings,
+      color: 'from-pink-500 to-rose-500'
     }
   ];
 
+  const showAlert = (message) => {
+    setAlertInfo({ show: true, message });
+    setTimeout(() => setAlertInfo({ show: false, message: '' }), 3000);
+  };
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -104,6 +119,38 @@ const RMSAI = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingMessage]);
+  
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [inputValue]);
+
+
+  // Handle image upload
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Image = e.target.result;
+        setUploadedImage(base64Image);
+        setImagePreview(base64Image);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove uploaded image
+  const removeImage = () => {
+    setUploadedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Stop streaming function
   const stopStreaming = () => {
@@ -127,9 +174,12 @@ const RMSAI = () => {
     });
   };
 
-  // Enhanced format message function that removes markdown formatting
+  // Enhanced format message function
   const formatMessage = (content, modelId) => {
-    // Remove all markdown formatting: **, *, _, ~~, etc.
+     if (typeof content !== 'string') {
+        return content;
+    }
+
     let cleaned = content
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/\*(.*?)\*/g, '$1')
@@ -137,46 +187,77 @@ const RMSAI = () => {
       .replace(/~~(.*?)~~/g, '$1')
       .replace(/`([^`]+)`/g, '$1');
 
-    // If CiteWise ImageAI, try to detect image URLs or base64
-    if (modelId === 'citeWise-imageAi') {
-      // Simple regex for image URLs
-      const imageUrlMatch = cleaned.match(/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif))/i);
-      // Simple regex for base64 images
-      const base64Match = cleaned.match(/data:image\/(png|jpg|jpeg|gif);base64,[A-Za-z0-9+/=]+/);
-      if (imageUrlMatch) {
+    if (modelId === 'rms-tutor') {
+        const sections = [];
+        let currentSection = { heading: null, list: [] };
+
+        cleaned.split('\n').forEach(line => {
+            const headingMatch = line.match(/^\d+\.\s+(.*)/);
+            const listItemMatch = line.match(/^\s*[-*]\s+(.*)/);
+            const summaryMatch = line.match(/^👉\s+(.*)/);
+
+            if (headingMatch) {
+                if (currentSection.heading || currentSection.list.length > 0) {
+                    sections.push(currentSection);
+                }
+                currentSection = { heading: headingMatch[1], list: [] };
+            } else if (listItemMatch) {
+                currentSection.list.push(listItemMatch[1]);
+            } else if (summaryMatch) {
+                 if (currentSection.heading || currentSection.list.length > 0) {
+                    sections.push(currentSection);
+                }
+                currentSection = { heading: null, list: [], summary: summaryMatch[1] };
+                sections.push(currentSection);
+                currentSection = { heading: null, list: [] };
+
+            } else if (line.trim() !== '') {
+                 if (!currentSection.heading && currentSection.list.length === 0) {
+                    // It's introductory text
+                    if (!sections.intro) sections.intro = [];
+                    sections.intro.push(line);
+                } else {
+                    currentSection.list.push(line);
+                }
+            }
+        });
+        if (currentSection.heading || currentSection.list.length > 0) {
+            sections.push(currentSection);
+        }
+
         return (
-          <div className="my-4 flex flex-col items-center">
-            <img src={imageUrlMatch[1]} alt="AI generated" className="rounded-lg max-w-full max-h-96 border border-gray-700 shadow" />
-            <p className="mt-2 text-gray-300 text-sm">AI generated image</p>
-          </div>
-        );
-      }
-      if (base64Match) {
-        return (
-          <div className="my-4 flex flex-col items-center">
-            <img src={base64Match[0]} alt="AI generated" className="rounded-lg max-w-full max-h-96 border border-gray-700 shadow" />
-            <p className="mt-2 text-gray-300 text-sm">AI generated image</p>
-          </div>
-        );
-      }
+            <div>
+                {sections.intro && <p className="mb-4">{sections.intro.join('\n')}</p>}
+                {sections.map((section, index) => (
+                    <div key={index} className="mb-4">
+                        {section.heading && <h3 className="text-lg font-semibold text-gray-100 mb-2">{`${index + 1}. ${section.heading}`}</h3>}
+                        {section.list.length > 0 && (
+                             <ul className="list-disc list-inside pl-4 space-y-1 text-gray-300">
+                                {section.list.map((item, i) => <li key={i}>{item}</li>)}
+                            </ul>
+                        )}
+                        {section.summary && <p className="mt-4 p-3 bg-gray-800/50 rounded-lg">👉 {section.summary}</p>}
+                    </div>
+                ))}
+            </div>
+        )
     }
 
     const parts = cleaned.split(/(```[\s\S]*?```)/g);
     return parts.map((part, index) => {
       if (part.startsWith('```') && part.endsWith('```')) {
-        // ...existing code...
         const codeContent = part.substring(3, part.length - 3);
         const firstNewline = codeContent.indexOf('\n');
         let language = 'plaintext';
-        let code = codeContent;
-        if (firstNewline > 0) {
-          language = codeContent.substring(0, firstNewline).trim();
-          code = codeContent.substring(firstNewline + 1);
+        let code = codeContent.trim();
+        if (firstNewline !== -1) {
+          language = codeContent.substring(0, firstNewline).trim() || 'plaintext';
+          code = codeContent.substring(firstNewline + 1).trim();
         }
         return (
           <div key={index} className="my-4">
-            <div className="flex items-center justify-between bg-gray-800 text-white px-4 py-2 rounded-t-lg">
-              <span className="text-xs font-semibold uppercase">{language || 'Code'}</span>
+            <div className="flex items-center justify-between bg-gray-900 text-white px-4 py-2 rounded-t-lg">
+              <span className="text-xs font-semibold uppercase">{language}</span>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(code);
@@ -198,73 +279,23 @@ const RMSAI = () => {
                 )}
               </button>
             </div>
-            <pre className="bg-gray-900 text-green-200 p-4 rounded-b-lg overflow-x-auto text-sm">
+            <pre className="bg-gray-800 text-green-200 p-4 rounded-b-lg overflow-x-auto text-sm">
               <code>{code}</code>
             </pre>
           </div>
         );
       } else {
-        // ...existing code...
-        return part.split('\n').map((line, lineIndex) => {
-          if (line.startsWith('# ')) {
-            return (
-              <h1 key={`${index}-${lineIndex}`} className="text-xl font-bold mt-6 mb-4 text-gray-100">
-                {line.substring(2)}
-              </h1>
-            );
-          }
-          if (line.startsWith('## ')) {
-            return (
-              <h2 key={`${index}-${lineIndex}`} className="text-lg font-semibold mt-5 mb-3 text-gray-200">
-                {line.substring(3)}
-              </h2>
-            );
-          }
-          if (line.startsWith('### ')) {
-            return (
-              <h3 key={`${index}-${lineIndex}`} className="text-base font-medium mt-4 mb-2 text-gray-300">
-                {line.substring(4)}
-              </h3>
-            );
-          }
-          if (line.startsWith('> ')) {
-            return (
-              <blockquote key={`${index}-${lineIndex}`} className="border-l-4 border-blue-400 pl-4 py-2 my-3 bg-blue-900/20 text-blue-300 italic">
-                {line.substring(2)}
-              </blockquote>
-            );
-          }
-          if (line.startsWith('- ')) {
-            return (
-              <li key={`${index}-${lineIndex}`} className="ml-5 mb-1 text-gray-300 list-disc">
-                {line.substring(2)}
-              </li>
-            );
-          }
-          if (line.match(/^\d+\.\s/)) {
-            return (
-              <li key={`${index}-${lineIndex}`} className="ml-5 mb-1 text-gray-300 list-decimal">
-                {line.replace(/^\d+\.\s/, '')}
-              </li>
-            );
-          }
-          if (line.trim() === '') {
-            return <br key={`${index}-${lineIndex}`} />;
-          }
-          return (
-            <p key={`${index}-${lineIndex}`} className="my-2 text-gray-200 leading-relaxed">
-              {line}
-            </p>
-          );
-        });
+         return <div key={index} className="whitespace-pre-wrap">{part}</div>;
       }
     });
   };
 
-  // Save current chat to history
   const saveCurrentChat = (chatMessages = messages) => {
     if (chatMessages.length > 0) {
-      const chatTitle = chatMessages[0]?.content?.slice(0, 50) + "..." || "New Chat";
+      const chatTitle = typeof chatMessages[0]?.content === 'string' 
+        ? (chatMessages[0].content.slice(0, 40) + (chatMessages[0].content.length > 40 ? "..." : ""))
+        : "Image Query";
+
       const chatId = currentChatId || Date.now().toString();
       
       setChatHistory(prev => {
@@ -277,13 +308,14 @@ const RMSAI = () => {
           timestamp: new Date().toISOString()
         };
         
+        let updatedHistory;
         if (existingIndex >= 0) {
-          const updated = [...prev];
-          updated[existingIndex] = chatData;
-          return updated;
+          updatedHistory = [...prev];
+          updatedHistory[existingIndex] = chatData;
         } else {
-          return [chatData, ...prev];
+          updatedHistory = [chatData, ...prev];
         }
+        return updatedHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       });
       
       if (!currentChatId) {
@@ -292,41 +324,69 @@ const RMSAI = () => {
     }
   };
 
-  // Load chat from history
   const loadChat = (chat) => {
+    if (isStreaming) stopStreaming();
     setMessages(chat.messages);
     setSelectedModel(chat.model);
     setCurrentChatId(chat.id);
     setStreamingMessage('');
-    
-    // Stop any ongoing streaming
-    if (isStreaming) {
-      stopStreaming();
-    }
+    setUploadedImage(null);
+    setImagePreview(null);
+    setSidebarOpen(false);
   };
+  
+  const deleteChat = (chatIdToDelete) => {
+    setChatHistory(prev => prev.filter(chat => chat.id !== chatIdToDelete));
+    if(currentChatId === chatIdToDelete) {
+        startNewChat(false);
+    }
+  }
 
-  // Start new chat
-  const startNewChat = () => {
-    // Save current chat first
-    if (messages.length > 0) {
+  const startNewChat = (shouldSaveCurrent = true) => {
+    if (shouldSaveCurrent && messages.length > 0) {
       saveCurrentChat();
     }
-    // Reset everything for new chat
+    if (isStreaming) stopStreaming();
     setMessages([]);
     setStreamingMessage('');
-    setCurrentChatId(Date.now().toString());
+    setCurrentChatId(null);
     setInputValue('');
-    // Stop any ongoing streaming
-    if (isStreaming) {
-      stopStreaming();
-    }
+    setUploadedImage(null);
+    setImagePreview(null);
+    setSidebarOpen(false);
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || isGenerating) return;
+    if ((!inputValue.trim() && !uploadedImage) || isGenerating) return;
 
-    const userMessage = { role: "user", content: inputValue };
+    let userContent = inputValue.trim();
+    let messageContentForDisplay = userContent;
+    let apiMessagesPayload = [];
+
+    if (uploadedImage) {
+        if (selectedModel !== 'citeWise-imageAi') {
+            showAlert("Only CiteWise ImageAI can analyze images. Please switch models.");
+            return;
+        }
+        apiMessagesPayload.push({
+            role: "user",
+            content: [
+                { type: "text", text: userContent || "Describe this image in detail." },
+                { type: "image_url", image_url: { url: uploadedImage } }
+            ]
+        });
+        messageContentForDisplay = (
+            <div className="space-y-3">
+                {userContent && <div className="text-white">{userContent}</div>}
+                <img src={uploadedImage} alt="Uploaded content" className="rounded-lg max-w-xs max-h-48 border border-gray-600"/>
+            </div>
+        );
+    } else {
+        apiMessagesPayload.push({ role: "user", content: userContent });
+    }
+    
+    const userMessage = { role: "user", content: messageContentForDisplay };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInputValue('');
@@ -334,399 +394,223 @@ const RMSAI = () => {
     setIsStreaming(true);
     setStreamingMessage('');
 
+    setUploadedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
     abortControllerRef.current = new AbortController();
 
     try {
-      const currentModel = models.find(m => m.id === selectedModel);
-      let systemPrompt = "You are RMS AI, an advanced educational assistant for students. Provide clear, well-structured responses without using markdown formatting like ** or * for emphasis. Use plain text with proper headings and spacing. ";
+        const currentModel = models.find(m => m.id === selectedModel);
+        let systemPrompt = "You are RMS AI, a helpful and intelligent study assistant. Your responses should be clear, well-structured, and easy to understand. Avoid using markdown formatting like ** or * for emphasis; use plain text with proper headings and line breaks.";
+        if (selectedModel === 'rms-tutor') {
+            systemPrompt += " Structure your explanations with numbered headings for main points (e.g., '1. Main Point') and bulleted lists for details (e.g., '- detail'). Conclude with a summary or a follow-up question starting with '👉'."
+        }
 
-      // Custom prompts for each model
-      switch (selectedModel) {
-        case 'rms-coder':
-          systemPrompt += "You specialize in programming and coding tasks. Format code in proper code blocks but avoid markdown emphasis in regular text. Provide clear explanations alongside code examples.";
-          break;
-        case 'rms-deepresearch':
-          systemPrompt += "You excel at deep research and complex academic topics. Structure your responses with clear headings and detailed explanations using plain text formatting.";
-          break;
-        case 'rms-tutor':
-          systemPrompt += "You are a helpful tutor. Provide step-by-step explanations for study questions and learning concepts. Use plain text formatting.";
-          break;
-        case 'citeWise-coderAi':
-          systemPrompt += "You are an expert code generator and debugger. Provide code solutions and debugging help in clear code blocks, with concise explanations.";
-          break;
-        case 'citeWise-FastestAi':
-          systemPrompt += "You respond quickly to general queries. Keep answers short, direct, and easy to understand.";
-          break;
-        case 'citeWise-HumanfeelingAi':
-          systemPrompt += "You are empathetic and conversational. Respond with understanding and support, using friendly and encouraging language.";
-          break;
-        case 'citeWise-prompt-creationAi':
-          systemPrompt += "You are an expert in crafting prompts and instructions for AI models. Help users create effective prompts for any task.";
-          break;
-        case 'citeWise-imageAi':
-          systemPrompt += "When generating images, always return the image as base64 data in the response. If possible, embed the image as a data URL (data:image/png;base64,...) in your reply.";
-          break;
-        default:
-          systemPrompt += "You help with study questions and learning concepts. Provide clear, concise explanations with examples when helpful, using plain text formatting.";
-      }
 
-      const messagesPayload = [
-        { role: "system", content: systemPrompt },
-        ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
-      ];
+        const historyForAPI = newMessages.slice(0, -1).map(msg => ({
+            role: msg.role,
+            content: typeof msg.content === 'string' ? msg.content : (msg.content.props.children[0]?.props.children || "User sent an image.")
+        }));
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "HTTP-Referer": YOUR_SITE_URL,
-          "X-Title": YOUR_SITE_NAME,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: currentModel.model,
-          messages: messagesPayload,
-          temperature: 0.7,
-          stream: true
-        }),
-        signal: abortControllerRef.current.signal
-      });
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                "HTTP-Referer": YOUR_SITE_URL,
+                "X-Title": YOUR_SITE_NAME,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: currentModel.model,
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    ...historyForAPI,
+                    ...apiMessagesPayload
+                ],
+                stream: true
+            }),
+            signal: abortControllerRef.current.signal
+        });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-      try {
         while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) break;
-          
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          
-          buffer = lines.pop() || '';
-          
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            
-            if (trimmedLine === '') continue;
-            if (trimmedLine === 'data: [DONE]') {
-              setIsStreaming(false);
-              setIsGenerating(false);
-              
-              setStreamingMessage(currentStreamingMessage => {
-                if (currentStreamingMessage.trim()) {
-                  const newMessage = { role: "assistant", content: currentStreamingMessage };
-                  setMessages(prev => {
-                    const updatedMessages = [...prev, newMessage];
-                    saveCurrentChat(updatedMessages);
-                    return updatedMessages;
-                  });
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const jsonStr = line.slice(6);
+                    if (jsonStr === '[DONE]') {
+                       stopStreaming();
+                       return;
+                    }
+                    try {
+                        const data = JSON.parse(jsonStr);
+                        if (data.choices && data.choices[0]?.delta?.content) {
+                            setStreamingMessage(prev => prev + data.choices[0].delta.content);
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse stream chunk:', jsonStr);
+                    }
                 }
-                return '';
-              });
-              return;
             }
-            
-            if (trimmedLine.startsWith('data: ')) {
-              try {
-                const jsonStr = trimmedLine.slice(6);
-                const data = JSON.parse(jsonStr);
-                
-                if (data.choices && data.choices[0] && data.choices[0].delta) {
-                  const delta = data.choices[0].delta;
-                  
-                  if (delta.content) {
-                    setStreamingMessage(prev => prev + delta.content);
-                  }
-                  
-                  if (data.choices[0].finish_reason === 'stop') {
-                    setIsStreaming(false);
-                    setIsGenerating(false);
-                    
-                    setStreamingMessage(currentStreamingMessage => {
-                      const finalMessage = currentStreamingMessage + (delta.content || '');
-                      if (finalMessage.trim()) {
-                        const newMessage = { role: "assistant", content: finalMessage };
-                        setMessages(prev => {
-                          const updatedMessages = [...prev, newMessage];
-                          saveCurrentChat(updatedMessages);
-                          return updatedMessages;
-                        });
-                      }
-                      return '';
-                    });
-                    return;
-                  }
-                }
-              } catch (parseError) {
-                console.error('Error parsing streaming data:', parseError);
-              }
-            }
-          }
         }
-      } catch (readError) {
-        if (readError.name === 'AbortError') {
-          console.log('Stream aborted by user');
-          return;
-        }
-        throw readError;
-      }
-      
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Request aborted by user');
-        return;
-      }
-      
-      console.error('Error getting response:', error);
-      alert('Error getting response. Please try again.');
-      setMessages(prev => prev.slice(0, -1));
+        if (error.name !== 'AbortError') {
+            console.error('Error during fetch:', error);
+            const errorMessage = { role: "assistant", content: `Sorry, an error occurred: ${error.message}`};
+            setMessages(prev => [...prev, errorMessage]);
+        }
     } finally {
-      setIsGenerating(false);
-      setIsStreaming(false);
-      setStreamingMessage('');
-      abortControllerRef.current = null;
+        if (isStreaming) {
+           stopStreaming();
+        }
     }
-  };
+};
 
+  const currentModelDetails = models.find(m => m.id === selectedModel);
+  
   return (
-    <div className="h-screen bg-gray-800 text-white flex overflow-hidden">
-      {/* Sidebar */}
-      <div className={`bg-gray-900 border-r border-gray-700 flex flex-col transition-all duration-300 ${
-        sidebarOpen ? 'w-80' : 'w-64'
-      } lg:flex hidden`}>
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-700 mt-10">
-          <button
-            onClick={startNewChat}
-            className="w-full flex items-center space-x-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">New chat</span>
-          </button>
-        </div>
-
-        {/* Chat History */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Recent Chats</h3>
-            <div className="space-y-1">
-              {chatHistory.length > 0 ? (
-                chatHistory.map((chat) => (
-                  <button
-                    key={chat.id}
-                    onClick={() => loadChat(chat)}
-                    className={`w-full text-left px-3 py-2 text-sm rounded cursor-pointer transition-colors ${
-                      currentChatId === chat.id
-                        ? 'bg-gray-700 text-white'
-                        : 'text-gray-300 hover:bg-gray-800'
-                    }`}
-                  >
-                    <div className="truncate">{chat.title}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {new Date(chat.timestamp).toLocaleDateString()} {chat.model && (<span className="ml-2 text-gray-400">{models.find(m => m.id === chat.model)?.name}</span>)}
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="px-3 py-2 text-sm text-gray-500 italic">
-                  No previous chats
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Model Selection */}
-        <div className="p-4 border-t border-gray-700">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">AI Models</h3>
-          <div className="space-y-2">
-            {models.map((model) => {
-              const Icon = model.icon;
-              const isSelected = selectedModel === model.id;
-              
-              return (
-                <button
-                  key={model.id}
-                  onClick={() => !isGenerating && setSelectedModel(model.id)}
-                  disabled={isGenerating}
-                  className={`w-full text-left p-2 rounded-lg transition-colors ${
-                    isSelected
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-300 hover:bg-gray-800'
-                  } ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-6 h-6 bg-gradient-to-r ${model.color} rounded-md flex items-center justify-center`}>
-                      <Icon className="w-3 h-3 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium truncate">{model.name}</div>
-                      <div className="text-xs text-gray-500 truncate">{model.description}</div>
-                    </div>
-                  </div>
+    <div className="h-screen bg-gray-900 text-white flex overflow-hidden font-sans">
+        <div className={`fixed inset-0 bg-gray-900/80 z-40 lg:hidden transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setSidebarOpen(false)}></div>
+        <div className={`fixed top-0 left-0 h-full bg-gray-900 border-r border-gray-700 flex flex-col w-80 z-50 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0 lg:w-80`}>
+            {/* Sidebar Content */}
+            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <Brain className="text-purple-400"/>
+                    RMS AI
+                </h2>
+                <button onClick={() => startNewChat()} className="flex items-center space-x-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
+                    <Plus className="w-4 h-4" />
                 </button>
-              );
-            })}
-          </div>
-
-          {/* Streaming Status */}
-          {isStreaming && (
-            <div className="mt-3 p-2 bg-green-900/20 border border-green-800 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-green-400">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-2"></div>
-                  <span className="text-xs">Streaming...</span>
-                </div>
-                <button
-                  onClick={stopStreaming}
-                  className="text-green-400 hover:text-green-300"
-                >
-                  <Square className="w-3 h-3" />
-                </button>
-              </div>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Mobile Header */}
-        <div className="lg:hidden bg-gray-900 border-b border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-800 rounded-lg"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1 text-sm"
-            >
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={startNewChat}
-              className="p-2 hover:bg-gray-800 rounded-lg"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto pt-8 mt-10">
-          <div className="max-w-4xl mx-auto">
-            {messages.length === 0 && !streamingMessage ? (
-              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
-                  <Wand2 className="w-8 h-8 text-white" />
+             <div className="flex-1 p-2 overflow-y-auto">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Recent Chats</h3>
+                <div className="space-y-1">
+                {chatHistory.map((chat) => (
+                    <div key={chat.id} className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer ${currentChatId === chat.id ? 'bg-gray-700' : 'hover:bg-gray-800'}`}>
+                        <div onClick={() => loadChat(chat)} className="flex-1 truncate pr-2">
+                            <p className="text-sm font-medium text-gray-200 truncate">{chat.title}</p>
+                        </div>
+                        <button onClick={() => deleteChat(chat.id)} className="p-1 rounded-md text-gray-500 hover:text-red-400 hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                ))}
                 </div>
-                <h2 className="text-3xl font-bold mb-4">RMS AI Assistant</h2>
-                <p className="text-gray-400 mb-8 max-w-md">
-                  Choose your AI model and start chatting. Get help with coding, research, or studying.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
-                  {[
-                    "Explain quantum computing",
-                    "Debug my Python code",
-                    "Summarize World War I causes",
-                    "Help with React components"
-                  ].map((example, index) => (
+            </div>
+            {/* Model Selection */}
+            <div className="p-4 border-t border-gray-700">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">AI Models</h3>
+                <div className="space-y-2">
+                {models.map((model) => (
                     <button
-                      key={index}
-                      onClick={() => setInputValue(example)}
-                      className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-left text-sm border border-gray-600 transition-colors"
+                        key={model.id}
+                        onClick={() => setSelectedModel(model.id)}
+                        disabled={isGenerating}
+                        className={`w-full flex items-center text-left p-3 rounded-lg transition-all duration-200 border-2 ${selectedModel === model.id ? 'bg-gray-700 border-purple-500' : 'bg-gray-800 border-transparent hover:bg-gray-700/50'} ${isGenerating ? 'cursor-not-allowed opacity-60' : ''}`}
                     >
-                      {example}
+                        <div className={`w-8 h-8 rounded-md flex items-center justify-center mr-3 flex-shrink-0 bg-gradient-to-br ${model.color}`}>
+                           <model.icon className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-sm text-gray-100">{model.name}</p>
+                            <p className="text-xs text-gray-400">{model.description}</p>
+                        </div>
                     </button>
-                  ))}
+                ))}
                 </div>
+            </div>
+        </div>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col bg-gray-800 relative">
+        {/* Custom Alert */}
+        {alertInfo.show && (
+             <motion.div 
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                className="absolute top-0 left-1/2 -translate-x-1/2 mt-4 z-50"
+             >
+                <div className="flex items-center gap-2 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg border border-red-600">
+                    <AlertCircle className="w-5 h-5" />
+                    <span className="text-sm font-medium">{alertInfo.message}</span>
+                     <button onClick={() => setAlertInfo({ show: false, message: '' })} className="ml-2 opacity-80 hover:opacity-100">&times;</button>
+                </div>
+            </motion.div>
+        )}
+        
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800/80 backdrop-blur-sm z-10">
+            <button className="lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                <Menu className="w-6 h-6"/>
+            </button>
+            <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${currentModelDetails.color}`}>
+                    <currentModelDetails.icon className="w-4 h-4 text-white"/>
+                </div>
+                <span className="font-semibold">{currentModelDetails.name}</span>
+            </div>
+            <div className="w-6"></div> {/* Spacer */}
+        </header>
+
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }} className="w-full">
+                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br ${currentModelDetails.color} mb-6 shadow-lg`}>
+                     <currentModelDetails.icon size={40} className="text-white" />
+                  </div>
+                  <h1 className="text-4xl font-bold mb-2">Welcome to {currentModelDetails.name}</h1>
+                  <p className="text-gray-400 mb-8">{currentModelDetails.description}</p>
+                </motion.div>
               </div>
             ) : (
-              <div className="space-y-8 p-6 pb-20">
-                {messages.map((message, index) => {
-                  const isGLM = message.role === 'assistant' && selectedModel === 'rms-tutor';
-                  return (
-                    <div
-                      key={index}
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-[85%] rounded-2xl p-5 shadow-lg ${
-                        message.role === 'user'
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
-                          : 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-100'
-                      }`}>
-                        <div className="flex items-center mb-3">
-                          {message.role === 'user' ? (
-                            <User className="w-4 h-4 mr-2" />
-                          ) : (
-                            <>
-                              {React.createElement(
-                                models.find(m => m.id === selectedModel)?.icon || Bot,
-                                { className: "w-4 h-4 mr-2" }
-                              )}
-                            </>
-                          )}
-                          <span className="text-sm font-medium opacity-90">
-                            {message.role === 'user' ? 'You' : models.find(m => m.id === selectedModel)?.name}
-                          </span>
+              <div className="space-y-6">
+                {messages.map((msg, index) => (
+                  <div key={index} className={`flex items-start gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                    {msg.role === 'assistant' && (
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${currentModelDetails.color}`}>
+                            <currentModelDetails.icon className="w-5 h-5 text-white"/>
                         </div>
-                        {/* Reasoning block for GLM 4.5 Air */}
-                        {isGLM && (
-                          <div className="mb-2">
-                            <details open>
-                              <summary className="cursor-pointer text-yellow-400 font-semibold">Reasoning (thought for 0.6s)</summary>
-                              <div className="mt-2 text-gray-300 text-sm">
-                                Let me start by welcoming the user and introducing myself as the AI assistant. I should provide a brief overview of what I can help with without going into too much detail at this point. I'll keep my tone friendly and professional.
-                              </div>
-                            </details>
-                          </div>
-                        )}
-                        {/* Actual model response */}
-                        <div className="prose prose-invert max-w-none text-base leading-relaxed">
-                          {formatMessage(message.content, message.role === 'assistant' ? selectedModel : null)}
+                    )}
+                     <div className={`max-w-2xl p-4 rounded-xl ${msg.role === 'user' ? 'bg-purple-600' : 'bg-gray-700'}`}>
+                        {formatMessage(msg.content, msg.role === 'assistant' ? selectedModel : null)}
+                    </div>
+                    {msg.role === 'user' && (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-600 flex-shrink-0">
+                            <User className="w-5 h-5"/>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Streaming Message */}
-                {streamingMessage && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] bg-gradient-to-r from-gray-700 to-gray-600 text-gray-100 rounded-2xl p-5 shadow-lg">
-                      <div className="flex items-center mb-3">
-                        {React.createElement(
-                          models.find(m => m.id === selectedModel)?.icon || Bot,
-                          { className: "w-4 h-4 mr-2" }
-                        )}
-                        <span className="text-sm font-medium opacity-90 flex items-center">
-                          {models.find(m => m.id === selectedModel)?.name}
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse ml-2"></div>
-                        </span>
-                      </div>
-                      <div className="prose prose-invert max-w-none text-base leading-relaxed">
-                        {formatMessage(streamingMessage, selectedModel)}
-                        <span className="inline-block w-2 h-5 bg-gray-400 animate-pulse ml-1"></span>
-                      </div>
-                    </div>
+                    )}
                   </div>
+                ))}
+                {isStreaming && (
+                    <div className="flex items-start gap-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${currentModelDetails.color}`}>
+                            <currentModelDetails.icon className="w-5 h-5 text-white"/>
+                        </div>
+                        <div className="max-w-2xl p-4 rounded-xl bg-gray-700">
+                             {formatMessage(streamingMessage, selectedModel)}
+                             <span className="inline-block w-2 h-4 bg-white animate-pulse ml-1"></span>
+                        </div>
+                    </div>
                 )}
-                
                 <div ref={messagesEndRef} />
               </div>
             )}
@@ -734,49 +618,56 @@ const RMSAI = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-700 p-6">
+        <div className="p-4 border-t border-gray-700 bg-gray-800">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="flex items-center space-x-3">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
+             {isStreaming && (
+                <div className="flex justify-center mb-2">
+                    <button onClick={stopStreaming} className="flex items-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 rounded-lg">
+                        <Square className="w-4 h-4" />
+                        Stop Generating
+                    </button>
+                </div>
+            )}
+            <div className="bg-gray-700 rounded-xl p-2 flex flex-col">
+              {imagePreview && (
+                <div className="p-2 relative group">
+                    <p className="text-xs text-gray-400 mb-1">Image for CiteWise ImageAI:</p>
+                    <img src={imagePreview} alt="upload preview" className="w-24 h-24 object-cover rounded-md"/>
+                    <button onClick={removeImage} className="absolute top-2 left-20 p-1 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X className="w-4 h-4"/>
+                    </button>
+                </div>
+              )}
+              <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-gray-600 transition-colors" title="Upload Image">
+                    <Upload className="w-5 h-5" />
+                </button>
+                <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                <textarea
+                  ref={textareaRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Message RMS AI Assistant..."
-                  className="w-full bg-gray-700 border border-gray-600 rounded-xl px-6 py-4 pr-14 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all"
-                  disabled={isGenerating}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
+                  placeholder={`Message ${currentModelDetails.name}...`}
+                  className="flex-1 bg-transparent resize-none outline-none text-white placeholder-gray-400 max-h-48"
+                  rows={1}
                 />
-                {isStreaming ? (
-                  <button
-                    type="button"
-                    onClick={stopStreaming}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    <Square className="w-5 h-5" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={!inputValue.trim() || isGenerating}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-white" />
-                    ) : (
-                      <Send className="w-5 h-5 text-white" />
-                    )}
-                  </button>
-                )}
-              </div>
-            </form>
-            <p className="text-xs text-gray-500 text-center mt-3">
-              RMS AI can make mistakes. Consider checking important information.
-            </p>
+                <button type="submit" disabled={isGenerating || (!inputValue.trim() && !uploadedImage)} className="p-2 rounded-full bg-purple-600 text-white disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors">
+                  {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
 
 export default RMSAI;
+
