@@ -50,7 +50,7 @@ const MindMapFlashcardGenerator = () => {
             }
           ],
           temperature: 0.2,
-          max_tokens: 3000,
+          max_tokens: 9000,
           top_p: 0.9
         })
       });
@@ -521,35 +521,35 @@ Return only the JSON array, no markdown or extra text.`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-2 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8 pt-8">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-2">
+        <div className="text-center mb-6 sm:mb-8 pt-6 sm:pt-8">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-2">
             🧠 AI Study Materials Generator
           </h1>
-          <p className="text-gray-600 text-lg sm:text-xl">
+          <p className="text-gray-600 text-base sm:text-lg md:text-xl">
             Generate comprehensive mind maps and flashcards instantly
           </p>
         </div>
 
         {/* Topic Input */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-blue-100">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white rounded-2xl shadow-xl p-3 sm:p-6 mb-6 sm:mb-8 border border-blue-100">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <input
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Enter any topic (e.g., Artificial Intelligence, Photosynthesis, Digital Marketing)"
-              className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-lg transition-all"
+              className="flex-1 px-3 py-3 sm:px-6 sm:py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-base sm:text-lg transition-all"
               disabled={loading}
               onKeyPress={(e) => e.key === 'Enter' && !loading && generateMindMap()}
             />
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={generateMindMap}
                 disabled={loading || !topic.trim()}
-                className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all transform hover:scale-105 disabled:transform-none shadow-lg"
+                className="px-4 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all transform hover:scale-105 disabled:transform-none shadow-lg text-sm sm:text-base"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -561,7 +561,7 @@ Return only the JSON array, no markdown or extra text.`;
               <button
                 onClick={generateFlashcards}
                 disabled={loading || !topic.trim()}
-                className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all transform hover:scale-105 disabled:transform-none shadow-lg"
+                className="px-4 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all transform hover:scale-105 disabled:transform-none shadow-lg text-sm sm:text-base"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -574,7 +574,7 @@ Return only the JSON array, no markdown or extra text.`;
           </div>
           
           {(mindMapData || flashcards.length > 0) && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
               <button
                 onClick={resetAll}
                 className="text-gray-600 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors"
@@ -588,7 +588,7 @@ Return only the JSON array, no markdown or extra text.`;
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-2 sm:gap-3">
             <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-red-700 font-medium">{error}</p>
@@ -604,7 +604,7 @@ Return only the JSON array, no markdown or extra text.`;
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-2xl shadow-xl p-12 text-center mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-12 text-center mb-6 sm:mb-8">
             <div className="flex flex-col items-center">
               <Loader2 className="h-16 w-16 animate-spin text-blue-600 mb-6" />
               <h3 className="text-2xl font-bold text-gray-800 mb-2">Generating Content...</h3>
@@ -618,16 +618,16 @@ Return only the JSON array, no markdown or extra text.`;
 
         {/* Mind Map Results */}
         {mindMapData && (
-          <div className="bg-white rounded-2xl shadow-xl mb-8 overflow-hidden border border-blue-100">
-            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+          <div className="bg-white rounded-2xl shadow-xl mb-6 sm:mb-8 overflow-hidden border border-blue-100">
+            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                <h3 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
                   <Brain className="h-8 w-8" />
                   Mind Map: {mindMapData.title}
                 </h3>
                 <button
                   onClick={downloadMindMapAsImage}
-                  className="bg-white text-blue-700 px-6 py-3 rounded-xl hover:bg-blue-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg"
+                  className="bg-white text-blue-700 px-4 py-2 sm:px-6 sm:py-3 rounded-xl hover:bg-blue-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg text-sm sm:text-base"
                 >
                   <Download className="h-5 w-5" />
                   Download PNG
@@ -635,15 +635,14 @@ Return only the JSON array, no markdown or extra text.`;
               </div>
             </div>
             
-            <div ref={mindMapRef} className="p-8">
-              <div className="text-center mb-10">
-                <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">{mindMapData.title}</h2>
-                <div className="w-32 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
-                <p className="text-gray-600 mt-3 text-lg">Learning Roadmap & Study Guide</p>
+            <div ref={mindMapRef} className="p-4 sm:p-8">
+              <div className="text-center mb-6 sm:mb-10">
+                <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">{mindMapData.title}</h2>
+                <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
+                <p className="text-gray-600 mt-2 sm:mt-3 text-base sm:text-lg">Learning Roadmap & Study Guide</p>
               </div>
-              
               {/* Mind Map Branches */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {mindMapData.mainBranches.map((branch, index) => (
                   <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-6 border-2 border-blue-200 hover:border-blue-300 transition-all transform hover:scale-105 hover:shadow-lg">
                     <div className="flex items-center mb-4">
@@ -682,24 +681,24 @@ Return only the JSON array, no markdown or extra text.`;
 
         {/* Flashcards Results */}
         {flashcards.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-indigo-100">
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-indigo-100 mb-6 sm:mb-8">
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                <h3 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
                   <BookOpen className="h-8 w-8" />
                   Flashcards: {topic} ({flashcards.length} cards)
                 </h3>
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     onClick={downloadFlashcardsAsTxt}
-                    className="bg-white text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg"
+                    className="bg-white text-indigo-700 px-2 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-indigo-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg text-xs sm:text-base"
                   >
                     <Download className="h-4 w-4" />
                     TXT
                   </button>
                   <button
                     onClick={downloadFlashcardsAsCSV}
-                    className="bg-white text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg"
+                    className="bg-white text-indigo-700 px-2 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-indigo-50 flex items-center gap-2 font-semibold transition-all transform hover:scale-105 shadow-lg text-xs sm:text-base"
                   >
                     <Download className="h-4 w-4" />
                     CSV
@@ -708,10 +707,10 @@ Return only the JSON array, no markdown or extra text.`;
               </div>
             </div>
             
-            <div ref={flashcardsRef} className="p-8">
+            <div ref={flashcardsRef} className="p-4 sm:p-8">
               {/* Category Overview */}
-              <div className="mb-8 text-center">
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 max-w-4xl mx-auto">
+              <div className="mb-6 sm:mb-8 text-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1 sm:gap-2 max-w-4xl mx-auto">
                   {[...new Set(flashcards.map(card => card.category))].map((category, index) => (
                     <div key={category} className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg px-3 py-2 text-xs font-semibold text-indigo-700 border border-indigo-200">
                       {category}
@@ -721,7 +720,7 @@ Return only the JSON array, no markdown or extra text.`;
               </div>
 
               {/* Flashcards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {flashcards.map((card) => (
                   <div key={card.id} className="perspective-1000">
                     <div 
@@ -765,11 +764,11 @@ Return only the JSON array, no markdown or extra text.`;
               </div>
 
               {/* Study Tips */}
-              <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
-                <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-blue-200">
+                <h4 className="text-base sm:text-lg font-bold text-gray-800 mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2">
                   📚 Study Tips
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-700">
                   <div>• Review cards in order: Fundamentals → Advanced</div>
                   <div>• Spend extra time on cards you get wrong</div>
                   <div>• Practice active recall before flipping</div>
@@ -781,8 +780,8 @@ Return only the JSON array, no markdown or extra text.`;
         )}
 
         {/* Footer */}
-        <div className="text-center py-8 text-gray-500">
-          <p className="text-sm">🚀 Powered by Advanced AI • Generate unlimited study materials instantly</p>
+        <div className="text-center py-6 sm:py-8 text-gray-500">
+          <p className="text-xs sm:text-sm">🚀 Powered by Advanced AI • Generate unlimited study materials instantly</p>
         </div>
       </div>
 

@@ -288,7 +288,7 @@ const InterviewPrepPlatform = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       <Toaster position="top-center" />
       <VerificationModal />
 
@@ -299,21 +299,21 @@ const InterviewPrepPlatform = () => {
       </div>
 
       <div className="relative z-10">
-        <header className="px-6 py-16">
+        <header className="px-2 sm:px-6 py-10 sm:py-16">
           <div className="max-w-7xl mx-auto text-center">
-            <div className="flex items-center justify-center space-x-4 mb-8">
-              <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+              <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg mb-4 sm:mb-0">
                 <Brain className="w-10 h-10 text-white" />
               </div>
-              <div className="text-left">
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              <div className="text-center sm:text-left">
+                <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                   Interview Prep Pro
                 </h1>
-                <p className="text-gray-600 text-xl mt-2">AI-Powered Deep Research & Roadmap Generator</p>
+                <p className="text-gray-600 text-lg sm:text-xl mt-2">AI-Powered Deep Research & Roadmap Generator</p>
               </div>
             </div>
             <div className="max-w-3xl mx-auto">
-              <p className="text-gray-700 text-lg leading-relaxed">
+              <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
                 Get personalized interview preparation roadmaps with deep company insights, role-specific guidance, 
                 and comprehensive study plans powered by advanced AI research.
               </p>
@@ -321,16 +321,16 @@ const InterviewPrepPlatform = () => {
           </div>
         </header>
 
-        <div className="max-w-7xl mx-auto px-6 pb-16">
-          <div className="mb-16">
-            <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Start Your Interview Preparation Journey</h2>
-                <p className="text-gray-600">Enter your target company and role to get a personalized research roadmap</p>
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 pb-10 sm:pb-16">
+          <div className="mb-10 sm:mb-16">
+            <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">Start Your Interview Preparation Journey</h2>
+                <p className="text-gray-600 text-base sm:text-lg">Enter your target company and role to get a personalized research roadmap</p>
               </div>
-              
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                <div className="space-y-3">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
+                <div className="space-y-2 sm:space-y-3">
                   <label className="flex items-center text-gray-700 font-semibold text-sm uppercase tracking-wider">
                     <Building2 className="w-5 h-5 mr-2 text-blue-500" />
                     Company Name
@@ -341,11 +341,11 @@ const InterviewPrepPlatform = () => {
                     value={formData.companyName}
                     onChange={handleInputChange}
                     placeholder="e.g., Google, Microsoft, Amazon, Tesla"
-                    className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base"
                   />
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <label className="flex items-center text-gray-700 font-semibold text-sm uppercase tracking-wider">
                     <Briefcase className="w-5 h-5 mr-2 text-purple-500" />
                     Job Role/Position
@@ -356,12 +356,12 @@ const InterviewPrepPlatform = () => {
                     value={formData.jobRole}
                     onChange={handleInputChange}
                     placeholder="e.g., Software Engineer, Product Manager"
-                    className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 text-base"
                   />
                 </div>
               </div>
 
-              <div className="space-y-3 mb-10">
+              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-10">
                 <label className="flex items-center text-gray-700 font-semibold text-sm uppercase tracking-wider">
                   <FileText className="w-5 h-5 mr-2 text-indigo-500" />
                   Job Description (Optional)
@@ -371,15 +371,15 @@ const InterviewPrepPlatform = () => {
                   value={formData.jobDescription}
                   onChange={handleInputChange}
                   placeholder="Paste the job description here for more targeted insights..."
-                  rows="5"
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none"
+                  rows="4"
+                  className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none text-base"
                 />
               </div>
 
               <button
                 onClick={generateRoadmap}
                 disabled={isGenerating}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-5 px-8 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-4 text-lg"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 sm:py-5 px-6 sm:px-8 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 sm:gap-4 text-base sm:text-lg"
               >
                 {isGenerating ? (
                   <>
@@ -394,7 +394,7 @@ const InterviewPrepPlatform = () => {
                 )}
               </button>
               {!isPremium && (
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">
                   You have {Math.max(0, FREE_LIMIT - usageCount)} free generation remaining.
                 </p>
               )}
@@ -402,10 +402,10 @@ const InterviewPrepPlatform = () => {
           </div>
 
           {roadmap && (
-            <div className="space-y-10">
+            <div className="space-y-8 sm:space-y-10">
               {/* Company Overview */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl mr-4">
                     <Building2 className="w-8 h-8 text-white" />
                   </div>
@@ -414,7 +414,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Deep insights about {roadmap.companyOverview.name}</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                   <div className="bg-blue-50 rounded-2xl p-6 border-l-4 border-blue-500">
                     <p className="text-blue-600 text-sm font-bold uppercase tracking-wider mb-2">Industry</p>
                     <p className="text-gray-800 font-semibold text-lg">{roadmap.companyOverview.industry}</p>
@@ -435,8 +435,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Role Analysis */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl mr-4">
                     <Target className="w-8 h-8 text-white" />
                   </div>
@@ -445,7 +445,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Everything about the {roadmap.roleAnalysis.title} position</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
                   <div className="space-y-6">
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
                       <p className="text-purple-600 text-sm font-bold uppercase tracking-wider mb-2">Experience Level</p>
@@ -476,8 +476,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Basic Topics */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl mr-4">
                     <CheckCircle className="w-8 h-8 text-white" />
                   </div>
@@ -486,7 +486,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Core topics you must master before the interview</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
                   {roadmap.basicTopics.map((section, index) => (
                     <div key={index} className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-200">
                       <h3 className="text-xl font-bold text-green-700 mb-6 flex items-center">
@@ -507,8 +507,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Advanced Topics */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl mr-4">
                     <Star className="w-8 h-8 text-white" />
                   </div>
@@ -517,7 +517,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Cutting-edge skills to set you apart from other candidates</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
                   {roadmap.advancedTopics.map((section, index) => (
                     <div key={index} className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border border-yellow-200">
                       <h3 className="text-xl font-bold text-orange-700 mb-6 flex items-center">
@@ -538,8 +538,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Interview Focus */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl mr-4">
                     <Users className="w-8 h-8 text-white" />
                   </div>
@@ -548,7 +548,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">What to expect and prepare for in your actual interviews</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {roadmap.interviewFocus.map((focus, index) => (
                     <div key={index} className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-xl p-6 hover:shadow-lg transition-shadow duration-200">
                       <div className="flex items-start">
@@ -563,8 +563,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Preparation Timeline */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl mr-4">
                     <Clock className="w-8 h-8 text-white" />
                   </div>
@@ -573,7 +573,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Structured timeline to maximize your interview success</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
                   {Object.entries(roadmap.preparationPlan).map(([week, plan], index) => (
                     <div key={index} className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-2xl p-8 hover:shadow-lg transition-shadow duration-200">
                       <div className="flex items-center mb-4">
@@ -589,8 +589,8 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Key Insights */}
-              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-10 border border-gray-200 shadow-xl">
-                <div className="flex items-center mb-8">
+              <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-4 sm:p-10 border border-gray-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-8 gap-4">
                   <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl mr-4">
                     <Award className="w-8 h-8 text-white" />
                   </div>
@@ -599,7 +599,7 @@ const InterviewPrepPlatform = () => {
                     <p className="text-gray-600 mt-1">Critical factors that will make you stand out as a candidate</p>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {roadmap.keyInsights.map((insight, index) => (
                     <div key={index} className="flex items-start space-x-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
                       <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -612,7 +612,7 @@ const InterviewPrepPlatform = () => {
               </div>
 
               {/* Success Tips */}
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-10 text-white shadow-xl">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-4 sm:p-10 text-white shadow-xl">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
                     <TrendingUp className="w-8 h-8 text-white" />
@@ -622,14 +622,14 @@ const InterviewPrepPlatform = () => {
                     With this comprehensive roadmap, you have everything you need to prepare thoroughly and confidently. 
                     Remember to practice consistently, stay curious, and showcase your unique value proposition during the interview.
                   </p>
-                  <div className="mt-8 flex flex-wrap justify-center gap-4">
-                    <div className="bg-white/20 rounded-full px-6 py-3">
+                  <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-4">
+                    <div className="bg-white/20 rounded-full px-4 py-2 sm:px-6 sm:py-3">
                       <span className="font-semibold">✨ Deep Research Complete</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-6 py-3">
+                    <div className="bg-white/20 rounded-full px-4 py-2 sm:px-6 sm:py-3">
                       <span className="font-semibold">🎯 Role-Specific Guidance</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-6 py-3">
+                    <div className="bg-white/20 rounded-full px-4 py-2 sm:px-6 sm:py-3">
                       <span className="font-semibold">📚 Structured Learning Path</span>
                     </div>
                   </div>

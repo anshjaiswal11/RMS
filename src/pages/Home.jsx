@@ -59,9 +59,9 @@ const Footer = () => {
 
   return (
     <footer className="bg-white dark:bg-secondary-900 border-t border-secondary-200 dark:border-secondary-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          <div className="col-span-2 lg:col-span-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          <div className="col-span-1 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
@@ -108,7 +108,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-secondary-200 dark:border-secondary-800 flex flex-col sm:flex-row justify-between items-center">
+  <div className="mt-8 pt-8 border-t border-secondary-200 dark:border-secondary-800 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-secondary-600 dark:text-secondary-400 text-sm">
             &copy; {new Date().getFullYear()} CiteWise. All Rights Reserved.
           </p>
@@ -251,7 +251,7 @@ const Home = () => {
 
       <div className="pt-16">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700"></div>
           <div className="absolute inset-0 bg-black/20"></div>
           
@@ -269,7 +269,7 @@ const Home = () => {
             />
           </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -285,7 +285,7 @@ const Home = () => {
                 Elevate your learning with AI-powered tools. Summarize PDFs, streamline research, 
                 and generate personalized tests to achieve academic excellence.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-xl mx-auto">
                 <a
                   href="/ai-summarizer"
                   className="btn-primary text-lg px-8 py-4 flex items-center justify-center space-x-2 group"
@@ -305,9 +305,9 @@ const Home = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 bg-white dark:bg-secondary-800">
+  <section className="py-16 bg-white dark:bg-secondary-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
@@ -332,7 +332,7 @@ const Home = () => {
         </section>
 
         {/* --- NEW AI WORKFLOWS SECTION --- */}
-        <section className="py-20 bg-secondary-50 dark:bg-secondary-900">
+  <section className="py-16 bg-secondary-50 dark:bg-secondary-900">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -349,7 +349,7 @@ const Home = () => {
                     </p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {aiWorkflows.map((workflow, index) => {
                         const Icon = workflow.icon;
                         return (
@@ -379,7 +379,7 @@ const Home = () => {
         </section>
 
         {/* Benefits Section (Formerly "Why Choose RMS?") */}
-        <section className="py-20 bg-white dark:bg-secondary-800">
+  <section className="py-16 bg-white dark:bg-secondary-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-1 gap-12 items-center">
               <motion.div
@@ -395,7 +395,7 @@ const Home = () => {
                   Our platform combines the power of AI with comprehensive study resources to give you 
                   the best possible preparation for your academic journey.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                   {benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -409,8 +409,8 @@ const Home = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+  <section className="py-16 bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700">
+          <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}

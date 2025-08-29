@@ -602,7 +602,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
 
   // Render different tabs
   const renderSetupTab = () => (
-    <div className="max-w-4xl mx-auto space-y-8">
+  <div className="max-w-4xl mx-auto space-y-8 px-2 sm:px-4">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           AI-Powered Career Optimization Platform
@@ -619,14 +619,14 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
       </div>
 
       {/* File Upload */}
-      <div className="bg-white rounded-xl shadow-lg p-8">
+  <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
           <Upload className="h-6 w-6 text-blue-600" />
           <h2 className="text-2xl font-semibold text-gray-900">Upload Your Resume</h2>
         </div>
         
         <div 
-          className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-400 transition-colors cursor-pointer"
+          className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-12 text-center hover:border-blue-400 transition-colors cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
         >
           <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -654,7 +654,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
       </div>
 
       {/* Job Description */}
-      <div className="bg-white rounded-xl shadow-lg p-8">
+  <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
           <Target className="h-6 w-6 text-blue-600" />
           <h2 className="text-2xl font-semibold text-gray-900">Target Job Description</h2>
@@ -664,8 +664,8 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="Paste the complete job description here. Include requirements, responsibilities, and qualifications for best results..."
-          rows={12}
-          className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          rows={8}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-base"
         />
         
         {jobDescription && (
@@ -693,7 +693,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         <button
           onClick={handleAnalyze}
           disabled={isAnalyzing || !resumeFile || !jobDescription}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold py-4 px-12 rounded-lg text-lg transition-all inline-flex items-center gap-3 shadow-lg"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold py-3 px-6 sm:py-4 sm:px-12 rounded-lg text-base sm:text-lg transition-all inline-flex items-center gap-3 shadow-lg w-full sm:w-auto"
         >
           {isAnalyzing ? (
             <>
@@ -719,9 +719,9 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
     if (!analysis) return null;
 
     return (
-      <div className="max-w-7xl mx-auto space-y-8">
+  <div className="max-w-7xl mx-auto space-y-8 px-2 sm:px-6">
         {/* Header with key scores */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
+  <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-8 text-white">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Career Analysis Dashboard</h1>
@@ -757,7 +757,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             <ScoreCircle score={analysis.overallScore} label="Overall Match" color="white" />
             <ScoreCircle score={analysis.atsScore} label="ATS Score" color="white" />
             <ScoreCircle score={analysis.matchPercentage} label="Skill Match" color="white" />
@@ -769,7 +769,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => setActiveTab('resume')}>
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -819,7 +819,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         </div>
 
         {/* Key Strengths and Critical Gaps */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-4">
               <Star className="h-6 w-6 text-green-600" />
@@ -910,7 +910,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         </div>
 
         {/* Career Path and Market Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-4">
               <TrendingUp className="h-6 w-6 text-indigo-600" />
@@ -990,7 +990,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
               <Award className="h-6 w-6 text-orange-600" />
               <h3 className="text-xl font-semibold">Recommended Certifications</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {analysis.certificationRecommendations.map((cert, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-2">
@@ -1052,9 +1052,9 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
     }
 
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+  <div className="max-w-5xl mx-auto space-y-6 px-2 sm:px-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-8 text-white">
+  <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-4 sm:p-8 text-white">
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-bold mb-2">Tailored Resume</h1>
@@ -1077,12 +1077,12 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         </div>
 
         {/* ATS Optimization Metrics */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+  <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <BarChart3 className="h-6 w-6 text-blue-600" />
             <h3 className="text-xl font-semibold">ATS Optimization Metrics</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <div className="text-2xl font-bold text-green-600 mb-1">
                 {tailoredResume.atsOptimizations?.keywordsDensity || 'N/A'}
@@ -1105,7 +1105,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
         </div>
 
         {/* Resume Content */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+  <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gray-50 px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Optimized Resume</h3>
@@ -1116,7 +1116,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
             </div>
           </div>
           
-          <div className="p-8 space-y-8">
+          <div className="p-4 sm:p-8 space-y-8">
             {/* Personal Info */}
             <div className="text-center border-b pb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -1177,7 +1177,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
               <div className="space-y-6">
                 {tailoredResume.professionalExperience.map((exp, index) => (
                   <div key={index} className="border-l-2 border-blue-200 pl-4">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
                       <div>
                         <h4 className="font-semibold text-gray-900">{exp.title}</h4>
                         <p className="text-blue-600 font-medium">{exp.company}</p>
@@ -1243,7 +1243,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
               </h3>
               <div className="space-y-2">
                 {tailoredResume.education.map((edu, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row sm:justify-between">
+                  <div key={index} className="flex flex-col sm:flex-row sm:justify-between gap-2">
                     <div>
                       <p className="font-medium text-gray-900">{edu.degree}</p>
                       <p className="text-gray-600">{edu.institution}</p>
@@ -1281,7 +1281,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
 
         {/* Optimization Details */}
         {tailoredResume.atsOptimizations?.improvementsMade && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
               <Lightbulb className="h-6 w-6 text-yellow-600" />
               <h3 className="text-xl font-semibold">ATS Optimizations Applied</h3>
@@ -1653,22 +1653,21 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
 
   // Main render
   return (
-    <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between h-auto sm:h-16 gap-2 sm:gap-0">
+            <div className="flex items-center py-2 sm:py-0">
               <div className="flex items-center gap-2">
                 <Brain className="h-8 w-8 text-blue-600" />
                 <h1 className="text-xl font-bold text-gray-900">Career AI Pro</h1>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-8">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-8 py-2 sm:py-0">
               <button
                 onClick={() => setActiveTab('setup')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === 'setup' 
                     ? 'bg-blue-100 text-blue-700' 
                     : 'text-gray-600 hover:text-gray-900'
@@ -1676,12 +1675,11 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
               >
                 Setup
               </button>
-              
               {analysis && (
                 <>
                   <button
                     onClick={() => setActiveTab('dashboard')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-lg font-medium transition-colors ${
                       activeTab === 'dashboard' 
                         ? 'bg-blue-100 text-blue-700' 
                         : 'text-gray-600 hover:text-gray-900'
@@ -1689,10 +1687,9 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
                   >
                     Dashboard
                   </button>
-                  
                   <button
                     onClick={() => setActiveTab('resume')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-lg font-medium transition-colors ${
                       activeTab === 'resume' 
                         ? 'bg-blue-100 text-blue-700' 
                         : 'text-gray-600 hover:text-gray-900'
@@ -1700,10 +1697,9 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
                   >
                     Resume
                   </button>
-                  
                   <button
                     onClick={() => setActiveTab('projects')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-lg font-medium transition-colors ${
                       activeTab === 'projects' 
                         ? 'bg-blue-100 text-blue-700' 
                         : 'text-gray-600 hover:text-gray-900'
@@ -1711,10 +1707,9 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
                   >
                     Projects
                   </button>
-                  
                   <button
                     onClick={() => setActiveTab('interview')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-lg font-medium transition-colors ${
                       activeTab === 'interview' 
                         ? 'bg-blue-100 text-blue-700' 
                         : 'text-gray-600 hover:text-gray-900'
@@ -1730,7 +1725,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
       </nav>
 
       {/* Main Content */}
-      <main className="py-8 px-4 sm:px-6 lg:px-8">
+  <main className="py-6 px-2 sm:px-6 lg:px-8">
         {activeTab === 'setup' && renderSetupTab()}
         {activeTab === 'dashboard' && renderDashboard()}
         {activeTab === 'resume' && renderResumeTab()}
@@ -1741,7 +1736,7 @@ Keywords Density: ${resume.atsOptimizations.keywordsDensity}`;
       {/* Loading Overlay */}
       {isAnalyzing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+          <div className="bg-white rounded-xl p-4 sm:p-8 max-w-md w-full mx-2 sm:mx-4">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">

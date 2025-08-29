@@ -787,32 +787,30 @@ Please help with this request:`;
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      
       <LivePreview 
         files={files} 
         isVisible={showPreview} 
         onClose={() => setShowPreview(false)} 
       />
-      
       <header className="sticky top-0 z-40 backdrop-blur-lg bg-gray-900/95 border-b border-gray-800">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-<div className="flex items-center space-x-4 mt-10">
-  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
-    <Sparkles className="w-6 h-6 text-white" />
-  </div>
-  <div>
-    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-      Agentic AI Code Generator
-    </h1>
-    <p className="text-xs text-gray-400">Intelligent code generation with real-time updates</p>
-  </div>
-</div>
-            <div className="flex items-center space-x-3">
+        <div className="max-w-screen-2xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
+            <div className="flex items-center space-x-2 sm:space-x-4 mt-6 sm:mt-10">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  Agentic AI Code Generator
+                </h1>
+                <p className="text-xs text-gray-400">Intelligent code generation with real-time updates</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-3 mt-2 sm:mt-0">
               {projectGenerated && canPreview && (
                 <button 
                   onClick={() => setShowPreview(true)} 
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2 text-sm shadow-lg hover:shadow-xl"
+                  className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2 text-xs sm:text-sm shadow-lg hover:shadow-xl"
                 >
                   <Eye className="w-4 h-4" />
                   <span>Live Preview</span>
@@ -821,7 +819,7 @@ Please help with this request:`;
               {projectGenerated && (
                 <button 
                   onClick={resetProject} 
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-all duration-200 flex items-center space-x-2 text-sm"
+                  className="px-3 sm:px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-all duration-200 flex items-center space-x-2 text-xs sm:text-sm"
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>New Project</span>
@@ -853,108 +851,106 @@ Please help with this request:`;
 
       {showSettings && (
         <div className="border-b border-gray-800 bg-gray-900/50">
-          <div className="max-w-screen-2xl mx-auto px-6 py-4">
+          <div className="max-w-screen-2xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">Project Name</label>
             <input 
               type="text" 
               value={projectName} 
               onChange={(e) => setProjectName(e.target.value)} 
-              className="w-full max-w-sm bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-blue-500 outline-none transition-all" 
+              className="w-full max-w-xs sm:max-w-sm bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-blue-500 outline-none transition-all" 
             />
           </div>
         </div>
       )}
 
-      <main className={`${showSettings ? 'h-[calc(100vh-130px)]' : 'h-[calc(100vh-81px)]'} flex overflow-hidden`}>
+      <main className={`${showSettings ? 'h-[calc(100vh-130px)]' : 'h-[calc(100vh-81px)]'} flex flex-col sm:flex-row overflow-hidden`}>
         {!projectGenerated ? (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="max-w-5xl w-full space-y-10 text-center">
-                <div className="space-y-4">
-                  <h2 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+            <div className="max-w-2xl sm:max-w-5xl w-full space-y-6 sm:space-y-10 text-center">
+                <div className="space-y-2 sm:space-y-4">
+                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
                     Build Your 
                     <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> Dream Project</span>
                   </h2>
-                  <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                  <p className="text-base sm:text-xl text-gray-400 max-w-lg sm:max-w-3xl mx-auto">
                     Describe your idea and watch as our agentic AI creates, fixes, and enhances your code in real-time. 
                     Full project generation with intelligent file updates.
                   </p>
                 </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 max-w-xs sm:max-w-4xl mx-auto">
                     {languages.slice(0, 5).map(lang => (
                         <div 
                           key={lang.id} 
                           onClick={() => setSelectedLanguage(lang.id)} 
-                          className={`group p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
+                          className={`group p-2 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
                             selectedLanguage === lang.id 
                               ? 'border-blue-500 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 shadow-lg shadow-blue-500/25' 
                               : 'border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800/70'
                           }`}
                         >
-                            <div className="flex flex-col items-center space-y-3">
-                                <span className="text-3xl group-hover:scale-110 transition-transform">{lang.icon}</span>
-                                <div className={`font-semibold text-sm ${lang.color}`}>{lang.name}</div>
+                            <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+                                <span className="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">{lang.icon}</span>
+                                <div className={`font-semibold text-xs sm:text-sm ${lang.color}`}>{lang.name}</div>
                                 <p className="text-xs text-gray-500 text-center">{lang.description}</p>
                             </div>
                         </div>
                     ))}
                 </div>
-
-                <div className="relative max-w-3xl mx-auto">
+                <div className="relative max-w-xs sm:max-w-3xl mx-auto">
                     <div className="relative">
                       <textarea 
                         value={idea} 
                         onChange={(e) => setIdea(e.target.value)} 
                         placeholder={`e.g., "A task management app with drag & drop, user authentication, dark mode, and real-time collaboration features"`}
-                        className="w-full bg-gray-800/50 backdrop-blur text-white p-6 pr-40 rounded-2xl border-2 border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none text-lg leading-relaxed shadow-xl"
+                        className="w-full bg-gray-800/50 backdrop-blur text-white p-4 sm:p-6 pr-20 sm:pr-40 rounded-2xl border-2 border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none text-base sm:text-lg leading-relaxed shadow-xl"
                         rows={4}
                       />
                       <button 
                         onClick={generateCode} 
                         disabled={isGenerating || !idea.trim()} 
-                        className="absolute right-4 top-1/2 -translate-y-1/2 px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-3 shadow-lg"
+                        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 px-4 sm:px-8 py-2 sm:py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2 sm:space-x-3 shadow-lg"
                       >
                         {isGenerating ? (
                           <>
-                            <Loader className="w-6 h-6 animate-spin" />
+                            <Loader className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
                             <span>Generating...</span>
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-6 h-6" />
+                            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
                             <span>Generate Code</span>
                           </>
                         )}
                       </button>
                     </div>
-                    <p className="text-sm text-gray-500 mt-3">
+                    <p className="text-xs sm:text-sm text-gray-500 mt-2 sm:mt-3">
                       Be specific about features, styling, and functionality you want. The AI will create a complete project structure.
                     </p>
                 </div>
             </div>
           </div>
         ) : (
-          <div className="flex flex-1 overflow-hidden p-6 gap-6">
+          <div className="flex flex-col sm:flex-row flex-1 overflow-hidden p-2 sm:p-6 gap-2 sm:gap-6">
             {/* Enhanced File Explorer */}
-            <div className="w-80 bg-gray-900/95 backdrop-blur border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl">
-                <div className="p-5 border-b border-gray-800">
-                    <h3 className="text-lg font-semibold text-white">{projectInfo?.name || 'Project Files'}</h3>
-                    <p className="text-sm text-gray-400 mt-1 line-clamp-2">{projectInfo?.description}</p>
-                    <div className="flex flex-wrap gap-1 mt-3">
+            <div className="w-44 sm:w-80 bg-gray-900/95 backdrop-blur border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl mb-2 sm:mb-0">
+                <div className="p-3 sm:p-5 border-b border-gray-800">
+                    <h3 className="text-base sm:text-lg font-semibold text-white">{projectInfo?.name || 'Project Files'}</h3>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">{projectInfo?.description}</p>
+                    <div className="flex flex-wrap gap-1 mt-2 sm:mt-3">
                       {projectInfo?.technologies?.slice(0, 3).map((tech, i) => (
                         <span key={i} className="px-2 py-1 bg-gray-700 text-xs rounded-md text-gray-300">{tech}</span>
                       ))}
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">
+                    <div className="text-xs text-gray-500 mt-1 sm:mt-2">
                       {files.length} files • {isUpdatingFiles ? 'Updating...' : 'Ready'}
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-1">
                     {files.map(file => (
                         <button 
                           key={file.name} 
                           onClick={() => setActiveFile(file)} 
-                          className={`w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition-all duration-200 ${
+                          className={`w-full text-left px-2 sm:px-4 py-2 sm:py-3 rounded-lg flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm transition-all duration-200 ${
                             activeFile?.name === file.name 
                               ? 'bg-blue-500/20 text-white border border-blue-500/30' 
                               : 'hover:bg-gray-800 text-gray-300'
@@ -971,24 +967,23 @@ Please help with this request:`;
                         </button>
                     ))}
                 </div>
-                <div className="p-4 border-t border-gray-800 space-y-3">
+                <div className="p-2 sm:p-4 border-t border-gray-800 space-y-2 sm:space-y-3">
                   <button 
                     onClick={downloadProject} 
                     disabled={isDownloading} 
-                    className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                    className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center space-x-2 disabled:opacity-50 text-xs sm:text-base"
                   >
-                    {isDownloading ? <Loader className="w-5 h-5 animate-spin"/> : <Download className="w-5 h-5" />}
+                    {isDownloading ? <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin"/> : <Download className="w-4 h-4 sm:w-5 sm:h-5" />}
                     <span>{isDownloading ? 'Creating Archive...' : 'Download ZIP'}</span>
                   </button>
                 </div>
             </div>
-
             {/* Enhanced Code Editor */}
             <div className="flex-1 flex flex-col bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
                 {activeFile ? (
                     <>
-                        <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur">
-                            <div className="flex items-center space-x-3 text-sm">
+                        <div className="flex items-center justify-between p-2 sm:p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur">
+                            <div className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm">
                                 <FileIcon filename={activeFile.name} />
                                 <span className="font-medium">{activeFile.name}</span>
                                 <span className="text-xs bg-gray-700 px-2 py-1 rounded text-gray-400">
@@ -1000,7 +995,7 @@ Please help with this request:`;
                                   </span>
                                 )}
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1 sm:space-x-2">
                                 <button 
                                   onClick={() => { 
                                     navigator.clipboard.writeText(activeFile.content); 
@@ -1025,28 +1020,27 @@ Please help with this request:`;
                     </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-900/20">
-                    <div className="text-center space-y-3">
-                      <FileText className="w-16 h-16 mx-auto opacity-50" />
-                      <p className="text-lg">Select a file to view and edit</p>
-                      <p className="text-sm">Choose from the file explorer on the left</p>
+                    <div className="text-center space-y-2 sm:space-y-3">
+                      <FileText className="w-10 h-10 sm:w-16 sm:h-16 mx-auto opacity-50" />
+                      <p className="text-base sm:text-lg">Select a file to view and edit</p>
+                      <p className="text-xs sm:text-sm">Choose from the file explorer on the left</p>
                     </div>
                   </div>
                 )}
             </div>
-
             {/* Enhanced Agentic Chat Panel */}
-            <div className={`fixed top-0 right-0 h-full w-96 bg-gray-900/98 backdrop-blur-xl border-l border-gray-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out z-30 ${
+            <div className={`fixed top-0 right-0 h-full w-72 sm:w-96 bg-gray-900/98 backdrop-blur-xl border-l border-gray-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out z-30 ${
               isChatVisible ? 'translate-x-0' : 'translate-x-full'
             }`}>
-                <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/80">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                <div className="flex items-center justify-between p-2 sm:p-4 border-b border-gray-800 bg-gray-900/80">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
                         isUpdatingFiles ? 'bg-orange-500 animate-pulse' : 'bg-blue-500'
                       }`}>
                         {isUpdatingFiles ? <Edit3 className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-base sm:text-lg font-semibold">
                           {isUpdatingFiles ? 'Updating Files...' : 'Agentic AI Assistant'}
                         </h3>
                         <p className="text-xs text-gray-400">
@@ -1061,44 +1055,42 @@ Please help with this request:`;
                       <X className="w-5 h-5" />
                     </button>
                 </div>
-                
-                <div className="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-700">
+                <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-2 sm:space-y-4 scrollbar-thin scrollbar-thumb-gray-700">
                     {chatMessages.map(msg => (
-                        <div key={msg.id} className={`flex items-start space-x-3 ${msg.type === 'user' ? 'justify-end' : ''}`}>
+                        <div key={msg.id} className={`flex items-start space-x-2 sm:space-x-3 ${msg.type === 'user' ? 'justify-end' : ''}`}>
                             {msg.type === 'bot' && (
-                              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
                                 <Bot className="w-4 h-4 text-white"/>
                               </div>
                             )}
-                            <div className={`p-4 rounded-xl max-w-xs text-sm shadow-lg ${
+                            <div className={`p-2 sm:p-4 rounded-xl max-w-xs text-xs sm:text-sm shadow-lg ${
                               msg.type === 'user' 
                                 ? 'bg-blue-600 text-white rounded-tr-sm' 
                                 : 'bg-gray-800 text-gray-100 rounded-tl-sm border border-gray-700'
                             }`}>
-                                <div className="prose prose-sm prose-invert" dangerouslySetInnerHTML={renderMarkdown(msg.message)} />
+                                <div className="prose prose-xs sm:prose-sm prose-invert" dangerouslySetInnerHTML={renderMarkdown(msg.message)} />
                                 {msg.fileUpdates > 0 && (
-                                  <div className="mt-2 text-xs text-green-400 flex items-center space-x-1">
+                                  <div className="mt-1 sm:mt-2 text-xs text-green-400 flex items-center space-x-1">
                                     <CheckCircle className="w-3 h-3" />
                                     <span>Updated {msg.fileUpdates} file(s)</span>
                                   </div>
                                 )}
                             </div>
                             {msg.type === 'user' && (
-                              <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 text-white"/>
                               </div>
                             )}
                         </div>
                     ))}
-                    
                     {isStreaming && streamingMessage && (
-                        <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
                                 <Bot className="w-4 h-4 text-white"/>
                             </div>
-                            <div className="p-4 rounded-xl max-w-xs text-sm bg-gray-800 text-gray-100 rounded-tl-sm border border-gray-700 shadow-lg">
-                                <div className="prose prose-sm prose-invert" dangerouslySetInnerHTML={renderMarkdown(streamingMessage)} />
-                                <div className="flex items-center space-x-1 mt-2">
+                            <div className="p-2 sm:p-4 rounded-xl max-w-xs text-xs sm:text-sm bg-gray-800 text-gray-100 rounded-tl-sm border border-gray-700 shadow-lg">
+                                <div className="prose prose-xs sm:prose-sm prose-invert" dangerouslySetInnerHTML={renderMarkdown(streamingMessage)} />
+                                <div className="flex items-center space-x-1 mt-1 sm:mt-2">
                                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
                                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
@@ -1106,21 +1098,19 @@ Please help with this request:`;
                             </div>
                         </div>
                     )}
-                    
                     {isChatting && !streamingMessage && (
-                        <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
                                 <Bot className="w-4 h-4 text-white"/>
                             </div>
-                            <div className="p-4 rounded-xl bg-gray-800 border border-gray-700">
-                                <Loader className="w-5 h-5 animate-spin text-blue-400"/>
+                            <div className="p-2 sm:p-4 rounded-xl bg-gray-800 border border-gray-700">
+                                <Loader className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-blue-400"/>
                             </div>
                         </div>
                     )}
                     <div ref={chatEndRef} />
                 </div>
-                
-                <div className="p-4 border-t border-gray-800 bg-gray-900/50">
+                <div className="p-2 sm:p-4 border-t border-gray-800 bg-gray-900/50">
                     <div className="relative">
                         <textarea 
                           value={chatInput} 
@@ -1132,15 +1122,15 @@ Please help with this request:`;
                             }
                           }}
                           placeholder="Fix the login bug, add a dark mode toggle, create a new component..."
-                          className="w-full bg-gray-800 text-white p-4 pr-14 rounded-lg border-2 border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none"
-                          rows={3}
+                          className="w-full bg-gray-800 text-white p-2 sm:p-4 pr-8 sm:pr-14 rounded-lg border-2 border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all resize-none text-xs sm:text-base"
+                          rows={2}
                         />
                         <button 
                           onClick={sendChatMessage} 
                           disabled={isChatting || !chatInput.trim()} 
-                          className="absolute right-3 bottom-3 p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          className="absolute right-2 sm:right-3 bottom-2 sm:bottom-3 p-2 sm:p-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
-                            <Send className="w-5 h-5" />
+                            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                     </div>
                 </div>

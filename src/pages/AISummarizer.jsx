@@ -656,34 +656,34 @@ const AISummarizer = () => {
       <VerificationModal />
 
       <div className="pt-16 min-h-screen bg-secondary-50 dark:bg-secondary-900">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-8 py-8 sm:py-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white">
                 AI PDF Study Assistant
               </h1>
             </div>
-            <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
               Upload your PDF study materials, get intelligent summaries, and ask questions about the content.
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="lg:col-span-1"
             >
-              <div className="card sticky top-24">
+              <div className="card lg:sticky lg:top-24">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
                     Upload Your File
@@ -700,7 +700,7 @@ const AISummarizer = () => {
 
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
+                  className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
                     }`}
@@ -803,7 +803,7 @@ const AISummarizer = () => {
                         <p>Chats left: {Math.max(0, FREE_LIMIT - usageCount.chats)}</p>
                     </div>
                 )}
-                <div className="mt-8 space-y-4">
+                  <div className="mt-6 sm:mt-8 space-y-4">
                   <h3 className="font-semibold text-secondary-900 dark:text-white">
                     Features:
                   </h3>
@@ -857,10 +857,10 @@ const AISummarizer = () => {
                   )}
                 </div>
 
-                <div className="flex-1 flex flex-col min-h-[70vh]">
+                <div className="flex-1 flex flex-col min-h-[60vh] sm:min-h-[70vh]">
                   {summary || streamingMessage || messages.length > 0 ? (
                     <div className="flex-1 flex flex-col">
-                      <div className="flex-1 overflow-y-auto mb-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg p-4">
+                      <div className="flex-1 overflow-y-auto mb-4 bg-secondary-50 dark:bg-secondary-800 rounded-lg p-2 sm:p-4">
                         <AnimatePresence>
                           {messages.map((message, index) => (
                             <motion.div
@@ -929,13 +929,13 @@ const AISummarizer = () => {
                         )}
                         <div ref={messagesEndRef} />
                       </div>
-                      <form onSubmit={handleAskQuestion} className="flex space-x-2">
+                      <form onSubmit={handleAskQuestion} className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="text"
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
                           placeholder={`Ask a question about the content... ${isStreaming && streamingType === 'chat' ? '- Streaming...' : ''}`}
-                          className="flex-1 px-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white"
+                          className="flex-1 px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white text-base"
                           disabled={isChatLoading}
                         />
                         {isStreaming && streamingType === 'chat' ? (

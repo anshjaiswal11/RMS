@@ -311,57 +311,56 @@ const ResearchStudyAssistant = () => {
   // --- Render Functions ---
 
   const renderUploadTab = () => (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <Upload className="mr-3 h-5 w-5" />
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4">
+          <h2 className="text-lg sm:text-xl font-bold text-white flex items-center">
+            <Upload className="mr-2 sm:mr-3 h-5 w-5" />
             Start Your Research Session
           </h2>
-          <p className="text-indigo-100 text-sm mt-1">
+          <p className="text-indigo-100 text-xs sm:text-sm mt-1">
             Upload a PDF or enter a topic to generate a comprehensive study guide.
           </p>
         </div>
-        
-        <div className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* PDF Upload */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
                 📄 Upload PDF Document
                 <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Recommended</span>
               </h3>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+                className={`border-2 border-dashed rounded-lg p-5 sm:p-8 text-center cursor-pointer transition-all duration-200 ${
                   uploadedFile 
                     ? 'border-green-400 bg-green-50' 
                     : 'border-gray-300 hover:border-indigo-500 hover:bg-indigo-50'
                 }`}
               >
-                <FileText className={`mx-auto h-12 w-12 mb-4 ${uploadedFile ? 'text-green-500' : 'text-gray-400'}`} />
+                <FileText className={`mx-auto h-10 w-10 sm:h-12 sm:w-12 mb-3 sm:mb-4 ${uploadedFile ? 'text-green-500' : 'text-gray-400'}`} />
                 {uploadedFile ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     <div className="flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <p className="text-lg font-medium text-gray-900 truncate">{uploadedFile.name}</p>
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-1 sm:mr-2" />
+                      <p className="text-base sm:text-lg font-medium text-gray-900 truncate">{uploadedFile.name}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setUploadedFile(null);
                         fileInputRef.current.value = '';
                       }}
-                      className="text-sm text-red-600 hover:text-red-800 font-semibold"
+                      className="text-xs sm:text-sm text-red-600 hover:text-red-800 font-semibold"
                     >
                       Remove file
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-lg font-medium text-gray-900">Drop your PDF here</p>
-                    <p className="text-sm text-gray-500">or click to browse files</p>
+                    <p className="text-base sm:text-lg font-medium text-gray-900">Drop your PDF here</p>
+                    <p className="text-xs sm:text-sm text-gray-500">or click to browse files</p>
                     <p className="text-xs text-gray-400 mt-2">Supports: Research papers, textbooks, articles</p>
                   </div>
                 )}
@@ -374,10 +373,9 @@ const ResearchStudyAssistant = () => {
                 className="hidden"
               />
             </div>
-
             {/* Topic Input */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">💡 Or Enter Research Topic</h3>
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">💡 Or Enter Research Topic</h3>
               <textarea
                 value={topic}
                 onChange={(e) => {
@@ -385,26 +383,25 @@ const ResearchStudyAssistant = () => {
                     if(uploadedFile) setUploadedFile(null);
                 }}
                 placeholder="Enter your research topic, e.g., 'The Impact of Quantum Computing on Cryptography' or 'CRISPR Gene Editing Ethics'..."
-                className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
+                className="w-full h-32 sm:h-48 p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-xs sm:text-sm"
               />
             </div>
           </div>
-
           {/* Process Button */}
-          <div className="mt-8 text-center">
+          <div className="mt-6 sm:mt-8 text-center">
             <button
               onClick={handleProcess}
               disabled={(!uploadedFile && !topic.trim()) || isProcessing}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center mx-auto space-x-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center mx-auto space-x-2 sm:space-x-3 text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                   <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <Brain className="h-6 w-6" />
+                  <Brain className="h-5 w-5 sm:h-6 sm:w-6" />
                   <span>Generate Study Guide</span>
                 </>
               )}
@@ -416,69 +413,64 @@ const ResearchStudyAssistant = () => {
   );
 
   const renderResultsTab = () => (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-lg p-4 shadow-sm border border-gray-200 gap-4">
-        <h2 className="text-xl font-bold text-gray-900 text-center sm:text-left">Your Comprehensive Study Guide</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 gap-2 sm:gap-4">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 text-center sm:text-left">Your Comprehensive Study Guide</h2>
         <button
           onClick={downloadStudyGuide}
-          className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors w-full sm:w-auto justify-center"
+          className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors w-full sm:w-auto justify-center text-xs sm:text-base"
         >
           <Download className="h-4 w-4" />
           <span>Download as JSON</span>
         </button>
       </div>
-
       {/* Executive Summary */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-          <h3 className="text-xl font-bold text-white flex items-center">📝 Executive Summary</h3>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-3 sm:py-4">
+          <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">📝 Executive Summary</h3>
         </div>
-        <div className="p-6">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{results.executiveSummary}</p>
+        <div className="p-4 sm:p-6">
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-xs sm:text-base">{results.executiveSummary}</p>
         </div>
       </div>
-
       {/* Interactive Study Guide */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
-          <h3 className="text-xl font-bold text-white flex items-center">📖 Interactive Study Guide</h3>
+        <div className="bg-gradient-to-r from-green-600 to-teal-600 px-4 sm:px-6 py-3 sm:py-4">
+          <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">📖 Interactive Study Guide</h3>
         </div>
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {results.studyGuide?.map((category, idx) => (
             <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => toggleSection(`category-${idx}`)}
-                className="w-full px-6 py-4 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <h4 className="text-lg font-semibold text-gray-900">{category.category}</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">{category.category}</h4>
                 {expandedSections[`category-${idx}`] ? <ChevronUp /> : <ChevronDown />}
               </button>
-              
               {expandedSections[`category-${idx}`] && (
-                <div className="p-6 space-y-6 bg-white">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-white">
                   {category.questions?.map((q, qIdx) => (
-                    <div key={qIdx} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                      <div className="flex items-start justify-between mb-4 gap-4">
-                        <h5 className="text-md font-medium text-gray-900 flex-1 pr-4">{q.question}</h5>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getDifficultyColor(q.difficulty)}`}>
+                    <div key={qIdx} className="bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-200">
+                      <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4 gap-2 sm:gap-4">
+                        <h5 className="text-sm sm:text-md font-medium text-gray-900 flex-1 pr-0 sm:pr-4">{q.question}</h5>
+                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getDifficultyColor(q.difficulty)}`}>
                           {q.difficulty}
                         </span>
                       </div>
-                      
-                      <div className="space-y-4">
+                      <div className="space-y-2 sm:space-y-4">
                         <div>
-                          <h6 className="text-sm font-semibold text-gray-700 mb-2 flex items-center"><BookOpen className="h-4 w-4 mr-2" />Study Resources:</h6>
-                          <ul className="text-sm text-gray-600 space-y-2 pl-5 list-disc">
+                          <h6 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2 flex items-center"><BookOpen className="h-4 w-4 mr-1 sm:mr-2" />Study Resources:</h6>
+                          <ul className="text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-2 pl-4 sm:pl-5 list-disc">
                             {q.studyResources?.map((resource, rIdx) => <li key={rIdx}>{resource}</li>)}
                           </ul>
                         </div>
-                        
                         <div>
-                          <h6 className="text-sm font-semibold text-gray-700 mb-2 flex items-center"><Target className="h-4 w-4 mr-2" />Key Points:</h6>
-                          <div className="flex flex-wrap gap-2">
+                          <h6 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2 flex items-center"><Target className="h-4 w-4 mr-1 sm:mr-2" />Key Points:</h6>
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {q.keyPoints?.map((point, pIdx) => (
-                              <span key={pIdx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">{point}</span>
+                              <span key={pIdx} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">{point}</span>
                             ))}
                           </div>
                         </div>
@@ -491,18 +483,17 @@ const ResearchStudyAssistant = () => {
           ))}
         </div>
       </div>
-
       {/* References Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Academic */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3">
-            <h4 className="text-lg font-bold text-white flex items-center">📚 Academic Papers ({results.references?.academic?.length || 0})</h4>
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-3 sm:px-4 py-2 sm:py-3">
+            <h4 className="text-base sm:text-lg font-bold text-white flex items-center">📚 Academic Papers ({results.references?.academic?.length || 0})</h4>
           </div>
-          <div className="p-4 flex-grow overflow-y-auto h-96">
+          <div className="p-3 sm:p-4 flex-grow overflow-y-auto h-60 sm:h-96">
             {results.references?.academic?.map((ref, idx) => (
-              <div key={idx} className="mb-4 pb-4 border-b border-gray-100 last:border-b-0">
-                <a href={ref.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 block mb-1 hover:underline">{ref.title}</a>
+              <div key={idx} className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100 last:border-b-0">
+                <a href={ref.link} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-800 block mb-1 hover:underline">{ref.title}</a>
                 <p className="text-xs text-gray-600 mb-1">{ref.authors} ({ref.year})</p>
                 <p className="text-xs text-gray-500 italic">{ref.journal}</p>
               </div>
@@ -511,13 +502,13 @@ const ResearchStudyAssistant = () => {
         </div>
         {/* Websites */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
-          <div className="bg-gradient-to-r from-green-600 to-teal-600 px-4 py-3">
-            <h4 className="text-lg font-bold text-white flex items-center">🌐 Web Resources ({results.references?.websites?.length || 0})</h4>
+          <div className="bg-gradient-to-r from-green-600 to-teal-600 px-3 sm:px-4 py-2 sm:py-3">
+            <h4 className="text-base sm:text-lg font-bold text-white flex items-center">🌐 Web Resources ({results.references?.websites?.length || 0})</h4>
           </div>
-          <div className="p-4 flex-grow overflow-y-auto h-96">
+          <div className="p-3 sm:p-4 flex-grow overflow-y-auto h-60 sm:h-96">
             {results.references?.websites?.map((site, idx) => (
-              <div key={idx} className="mb-4 pb-4 border-b border-gray-100 last:border-b-0">
-                <a href={site.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-green-700 hover:text-green-900 block mb-1 hover:underline">{site.title}</a>
+              <div key={idx} className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100 last:border-b-0">
+                <a href={site.link} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-medium text-green-700 hover:text-green-900 block mb-1 hover:underline">{site.title}</a>
                 <p className="text-xs text-gray-600">{site.description}</p>
               </div>
             ))}
@@ -525,13 +516,13 @@ const ResearchStudyAssistant = () => {
         </div>
         {/* Videos */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
-          <div className="bg-gradient-to-r from-red-600 to-pink-600 px-4 py-3">
-            <h4 className="text-lg font-bold text-white flex items-center">🎥 Video Lectures ({results.references?.videos?.length || 0})</h4>
+          <div className="bg-gradient-to-r from-red-600 to-pink-600 px-3 sm:px-4 py-2 sm:py-3">
+            <h4 className="text-base sm:text-lg font-bold text-white flex items-center">🎥 Video Lectures ({results.references?.videos?.length || 0})</h4>
           </div>
-          <div className="p-4 flex-grow overflow-y-auto h-96">
+          <div className="p-3 sm:p-4 flex-grow overflow-y-auto h-60 sm:h-96">
             {results.references?.videos?.map((video, idx) => (
-              <div key={idx} className="mb-4 pb-4 border-b border-gray-100 last:border-b-0">
-                <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-red-600 hover:text-red-800 block mb-1 hover:underline">{video.title}</a>
+              <div key={idx} className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100 last:border-b-0">
+                <a href={video.link} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-medium text-red-600 hover:text-red-800 block mb-1 hover:underline">{video.title}</a>
                 <p className="text-xs text-gray-600">{video.channel}</p>
                 <p className="text-xs text-gray-500">{video.duration}</p>
               </div>
@@ -539,34 +530,33 @@ const ResearchStudyAssistant = () => {
           </div>
         </div>
       </div>
-
       {/* Insights and Trends */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">
-            <h4 className="text-lg font-bold text-white flex items-center">💡 Critical Insights</h4>
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-3 sm:px-4 py-2 sm:py-3">
+            <h4 className="text-base sm:text-lg font-bold text-white flex items-center">💡 Critical Insights</h4>
           </div>
-          <div className="p-4">
-            <ul className="space-y-3">
+          <div className="p-3 sm:p-4">
+            <ul className="space-y-2 sm:space-y-3">
               {results.insights?.map((insight, idx) => (
                 <li key={idx} className="flex items-start">
-                  <Star className="h-4 w-4 text-yellow-500 mt-0.5 mr-3 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{insight}</span>
+                  <Star className="h-4 w-4 text-yellow-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-gray-700">{insight}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
         <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-          <div className="bg-gradient-to-r from-orange-600 to-red-600 px-4 py-3">
-            <h4 className="text-lg font-bold text-white flex items-center">📈 Current Trends</h4>
+          <div className="bg-gradient-to-r from-orange-600 to-red-600 px-3 sm:px-4 py-2 sm:py-3">
+            <h4 className="text-base sm:text-lg font-bold text-white flex items-center">📈 Current Trends</h4>
           </div>
-          <div className="p-4">
-            <ul className="space-y-3">
+          <div className="p-3 sm:p-4">
+            <ul className="space-y-2 sm:space-y-3">
               {results.trends?.map((trend, idx) => (
                 <li key={idx} className="flex items-start">
-                  <TrendingUp className="h-4 w-4 text-orange-500 mt-0.5 mr-3 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{trend}</span>
+                  <TrendingUp className="h-4 w-4 text-orange-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-gray-700">{trend}</span>
                 </li>
               ))}
             </ul>
@@ -580,21 +570,21 @@ const ResearchStudyAssistant = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans">
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
+        <div className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between h-auto sm:h-16 gap-2 sm:gap-0">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="p-2 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-md">
-                <Brain className="h-6 w-6 text-white" />
+                <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Research & Study Assistant AI</h1>
-                <p className="text-sm text-gray-500">Your AI-Powered Study Partner</p>
+                <h1 className="text-base sm:text-xl font-bold text-gray-900">Research & Study Assistant AI</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Your AI-Powered Study Partner</p>
               </div>
             </div>
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
               <button
                 onClick={() => setActiveTab('upload')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'upload' 
                     ? 'bg-white text-indigo-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-gray-200'
@@ -604,7 +594,7 @@ const ResearchStudyAssistant = () => {
               </button>
               <button
                 onClick={() => setActiveTab('results')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
                   activeTab === 'results' 
                     ? 'bg-white text-indigo-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-gray-200'
@@ -617,47 +607,44 @@ const ResearchStudyAssistant = () => {
           </div>
         </div>
       </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-full lg:max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
         {/* Error Display */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start shadow-md">
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+          <div className="mb-4 sm:mb-6 bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 flex items-start shadow-md">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" />
             <div>
-              <h4 className="text-red-800 font-medium">An Error Occurred</h4>
-              <p className="text-red-700 text-sm mt-1">{error}</p>
+              <h4 className="text-red-800 font-medium text-xs sm:text-base">An Error Occurred</h4>
+              <p className="text-red-700 text-xs sm:text-sm mt-1">{error}</p>
             </div>
           </div>
         )}
-
         {/* Processing Status */}
         {isProcessing && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-md">
-            <div className="flex items-center mb-2">
-              <Loader2 className="h-5 w-5 text-blue-500 animate-spin mr-3" />
-              <h4 className="text-blue-800 font-medium">Processing your request...</h4>
+          <div className="mb-4 sm:mb-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 shadow-md">
+            <div className="flex items-center mb-1 sm:mb-2">
+              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 animate-spin mr-2 sm:mr-3" />
+              <h4 className="text-blue-800 font-medium text-xs sm:text-base">Processing your request...</h4>
             </div>
-            <div className="w-full bg-blue-200 rounded-full h-2.5">
+            <div className="w-full bg-blue-200 rounded-full h-2">
               <div 
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <p className="text-blue-700 text-sm mt-2 text-center font-medium">{progressMessage}</p>
+            <p className="text-blue-700 text-xs sm:text-sm mt-2 text-center font-medium">{progressMessage}</p>
           </div>
         )}
-
         {/* Tab Content */}
         {activeTab === 'upload' && renderUploadTab()}
         {activeTab === 'results' && results && renderResultsTab()}
         {activeTab === 'results' && !results && !isProcessing && (
-          <div className="text-center py-12 bg-white rounded-2xl shadow-xl border border-gray-200">
-            <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">Your Study Guide Awaits</h3>
-            <p className="text-gray-500 mb-6">Upload a document or enter a topic to get started.</p>
+          <div className="text-center py-8 sm:py-12 bg-white rounded-2xl shadow-xl border border-gray-200">
+            <Brain className="h-10 w-10 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-xl font-semibold text-gray-600 mb-1 sm:mb-2">Your Study Guide Awaits</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">Upload a document or enter a topic to get started.</p>
             <button
               onClick={() => setActiveTab('upload')}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold text-xs sm:text-base"
             >
               Start a New Session
             </button>

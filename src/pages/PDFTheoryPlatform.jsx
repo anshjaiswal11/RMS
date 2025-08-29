@@ -281,31 +281,31 @@ Provide evaluation in this JSON format ONLY:
   // --- RENDER ---
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <header className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-              <BookOpen className="h-10 w-10 text-white" />
+        <header className="text-center mb-8 sm:mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+              <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               PDF Theory Master
             </h1>
           </div>
-          <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+          <p className="text-gray-600 text-base sm:text-xl max-w-xl sm:max-w-2xl mx-auto">
             Transform your PDF notes into interactive learning experiences with AI-powered questions and evaluations
           </p>
         </header>
 
         {/* Error Display */}
         {error && (
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-xl shadow-sm">
+          <div className="max-w-lg sm:max-w-4xl mx-auto mb-6 sm:mb-8">
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 sm:p-6 rounded-r-xl shadow-sm">
               <div className="flex items-center">
-                <AlertCircle className="h-6 w-6 text-red-400 mr-3" />
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-400 mr-2 sm:mr-3" />
                 <div>
                   <p className="font-medium text-red-800">Error</p>
-                  <p className="text-red-700">{error}</p>
+                  <p className="text-red-700 text-sm sm:text-base">{error}</p>
                 </div>
               </div>
             </div>
@@ -314,41 +314,38 @@ Provide evaluation in this JSON format ONLY:
 
         {/* Upload Stage */}
         {stage === 'upload' && (
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-12 border border-white/20">
+          <div className="max-w-md sm:max-w-3xl mx-auto">
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 sm:p-12 border border-white/20">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-8">
-                  <Upload className="h-12 w-12 text-blue-600" />
+                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mb-6 sm:mb-8">
+                  <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-blue-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Upload Your Study Material</h2>
-                <p className="text-gray-600 text-lg mb-8 max-w-md mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">Upload Your Study Material</h2>
+                <p className="text-gray-600 text-base sm:text-lg mb-6 sm:mb-8 max-w-xs sm:max-w-md mx-auto">
                   Upload your PDF notes and our AI will generate comprehensive questions with detailed answers across three difficulty levels.
                 </p>
-                
                 <input type="file" accept=".pdf" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-                
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={loading}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 mx-auto shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 sm:px-10 py-3 sm:py-5 rounded-2xl font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 sm:gap-3 mx-auto shadow-lg hover:shadow-xl"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin h-6 w-6" />
-                      {loadingMessage}
+                      <Loader2 className="animate-spin h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-base">{loadingMessage}</span>
                     </>
                   ) : (
                     <>
-                      <FileText className="h-6 w-6" />
+                      <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
                       Choose PDF File
                     </>
                   )}
                 </button>
-                
                 {pdfFile && !loading && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200 inline-block">
-                    <p className="text-blue-800 font-medium flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
+                  <div className="mt-4 sm:mt-6 p-2 sm:p-4 bg-blue-50 rounded-xl border border-blue-200 inline-block">
+                    <p className="text-blue-800 font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-base">
+                      <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
                       {pdfFile.name}
                     </p>
                   </div>
@@ -360,61 +357,57 @@ Provide evaluation in this JSON format ONLY:
 
         {/* Questions Stage */}
         {stage === 'questions' && (
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-full sm:max-w-7xl mx-auto">
             {/* Stats Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-6 mb-6 sm:mb-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-lg border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Questions</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Total Questions</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.total}</p>
                   </div>
-                  <Target className="h-8 w-8 text-blue-600" />
+                  <Target className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                 </div>
               </div>
-              
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-lg border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Answered</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.answered}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Answered</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.answered}</p>
                   </div>
-                  <Edit3 className="h-8 w-8 text-green-600" />
+                  <Edit3 className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
                 </div>
               </div>
-              
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-lg border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Average Score</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats.average}/10</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Average Score</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.average}/10</p>
                   </div>
-                  <Award className="h-8 w-8 text-yellow-600" />
+                  <Award className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
                 </div>
               </div>
-              
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-lg border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Progress</p>
-                    <p className="text-3xl font-bold text-gray-900">{Math.round((stats.answered/stats.total)*100)}%</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Progress</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{Math.round((stats.answered/stats.total)*100)}%</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-indigo-600" />
+                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
                 </div>
               </div>
-              
               <button
                 onClick={resetPlatform}
-                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-2xl font-medium transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
+                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-2xl font-medium transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-1 sm:gap-2 shadow-lg px-2 sm:px-0 py-2 sm:py-0"
               >
-                <Upload className="h-5 w-5" />
-                New PDF
+                <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-xs sm:text-base">New PDF</span>
               </button>
             </div>
 
             {/* Difficulty Tabs */}
-            <div className="mb-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/20 inline-flex">
+            <div className="mb-6 sm:mb-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-1 sm:p-2 shadow-lg border border-white/20 inline-flex flex-wrap">
                 {[
                   { key: 'all', label: 'All Questions', count: stats.total },
                   { key: 'basic', label: 'Basic', count: stats.basic },
@@ -424,7 +417,7 @@ Provide evaluation in this JSON format ONLY:
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 text-xs sm:text-base ${
                       activeTab === tab.key
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -437,63 +430,63 @@ Provide evaluation in this JSON format ONLY:
             </div>
 
             {/* Questions Grid */}
-            <div className="grid gap-8">
+            <div className="grid gap-4 sm:gap-8">
               {filteredQuestions.map((question) => (
-                <div key={question.id} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+                <div key={question.id} className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 overflow-hidden">
                   {/* Question Header */}
-                  <div className="p-8 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-gray-100">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                          <span className="text-xl font-bold text-blue-600">Q{question.id}</span>
+                  <div className="p-4 sm:p-8 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4 gap-2 sm:gap-0">
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                          <span className="text-base sm:text-xl font-bold text-blue-600">Q{question.id}</span>
                         </div>
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getDifficultyClass(question.difficulty)}`}>
+                          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${getDifficultyClass(question.difficulty)}`}>
                               {getDifficultyIcon(question.difficulty)} {question.difficulty}
                             </span>
                             {evaluations[question.id] && (
-                              <span className={`px-3 py-1 rounded-full text-sm font-bold ${getGradeColor(evaluations[question.id].grade)}`}>
+                              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${getGradeColor(evaluations[question.id].grade)}`}>
                                 Grade: {evaluations[question.id].grade}
                               </span>
                             )}
                           </div>
-                          <h3 className="text-xl font-semibold text-gray-800 leading-relaxed">
+                          <h3 className="text-base sm:text-xl font-semibold text-gray-800 leading-relaxed">
                             {question.text}
                           </h3>
                         </div>
                       </div>
                       <button
                         onClick={() => toggleExpanded(question.id)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors"
+                        className="p-1 sm:p-2 rounded-full hover:bg-white/50 transition-colors"
                       >
                         {expandedQuestions[question.id] ? (
-                          <ChevronUp className="h-6 w-6 text-gray-600" />
+                          <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
                         ) : (
-                          <ChevronDown className="h-6 w-6 text-gray-600" />
+                          <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
                         )}
                       </button>
                     </div>
-                    <p className="text-gray-600 text-sm">{question.explanation}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">{question.explanation}</p>
                   </div>
 
                   {/* Question Content */}
                   {expandedQuestions[question.id] && (
-                    <div className="p-8 space-y-6">
+                    <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                       {/* Show/Hide Answer Button */}
-                      <div className="flex gap-4">
+                      <div className="flex gap-2 sm:gap-4">
                         <button
                           onClick={() => toggleAnswer(question.id)}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-lg hover:shadow-xl text-xs sm:text-base"
                         >
                           {showAnswers[question.id] ? (
                             <>
-                              <EyeOff className="h-5 w-5" />
+                              <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                               Hide Answer
                             </>
                           ) : (
                             <>
-                              <Eye className="h-5 w-5" />
+                              <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                               Show Answer
                             </>
                           )}
@@ -502,45 +495,43 @@ Provide evaluation in this JSON format ONLY:
 
                       {/* AI Answer */}
                       {showAnswers[question.id] && (
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <Bot className="h-6 w-6 text-purple-600" />
-                            <h4 className="text-lg font-semibold text-purple-800">AI Generated Answer</h4>
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-3 sm:p-6 border border-purple-200">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                            <Bot className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600" />
+                            <h4 className="text-base sm:text-lg font-semibold text-purple-800">AI Generated Answer</h4>
                           </div>
                           <div className="prose prose-gray max-w-none">
-                            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{question.answer}</p>
+                            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-xs sm:text-base">{question.answer}</p>
                           </div>
                         </div>
                       )}
 
                       {/* User Answer Section */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <Edit3 className="h-6 w-6 text-green-600" />
-                          <h4 className="text-lg font-semibold text-gray-800">Write Your Answer</h4>
+                      <div className="space-y-2 sm:space-y-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <Edit3 className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+                          <h4 className="text-base sm:text-lg font-semibold text-gray-800">Write Your Answer</h4>
                         </div>
-                        
                         <textarea
                           value={userAnswers[question.id] || ''}
                           onChange={(e) => handleUserAnswerChange(question.id, e.target.value)}
                           placeholder="Write your comprehensive answer here..."
-                          rows="6"
-                          className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 resize-none bg-white/50 backdrop-blur-sm"
+                          rows="4"
+                          className="w-full p-2 sm:p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 resize-none bg-white/50 backdrop-blur-sm text-xs sm:text-base"
                         />
-                        
                         <button
                           onClick={() => evaluateUserAnswer(question.id)}
                           disabled={loading || !userAnswers[question.id]?.trim()}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg hover:shadow-xl"
+                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 shadow-lg hover:shadow-xl text-xs sm:text-base"
                         >
                           {loading ? (
                             <>
-                              <Loader2 className="animate-spin h-5 w-5" />
+                              <Loader2 className="animate-spin h-4 w-4 sm:h-5 sm:w-5" />
                               Evaluating...
                             </>
                           ) : (
                             <>
-                              <Check className="h-5 w-5" />
+                              <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                               Submit & Evaluate
                             </>
                           )}
@@ -549,20 +540,20 @@ Provide evaluation in this JSON format ONLY:
 
                       {/* Evaluation Results */}
                       {evaluations[question.id] && (
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 space-y-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <Star className="h-6 w-6 text-yellow-500" />
-                              <h4 className="text-lg font-semibold text-gray-800">Evaluation Results</h4>
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-3 sm:p-6 border border-blue-200 space-y-3 sm:space-y-6">
+                          <div className="flex flex-col sm:flex-row items-center justify-between">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Star className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-500" />
+                              <h4 className="text-base sm:text-lg font-semibold text-gray-800">Evaluation Results</h4>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 sm:gap-4">
                               <div className="text-right">
-                                <div className="text-3xl font-bold text-blue-600">{evaluations[question.id].score}/10</div>
+                                <div className="text-xl sm:text-3xl font-bold text-blue-600">{evaluations[question.id].score}/10</div>
                                 <div className="flex">
                                   {[...Array(10)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`h-4 w-4 ${
+                                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
                                         i < evaluations[question.id].score ? 'text-yellow-400 fill-current' : 'text-gray-300'
                                       }`}
                                     />
@@ -571,40 +562,37 @@ Provide evaluation in this JSON format ONLY:
                               </div>
                             </div>
                           </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
                             {evaluations[question.id].strengths.length > 0 && (
-                              <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                                <h5 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                                  <Check className="h-5 w-5" />
+                              <div className="bg-green-50 rounded-xl p-2 sm:p-4 border border-green-200">
+                                <h5 className="font-semibold text-green-800 mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2 text-xs sm:text-base">
+                                  <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                                   Strengths
                                 </h5>
-                                <ul className="space-y-2">
+                                <ul className="space-y-1 sm:space-y-2">
                                   {evaluations[question.id].strengths.map((strength, idx) => (
-                                    <li key={idx} className="text-green-700 text-sm">• {strength}</li>
+                                    <li key={idx} className="text-green-700 text-xs sm:text-sm">• {strength}</li>
                                   ))}
                                 </ul>
                               </div>
                             )}
-                            
                             {evaluations[question.id].improvements.length > 0 && (
-                              <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-                                <h5 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
-                                  <Lightbulb className="h-5 w-5" />
+                              <div className="bg-orange-50 rounded-xl p-2 sm:p-4 border border-orange-200">
+                                <h5 className="font-semibold text-orange-800 mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2 text-xs sm:text-base">
+                                  <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
                                   Areas for Improvement
                                 </h5>
-                                <ul className="space-y-2">
+                                <ul className="space-y-1 sm:space-y-2">
                                   {evaluations[question.id].improvements.map((improvement, idx) => (
-                                    <li key={idx} className="text-orange-700 text-sm">• {improvement}</li>
+                                    <li key={idx} className="text-orange-700 text-xs sm:text-sm">• {improvement}</li>
                                   ))}
                                 </ul>
                               </div>
                             )}
                           </div>
-                          
-                          <div className="bg-white rounded-xl p-4 border border-gray-200">
-                            <h5 className="font-semibold text-gray-800 mb-2">Detailed Feedback</h5>
-                            <p className="text-gray-700 leading-relaxed">{evaluations[question.id].feedback}</p>
+                          <div className="bg-white rounded-xl p-2 sm:p-4 border border-gray-200">
+                            <h5 className="font-semibold text-gray-800 mb-1 sm:mb-2 text-xs sm:text-base">Detailed Feedback</h5>
+                            <p className="text-gray-700 leading-relaxed text-xs sm:text-base">{evaluations[question.id].feedback}</p>
                           </div>
                         </div>
                       )}
@@ -615,7 +603,7 @@ Provide evaluation in this JSON format ONLY:
             </div>
 
             {/* Expand/Collapse All */}
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-6 sm:mt-8">
               <button
                 onClick={() => {
                   const allExpanded = Object.values(expandedQuestions).every(Boolean);
@@ -625,16 +613,16 @@ Provide evaluation in this JSON format ONLY:
                   });
                   setExpandedQuestions(newState);
                 }}
-                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-lg hover:shadow-xl text-xs sm:text-base"
               >
                 {Object.values(expandedQuestions).every(Boolean) ? (
                   <>
-                    <ChevronUp className="h-5 w-5" />
+                    <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     Collapse All
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="h-5 w-5" />
+                    <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />
                     Expand All
                   </>
                 )}

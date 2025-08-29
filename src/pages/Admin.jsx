@@ -370,7 +370,7 @@ const RMSAdminDashboard = () => {
   );
 
   const Sidebar = () => (
-    <div className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white dark:bg-gray-800 h-screen fixed left-0 top-0 z-30 shadow-xl border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col`}>
+    <div className={`${isSidebarOpen ? 'w-64' : 'w-16'} bg-white dark:bg-gray-800 h-screen fixed left-0 top-0 z-30 shadow-xl border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col min-w-[64px] sm:min-w-[80px]`}>
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center h-20">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -419,7 +419,7 @@ const RMSAdminDashboard = () => {
   );
 
   const Header = () => (
-    <header className={`${isSidebarOpen ? 'ml-64' : 'ml-20'} bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center transition-all duration-300 sticky top-0 z-20`}>
+    <header className={`${isSidebarOpen ? 'ml-64' : 'ml-16'} bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center transition-all duration-300 sticky top-0 z-20 gap-4`}>
       <div className="flex items-center space-x-4">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -458,7 +458,7 @@ const RMSAdminDashboard = () => {
 
   const DashboardView = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard
           title="Total Payments"
           value={dashboardStats.totalPayments}
@@ -489,7 +489,7 @@ const RMSAdminDashboard = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Payments</h3>
           <div className="space-y-4">
@@ -550,7 +550,7 @@ const RMSAdminDashboard = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {filteredPayments.map((payment) => (
           <PaymentCard key={payment._id} payment={payment} />
         ))}
@@ -589,7 +589,7 @@ const RMSAdminDashboard = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         {filteredContacts.map((contact) => (
           <ContactCard key={contact._id} contact={contact} />
         ))}
@@ -606,7 +606,7 @@ const RMSAdminDashboard = () => {
   );
 
   const SettingsView = () => (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-2xl mx-auto px-2">
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">API Configuration</h3>
         <div className="space-y-4">
@@ -646,14 +646,14 @@ const RMSAdminDashboard = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
-        <Sidebar />
-        <div className={`${isSidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
-            <Header />
-            <main className="p-6">
-                {renderCurrentView()}
-            </main>
-        </div>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
+    <Sidebar />
+    <div className={`${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-all duration-300 flex-1 flex flex-col`}>
+      <Header />
+      <main className="p-2 sm:p-4 md:p-6">
+        {renderCurrentView()}
+      </main>
+    </div>
         
         {/* Loading Overlay */}
         {isLoading && (
