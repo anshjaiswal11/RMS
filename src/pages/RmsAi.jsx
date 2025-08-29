@@ -33,7 +33,7 @@ const RMSAI = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('rms-deepresearch');
+  const [selectedModel, setSelectedModel] = useState('rms-tutor');
   const [copiedCodeIndex, setCopiedCodeIndex] = useState(null);
   const [streamingMessage, setStreamingMessage] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
