@@ -25,6 +25,7 @@ import ResearchStudyAssistant from './pages/ResearchStudyAssistant';
 import AICareerPlatform from './pages/AICareerPlatform';
 import AI from './pages/AgenticAI'
 import MindMapFlashcardGenerator from './pages/MindMapFlashcardGenerator';
+import ServerError from './pages/servererror';
 
 
 
@@ -59,10 +60,10 @@ function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 transition-colors duration-300">
-        <Navbar />
+        {/* <Navbar /> */}
         <AnimatePresence mode="wait">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<ServerError />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/GetRMSKey" element={<GetRMSKey />} />
             <Route path="/ai-pdf-theory" element={<PDFTheoryPlatform />} />
