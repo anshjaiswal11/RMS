@@ -361,7 +361,7 @@ export default function AgenticAICodeGenerator() {
   const [isUpdatingFiles, setIsUpdatingFiles] = useState(false);
   const chatEndRef = useRef(null);
 
-  const API_KEY = process.env.REACT_APP_OPENROUTER_API2_KEY;
+  const API_KEY = process.env.REACT_APP_OPENROUTER_API4_KEY;
   const [projectName, setProjectName] = useState('ai-generated-project');
 
   useEffect(() => {
