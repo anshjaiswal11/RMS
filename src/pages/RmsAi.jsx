@@ -25,8 +25,8 @@ import {
 } from 'lucide-react';
 
 // IMPORTANT: Replace "YOUR_OPENROUTER_API_KEY" with your actual OpenRouter API key.
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API3_KEY;
-const YOUR_SITE_URL = 'http://localhost:3000';
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY || '';
+const YOUR_SITE_URL = 'https://www.citewise.xyz/';
 const YOUR_SITE_NAME = 'RMS Study Assistant';
 
 const RMSAI = () => {
