@@ -26,6 +26,7 @@ import AICareerPlatform from './pages/AICareerPlatform';
 import AI from './pages/AgenticAI'
 import MindMapFlashcardGenerator from './pages/MindMapFlashcardGenerator';
 import ServerError from './pages/servererror';
+import Agenticpreview from './pages/RMSAgenticLanding';
 
 
 
@@ -60,15 +61,16 @@ function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 transition-colors duration-300">
-        {/* <Navbar /> */}
+        <Navbar />
         <AnimatePresence mode="wait">
           <Routes>
-            <Route path="/" element={<ServerError />} />
+            <Route path="/" element={<Home />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/GetRMSKey" element={<GetRMSKey />} />
             <Route path="/ai-pdf-theory" element={<PDFTheoryPlatform />} />
             <Route path="/research-study-assistant" element={<ResearchStudyAssistant />} />
             <Route path="/ai-career-platform" element={<AICareerPlatform />} />
+            <Route path="/agentic-ai-preview-$=001" element={<Agenticpreview />} />
             <Route path="/agentic-ai" element={<AI />} />
             <Route path="/mind-map-flashcard-generator" element={<MindMapFlashcardGenerator />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}

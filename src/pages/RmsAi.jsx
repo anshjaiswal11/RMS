@@ -52,7 +52,7 @@ const RMSAI = () => {
     {
       id: 'rms-deepresearch',
       name: 'RMS DeepResearch',
-      model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+      model: 'deepseek/deepseek-chat-v3.1:free',
       description: 'Advanced research and deep understanding',
       icon: Brain,
       color: 'from-purple-500 to-indigo-500'
@@ -176,8 +176,8 @@ const RMSAI = () => {
 
   // Enhanced format message function
   const formatMessage = (content, modelId) => {
-     if (typeof content !== 'string') {
-        return content;
+    if (typeof content !== 'string') {
+      return content;
     }
 
     let cleaned = content
@@ -187,60 +187,74 @@ const RMSAI = () => {
       .replace(/~~(.*?)~~/g, '$1')
       .replace(/`([^`]+)`/g, '$1');
 
-    if (modelId === 'rms-tutor') {
-        const sections = [];
-        let currentSection = { heading: null, list: [] };
+    // Unified formatting for rms-tutor and rms-deepresearch
+    if (modelId === 'rms-tutor' || modelId === 'rms-deepresearch') {
+      // Extract 'Thinking' block if present
+      let thinkingBlock = null;
+      let answerBlock = cleaned;
+      const thinkingMatch = cleaned.match(/Thinking:(.*?)(\n\n|$)/s);
+      if (thinkingMatch) {
+        thinkingBlock = thinkingMatch[1].trim();
+        answerBlock = cleaned.replace(thinkingMatch[0], '').trim();
+      }
 
-        cleaned.split('\n').forEach(line => {
-            const headingMatch = line.match(/^\d+\.\s+(.*)/);
-            const listItemMatch = line.match(/^\s*[-*]\s+(.*)/);
-            const summaryMatch = line.match(/^👉\s+(.*)/);
+      // Parse answer block into sections
+      const sections = [];
+      let currentSection = { heading: null, list: [] };
+      answerBlock.split('\n').forEach(line => {
+        const headingMatch = line.match(/^\d+\.\s+(.*)/);
+        const listItemMatch = line.match(/^\s*[-*]\s+(.*)/);
+        const summaryMatch = line.match(/^👉\s+(.*)/);
 
-            if (headingMatch) {
-                if (currentSection.heading || currentSection.list.length > 0) {
-                    sections.push(currentSection);
-                }
-                currentSection = { heading: headingMatch[1], list: [] };
-            } else if (listItemMatch) {
-                currentSection.list.push(listItemMatch[1]);
-            } else if (summaryMatch) {
-                 if (currentSection.heading || currentSection.list.length > 0) {
-                    sections.push(currentSection);
-                }
-                currentSection = { heading: null, list: [], summary: summaryMatch[1] };
-                sections.push(currentSection);
-                currentSection = { heading: null, list: [] };
-
-            } else if (line.trim() !== '') {
-                 if (!currentSection.heading && currentSection.list.length === 0) {
-                    // It's introductory text
-                    if (!sections.intro) sections.intro = [];
-                    sections.intro.push(line);
-                } else {
-                    currentSection.list.push(line);
-                }
-            }
-        });
-        if (currentSection.heading || currentSection.list.length > 0) {
+        if (headingMatch) {
+          if (currentSection.heading || currentSection.list.length > 0) {
             sections.push(currentSection);
+          }
+          currentSection = { heading: headingMatch[1], list: [] };
+        } else if (listItemMatch) {
+          currentSection.list.push(listItemMatch[1]);
+        } else if (summaryMatch) {
+          if (currentSection.heading || currentSection.list.length > 0) {
+            sections.push(currentSection);
+          }
+          currentSection = { heading: null, list: [], summary: summaryMatch[1] };
+          sections.push(currentSection);
+          currentSection = { heading: null, list: [] };
+        } else if (line.trim() !== '') {
+          if (!currentSection.heading && currentSection.list.length === 0) {
+            if (!sections.intro) sections.intro = [];
+            sections.intro.push(line);
+          } else {
+            currentSection.list.push(line);
+          }
         }
+      });
+      if (currentSection.heading || currentSection.list.length > 0) {
+        sections.push(currentSection);
+      }
 
-        return (
-            <div>
-                {sections.intro && <p className="mb-4">{sections.intro.join('\n')}</p>}
-                {sections.map((section, index) => (
-                    <div key={index} className="mb-4">
-                        {section.heading && <h3 className="text-lg font-semibold text-gray-100 mb-2">{`${index + 1}. ${section.heading}`}</h3>}
-                        {section.list.length > 0 && (
-                             <ul className="list-disc list-inside pl-4 space-y-1 text-gray-300">
-                                {section.list.map((item, i) => <li key={i}>{item}</li>)}
-                            </ul>
-                        )}
-                        {section.summary && <p className="mt-4 p-3 bg-gray-800/50 rounded-lg">👉 {section.summary}</p>}
-                    </div>
-                ))}
+      return (
+        <div>
+          {thinkingBlock && (
+            <details className="mb-4 bg-gray-800/60 rounded-lg p-3 border-l-4 border-blue-500">
+              <summary className="font-semibold text-blue-400 cursor-pointer">Model Thinking</summary>
+              <div className="mt-2 text-gray-300 whitespace-pre-wrap">{thinkingBlock}</div>
+            </details>
+          )}
+          {sections.intro && <p className="mb-4">{sections.intro.join('\n')}</p>}
+          {sections.map((section, index) => (
+            <div key={index} className="mb-4">
+              {section.heading && <h3 className="text-lg font-semibold text-gray-100 mb-2">{`${index + 1}. ${section.heading}`}</h3>}
+              {section.list.length > 0 && (
+                <ul className="list-disc list-inside pl-4 space-y-1 text-gray-300">
+                  {section.list.map((item, i) => <li key={i}>{item}</li>)}
+                </ul>
+              )}
+              {section.summary && <p className="mt-4 p-3 bg-gray-800/50 rounded-lg">👉 {section.summary}</p>}
             </div>
-        )
+          ))}
+        </div>
+      );
     }
 
     const parts = cleaned.split(/(```[\s\S]*?```)/g);
@@ -285,7 +299,7 @@ const RMSAI = () => {
           </div>
         );
       } else {
-         return <div key={index} className="whitespace-pre-wrap">{part}</div>;
+        return <div key={index} className="whitespace-pre-wrap">{part}</div>;
       }
     });
   };
@@ -401,83 +415,161 @@ const RMSAI = () => {
     abortControllerRef.current = new AbortController();
 
     try {
-        const currentModel = models.find(m => m.id === selectedModel);
-        let systemPrompt = "You are RMS AI, a helpful and intelligent study assistant. Your responses should be clear, well-structured, and easy to understand. Avoid using markdown formatting like ** or * for emphasis; use plain text with proper headings and line breaks.";
-        if (selectedModel === 'rms-tutor') {
-            systemPrompt += " Structure your explanations with numbered headings for main points (e.g., '1. Main Point') and bulleted lists for details (e.g., '- detail'). Conclude with a summary or a follow-up question starting with '👉'."
-        }
+      const currentModel = models.find(m => m.id === selectedModel);
+      let systemPrompt = "You are RMS AI, a helpful and intelligent study assistant. Your responses should be clear, well-structured, and easy to understand. Avoid using markdown formatting like ** or * for emphasis; use plain text with proper headings and line breaks.";
+      if (selectedModel === 'rms-tutor') {
+        systemPrompt += " Structure your explanations with numbered headings for main points (e.g., '1. Main Point') and bulleted lists for details (e.g., '- detail'). Conclude with a summary or a follow-up question starting with '👉'.";
+      }
+      if (selectedModel === 'rms-deepresearch') {
+        systemPrompt += "\n\nYou are DeepSeek V3.1 in reasoning mode. For every question, first show your 'Thinking:' (step-by-step reasoning, thoughts, and analysis) in plain text, then provide your final answer in the following format: numbered headings for main points (e.g., '1. Main Point'), bulleted lists for details (e.g., '- detail'), and a summary or follow-up question starting with '👉'. Always output both 'Thinking:' and the answer in this format. Do not use markdown formatting.";
+      }
 
+      const historyForAPI = newMessages.slice(0, -1).map(msg => ({
+        role: msg.role,
+        content: typeof msg.content === 'string' ? msg.content : (msg.content.props.children[0]?.props.children || "User sent an image.")
+      }));
 
-        const historyForAPI = newMessages.slice(0, -1).map(msg => ({
-            role: msg.role,
-            content: typeof msg.content === 'string' ? msg.content : (msg.content.props.children[0]?.props.children || "User sent an image.")
-        }));
-
+      // --- IMAGE GENERATION LOGIC ---
+      if (selectedModel === 'citeWise-imageAi') {
+        // Request both image and text modalities
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "HTTP-Referer": YOUR_SITE_URL,
-                "X-Title": YOUR_SITE_NAME,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: currentModel.model,
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    ...historyForAPI,
-                    ...apiMessagesPayload
-                ],
-                stream: true
-            }),
-            signal: abortControllerRef.current.signal
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "HTTP-Referer": YOUR_SITE_URL,
+            "X-Title": YOUR_SITE_NAME,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: currentModel.model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...historyForAPI,
+              ...apiMessagesPayload
+            ],
+            modalities: ["image", "text"],
+            stream: false
+          }),
+          signal: abortControllerRef.current.signal
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+          const errorData = await response.json();
+          throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
         }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    const jsonStr = line.slice(6);
-                    if (jsonStr === '[DONE]') {
-                       stopStreaming();
-                       return;
+        const result = await response.json();
+        // Extract base64 image from response
+        const choices = result.choices || [];
+        let imageData = null;
+        let textContent = '';
+        if (choices.length > 0) {
+          const message = choices[0].message || {};
+          textContent = message.content || '';
+          const images = message.images || [];
+          if (images.length > 0 && images[0].image_url && images[0].image_url.url) {
+            imageData = images[0].image_url.url; // This is a data URI (base64)
+          }
+        }
+        // Show both text and image in chat
+        const aiMessage = {
+          role: "assistant",
+          content: (
+            <div className="space-y-4">
+              {textContent && <div>{textContent}</div>}
+              {imageData && (
+                <div className="flex flex-col items-center space-y-2">
+                  <img
+                    src={imageData}
+                    alt="Generated"
+                    className="rounded-xl border-4 border-blue-500 shadow-xl max-w-full"
+                    style={{ width: '480px', maxWidth: '90vw', height: 'auto' }}
+                  />
+                  <a
+                    href={imageData}
+                    download={
+                      'openrouter-image-' + Date.now() + '.png'
                     }
-                    try {
-                        const data = JSON.parse(jsonStr);
-                        if (data.choices && data.choices[0]?.delta?.content) {
-                            setStreamingMessage(prev => prev + data.choices[0].delta.content);
-                        }
-                    } catch (e) {
-                        console.error('Failed to parse stream chunk:', jsonStr);
-                    }
-                }
+                    className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-lg transition-colors"
+                  >
+                    Download Image
+                  </a>
+                </div>
+              )}
+            </div>
+          )
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        setIsStreaming(false);
+        setIsGenerating(false);
+        return;
+      }
+      // --- END IMAGE GENERATION LOGIC ---
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": YOUR_SITE_URL,
+          "X-Title": YOUR_SITE_NAME,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: currentModel.model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...historyForAPI,
+            ...apiMessagesPayload
+          ],
+          stream: true
+        }),
+        signal: abortControllerRef.current.signal
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6);
+            if (jsonStr === '[DONE]') {
+              stopStreaming();
+              return;
             }
+            try {
+              const data = JSON.parse(jsonStr);
+              if (data.choices && data.choices[0]?.delta?.content) {
+                setStreamingMessage(prev => prev + data.choices[0].delta.content);
+              }
+            } catch (e) {
+              console.error('Failed to parse stream chunk:', jsonStr);
+            }
+          }
         }
+      }
     } catch (error) {
-        if (error.name !== 'AbortError') {
-            console.error('Error during fetch:', error);
-            const errorMessage = { role: "assistant", content: `Sorry, an error occurred: ${error.message}`};
-            setMessages(prev => [...prev, errorMessage]);
-        }
+      if (error.name !== 'AbortError') {
+        console.error('Error during fetch:', error);
+        const errorMessage = { role: "assistant", content: `Sorry, an error occurred: ${error.message}` };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } finally {
-        if (isStreaming) {
-           stopStreaming();
-        }
+      if (isStreaming) {
+        stopStreaming();
+      }
     }
 };
 
