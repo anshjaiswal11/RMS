@@ -646,15 +646,14 @@ const RMSAdminDashboard = () => {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
-    <Sidebar />
-    <div className={`${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-all duration-300 flex-1 flex flex-col`}>
-      <Header />
-      <main className="p-2 sm:p-4 md:p-6">
-        {renderCurrentView()}
-      </main>
-    </div>
-        
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 flex flex-col">
+        <Sidebar />
+        <div className={`${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-all duration-300 flex-1 flex flex-col`}>
+          <Header />
+          <main className="mt-[10px] p-2 sm:p-4 md:p-6">
+            {renderCurrentView()}
+          </main>
+        </div>
         {/* Loading Overlay */}
         {isLoading && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">

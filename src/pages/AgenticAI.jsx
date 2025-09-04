@@ -1135,7 +1135,7 @@ Please help with this request:`;
   const selectedLangInfo = languages.find(l => l.id === selectedLanguage);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-gray-900 text-white font-sans relative overflow-hidden mt-[10px] px-2 sm:px-4">
       <ThreeJSBackground />
       
       {/* Custom CSS for enhanced animations */}
@@ -1287,7 +1287,7 @@ Please help with this request:`;
         </div>
       )}
 
-      <main className={`${showSettings ? 'h-[calc(100vh-180px)]' : 'h-[calc(100vh-100px)]'} flex flex-col sm:flex-row overflow-hidden relative z-10`}>
+  <main className={`${showSettings ? 'h-[calc(100vh-180px)]' : 'h-[calc(100vh-100px)]'} flex flex-col sm:flex-row overflow-hidden relative z-10 mt-2`}>
         {!projectGenerated ? (
           <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
             <div className="max-w-2xl sm:max-w-6xl w-full space-y-8 sm:space-y-12 text-center animate-fade-in">
