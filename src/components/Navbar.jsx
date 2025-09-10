@@ -20,7 +20,6 @@ import {
   KeyRound,
   Users,
   Code,
-  Briefcase,
   BookOpen
 } from 'lucide-react';
 // Note: You might need to install a theme context or remove this line
