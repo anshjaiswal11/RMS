@@ -117,35 +117,34 @@ const MindMapFlashcardGenerator = () => {
 
   const cleanJsonResponse = (response) => {
     let cleaned = response.trim();
-    
     // Remove markdown code blocks
-    cleaned = cleaned.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-    
+    cleaned = cleaned.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
     // Remove any text before the first { or [
     const firstBrace = cleaned.indexOf('{');
     const firstBracket = cleaned.indexOf('[');
-    
     if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
       cleaned = cleaned.substring(firstBrace);
     } else if (firstBracket !== -1) {
       cleaned = cleaned.substring(firstBracket);
     }
-    
     // Remove any text after the last } or ]
     const lastBrace = cleaned.lastIndexOf('}');
     const lastBracket = cleaned.lastIndexOf(']');
-    
     if (lastBrace !== -1 && lastBrace > lastBracket) {
       cleaned = cleaned.substring(0, lastBrace + 1);
     } else if (lastBracket !== -1) {
       cleaned = cleaned.substring(0, lastBracket + 1);
     }
-    
-    // Fix common JSON issues
-    cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-    cleaned = cleaned.replace(/\n/g, ' '); // Replace newlines
-    cleaned = cleaned.replace(/\s+/g, ' '); // Multiple spaces to single
-    
+    // Remove stray periods and invalid characters before/after JSON
+    cleaned = cleaned.replace(/^[^\[{]+/, ''); // Remove non-JSON chars at start
+    cleaned = cleaned.replace(/[^\]}]+$/, ''); // Remove non-JSON chars at end
+    // Remove trailing commas before closing braces/brackets
+    cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+    // Remove any stray periods not inside quotes
+    cleaned = cleaned.replace(/(?<!["'])\.(?!["'])/g, '');
+    // Replace newlines and multiple spaces
+    cleaned = cleaned.replace(/\n/g, ' ');
+    cleaned = cleaned.replace(/\s+/g, ' ');
     return cleaned;
   };
 
