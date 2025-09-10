@@ -19,7 +19,9 @@ import {
   Lightbulb,
   KeyRound,
   Users,
-  Code
+  Code,
+  Briefcase,
+  BookOpen
 } from 'lucide-react';
 // Note: You might need to install a theme context or remove this line
 // import { useTheme } from '../context/ThemeContext'; 
@@ -61,7 +63,9 @@ const Navbar = () => {
       { path: '/ai-career-platform', label: 'AI Career Platform', icon: Briefcase },
       { path: '/mind-map-flashcard-generator', label: 'Mind Map Flashcard Generator', icon: Lightbulb },
       { path: '/agentic-ai-preview-$=001', label: 'Agentic AI', icon: Code },
-      { path: '/pdf-generator', label: 'PDF Generator', icon: Code },
+      { path: '/pdf-generator', label: 'PDF Generator', icon: Briefcase },
+      // { path: '/server-error', label: 'Server Error', icon: Code },
+      { path: '/pdf-editor', label: 'PDF Editor', icon: Code },
 
   ];
 

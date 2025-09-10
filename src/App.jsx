@@ -28,7 +28,7 @@ import MindMapFlashcardGenerator from './pages/MindMapFlashcardGenerator';
 import ServerError from './pages/servererror';
 import Agenticpreview from './pages/RMSAgenticLanding';
 import Pdfgenerator from './pages/Pdfgenerator';
-
+import PDFEditor from './pages/Pdfeditor';
 
 
 function App() {
@@ -76,6 +76,7 @@ function App() {
             <Route path="/mind-map-flashcard-generator" element={<MindMapFlashcardGenerator />} />
             <Route path="/pdf-generator" element={<Pdfgenerator />} />
             <Route path="/server-error" element={<ServerError />} />
+            <Route path="/pdf-editor" element={<PDFEditor />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
             <Route path="/freetest" element={<Freetest />} />
             <Route path="/admin" element={<Admin />} />
