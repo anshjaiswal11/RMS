@@ -15,7 +15,7 @@ const MindMapFlashcardGenerator = () => {
   // Updated API configuration
   const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
   const MODELS = [
-    'microsoft/phi-3-mini-128k-instruct:free',
+    'openai/gpt-oss-120b:free',
     'google/gemma-2-9b-it:free', 
     'meta-llama/llama-3.2-3b-instruct:free',
     'qwen/qwen-2.5-7b-instruct:free'
