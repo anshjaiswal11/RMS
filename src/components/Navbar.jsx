@@ -61,6 +61,8 @@ const Navbar = () => {
       { path: '/ai-career-platform', label: 'AI Career Platform', icon: Briefcase },
       { path: '/mind-map-flashcard-generator', label: 'Mind Map Flashcard Generator', icon: Lightbulb },
       { path: '/agentic-ai-preview-$=001', label: 'Agentic AI', icon: Code },
+      { path: '/pdf-generator', label: 'PDF Generator', icon: Code },
+
   ];
 
   const navItems = [

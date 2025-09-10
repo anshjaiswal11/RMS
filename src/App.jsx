@@ -27,6 +27,7 @@ import AI from './pages/AgenticAI'
 import MindMapFlashcardGenerator from './pages/MindMapFlashcardGenerator';
 import ServerError from './pages/servererror';
 import Agenticpreview from './pages/RMSAgenticLanding';
+import Pdfgenerator from './pages/Pdfgenerator';
 
 
 
@@ -73,6 +74,8 @@ function App() {
             <Route path="/agentic-ai-preview-$=001" element={<Agenticpreview />} />
             <Route path="/agentic-ai" element={<AI />} />
             <Route path="/mind-map-flashcard-generator" element={<MindMapFlashcardGenerator />} />
+            <Route path="/pdf-generator" element={<Pdfgenerator />} />
+            <Route path="/server-error" element={<ServerError />} />
             {/* <Route path="/refundpolicy" element={<RefundPolicy />} /> */}
             <Route path="/freetest" element={<Freetest />} />
             <Route path="/admin" element={<Admin />} />
