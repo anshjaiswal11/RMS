@@ -218,7 +218,7 @@ const PDFEditor = () => {
     // --- AI CONTENT GENERATION (from original code, unchanged) ---
     const streamContentFromAPI = async (prompt, type) => {
         // This function is kept as provided by the user.
-        const apiKey = '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';
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
         abortControllerRef.current = new AbortController();
         const typePrompts = {
             paragraph: `Write a concise, well-structured paragraph (2-3 sentences) about: ${prompt}. Make it informative and professional.`,
