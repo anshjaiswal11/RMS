@@ -11,8 +11,6 @@ import {
 // --- PDF LIBRARIES ---
 // You need to install these: npm install react-pdf pdf-lib
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 // --- PDF.js WORKER SETUP ---
