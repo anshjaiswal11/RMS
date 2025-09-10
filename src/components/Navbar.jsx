@@ -19,8 +19,7 @@ import {
   Lightbulb,
   KeyRound,
   Users,
-  Code,
-  BookOpen
+  Code
 } from 'lucide-react';
 // Note: You might need to install a theme context or remove this line
 // import { useTheme } from '../context/ThemeContext'; 
