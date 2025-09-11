@@ -216,7 +216,7 @@ const Navbar = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden pl-8"
                       >
-                        <div className="py-2 space-y-1">
+                        <div className="py-2 space-y-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500">
                         {item.children.map(child => {
                           const ChildIcon = child.icon;
                           return (
