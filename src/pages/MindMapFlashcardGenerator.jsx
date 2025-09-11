@@ -197,6 +197,10 @@ Return only the JSON object, no other text.`;
       const cleanJson = cleanJsonResponse(response);
       console.log('Cleaned JSON:', cleanJson);
       
+      if (!cleanJson || (!cleanJson.trim().startsWith('{') && !cleanJson.trim().startsWith('['))) {
+        throw new Error('No valid JSON found in response. The AI did not return a mind map. Please try again or rephrase your topic.');
+      }
+      
       let mindMapObj;
       try {
         mindMapObj = JSON.parse(cleanJson);

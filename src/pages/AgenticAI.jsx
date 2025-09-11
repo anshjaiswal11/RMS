@@ -634,10 +634,10 @@ export default function AgenticAICodeGenerator() {
   // 1. Store an array of API keys. Replace these with your actual keys,
   // preferably loaded from environment variables for security.
   const apiKeys = useMemo(() => [
-    process.env.REACT_APP_OPENAI_API_KEY,
-    process.env.REACT_APP_OPENAI_API2_KEY,
-    process.env.REACT_APP_OPENAI_API3_KEY,
-    process.env.REACT_APP_OPENAI_API4_KEY,
+    process.env.REACT_APP_OPENROUTER_API2_KEY,
+    process.env.REACT_APP_OPENROUTER_API3_KEY,
+    process.env.REACT_APP_OPENROUTER_API_KEY,
+    process.env.REACT_APP_OPENROUTER_API2_KEY,
   ], []);
 
   // 2. Use a ref to keep track of the current key index across re-renders.
