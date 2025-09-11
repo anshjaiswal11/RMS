@@ -5,68 +5,553 @@ import {
   Package, GitBranch, Monitor, Smartphone, Globe, Database, Cpu, Layers, CheckCircle, 
   AlertCircle, Copy, ExternalLink, X, Loader, Maximize2, Minimize2, RotateCcw, Edit3,
   FileCode, FilePlus, Bug, Lightbulb, ChevronRight, Star, Heart
+} from 'lucide-react';
+
+// Enhanced JSZip CDN loading
+import * as THREE from 'three';
+const JSZIP_CDN = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+
+// Three.js Background Animation Component
+const ThreeJSBackground = () => {
+  const mountRef = useRef(null);
+  const sceneRef = useRef(null);
+  const rendererRef = useRef(null);
+  const animationRef = useRef(null);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    // Basic Three.js setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    mountRef.current.appendChild(renderer.domElement);
+    
+    // Create floating particles
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 100;
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 20;
+      positions[i + 1] = (Math.random() - 0.5) * 20;
+      positions[i + 2] = (Math.random() - 0.5) * 20;
+      
+      colors[i] = Math.random() * 0.5 + 0.5;
+      colors[i + 1] = Math.random() * 0.5 + 0.8;
+      colors[i + 2] = 1;
+    }
+    
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+    const particlesMaterial = new THREE.PointsMaterial({
+      size: 0.05,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particles);
+    
+    // Create geometric shapes
+    const shapes = [];
+    for (let i = 0; i < 5; i++) {
+      const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      const material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(`hsl(${200 + i * 30}, 70%, 60%)`),
+        transparent: true,
+        opacity: 0.6,
+        wireframe: true
+      });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 10
+      );
+      cube.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      shapes.push(cube);
+      scene.add(cube);
+    }
+    
+    camera.position.z = 8;
+    
+    sceneRef.current = scene;
+    rendererRef.current = renderer;
+    
+    // Animation loop
+    const animate = () => {
+      animationRef.current = requestAnimationFrame(animate);
+      
+      // Rotate particles
+      particles.rotation.x += 0.001;
+      particles.rotation.y += 0.002;
+      
+      // Animate shapes
+      shapes.forEach((shape, index) => {
+        shape.rotation.x += 0.01;
+        shape.rotation.y += 0.005;
+        shape.position.y += Math.sin(Date.now() * 0.001 + index) * 0.002;
+      });
+      
+      renderer.render(scene, camera);
+    };
+    
+    animate();
+    
+    // Handle resize
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, []);
+
+  return <div ref={mountRef} className="fixed inset-0 z-0 pointer-events-none opacity-30" />;
+};
+
+// Enhanced Code Editor with better syntax highlighting
+const CodeEditor = lazy(() => {
+  const EditorComponent = ({ code, language, onChange, theme = 'dark' }) => {
+    const textareaRef = useRef(null);
+    const highlightRef = useRef(null);
+
+    const languageMap = {
+      'javascript': 'js', 'react': 'jsx', 'nextjs': 'jsx', 'nodejs': 'js', 'express': 'js',
+      'typescript': 'ts', 'jsx': 'jsx', 'tsx': 'tsx', 'html': 'html', 'css': 'css',
+      'json': 'json', 'python': 'py', 'java': 'java', 'cpp': 'cpp', 'vue': 'vue',
+      'svelte': 'svelte', 'php': 'php', 'go': 'go', 'rust': 'rs', 'dart': 'dart'
+    };
+
+    const getHighlightedCode = (code, lang) => {
+      if (!code) return '';
+
+      const escapeHtml = str => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      const patterns = {
+        js: [
+          { pattern: /(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|try|catch|throw|new|switch|case|default|break|continue)/g, class: 'text-purple-400' },
+          { pattern: /(".*?"|'.*?'|`.*?`)/g, class: 'text-green-300' },
+          { pattern: /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm, class: 'text-gray-500' },
+          { pattern: /(\d+(?:\.\d+)?)/g, class: 'text-orange-400' },
+          { pattern: /(true|false|null|undefined)/g, class: 'text-blue-400' },
+          { pattern: /([A-Z][a-zA-Z0-9_]*)/g, class: 'text-yellow-300' },
+        ],
+        jsx: [
+          { pattern: /(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|try|catch|throw|new|switch|case|default|break|continue)/g, class: 'text-purple-400' },
+          { pattern: /(<\/?[A-Z][^>]*>|<\/?[a-z][^>]*>)/g, class: 'text-cyan-400' },
+          { pattern: /(\w+)=/g, class: 'text-red-400' },
+          { pattern: /(".*?"|'.*?'|`.*?`)/g, class: 'text-green-300' },
+          { pattern: /(\/\/.*$|\/\*[\s\S]*?\*\/|\{.*\})/gm, class: 'text-gray-500' }
+        ],
+        html: [
+          { pattern: /(<\/?[^>]+>)/g, class: 'text-cyan-400' },
+          { pattern: /(\w+)=/g, class: 'text-red-400' },
+          { pattern: /(".*?"|'.*?')/g, class: 'text-green-300' },
+          { pattern: /()/g, class: 'text-gray-500' }
+        ],
+        css: [
+          { pattern: /([.#]?[a-zA-Z0-9_-]+)\s*(?={)/g, class: 'text-cyan-400' },
+          { pattern: /([\w-]+)\s*:/g, class: 'text-red-400' },
+          { pattern: /(::?[\w-]+)/g, class: 'text-yellow-300' },
+          { pattern: /(".*?"|'.*?'|#[\da-fA-F]{3,6}|\d+px|\d+rem|\d+em)/g, class: 'text-green-300' },
+          { pattern: /(\/\*[\s\S]*?\*\/)/g, class: 'text-gray-500' }
+        ],
+        python: [
+          { pattern: /(def|class|if|elif|else|for|while|return|import|from|try|except|with|as|pass|break|continue|lambda)/g, class: 'text-purple-400' },
+          { pattern: /(".*?"|'.*?')/g, class: 'text-green-300' },
+          { pattern: /(#.*$)/gm, class: 'text-gray-500' },
+          { pattern: /(\d+)/g, class: 'text-orange-400' }
+        ]
+      };
+
+      const langPatterns = patterns[lang] || patterns.js;
+      const combinedRegex = new RegExp(langPatterns.map(p => `(${p.pattern.source})`).join('|'), 'g');
+      
+      let lastIndex = 0;
+      const parts = [];
+      
+      code.replace(combinedRegex, (match, ...args) => {
+        const offset = args[args.length - 2];
+        const groupIndex = args.slice(0, -2).findIndex(g => g !== undefined);
+
+        if (offset > lastIndex) {
+          parts.push(escapeHtml(code.substring(lastIndex, offset)));
+        }
+        
+        if (groupIndex !== -1 && langPatterns[groupIndex]) {
+          const className = langPatterns[groupIndex].class;
+          parts.push(`<span class="${className}">${escapeHtml(match)}</span>`);
+        } else {
+          parts.push(escapeHtml(match));
+        }
+        
+        lastIndex = offset + match.length;
+        return match;
+      });
+
+      if (lastIndex < code.length) {
+        parts.push(escapeHtml(code.substring(lastIndex)));
+      }
+
+      return parts.join('');
+    };
+
+    const handleScroll = () => {
+        if (highlightRef.current && textareaRef.current) {
+            highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+            highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+        }
+    };
+
+    return (
+      <div className="h-full bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-xl overflow-hidden relative font-mono text-sm leading-6 shadow-2xl border border-gray-700/50">
+        <textarea
+          ref={textareaRef}
+          value={code}
+          onChange={(e) => onChange(e.target.value)}
+          onScroll={handleScroll}
+          className="absolute inset-0 w-full h-full bg-transparent text-transparent caret-white p-6 resize-none outline-none z-10 scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-transparent"
+          placeholder={`Enter your ${language} code here...`}
+          spellCheck={false}
+          style={{ tabSize: 2 }}
+        />
+        <pre
+          ref={highlightRef}
+          className="absolute inset-0 pointer-events-none p-6 whitespace-pre-wrap break-words overflow-auto scrollbar-thin scrollbar-thumb-blue-500/30 scrollbar-track-transparent"
+          aria-hidden="true"
+        >
+          <code dangerouslySetInnerHTML={{ __html: getHighlightedCode(code, languageMap[language] || 'js') }} />
+        </pre>
+        <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+      </div>
+    );
+  };
+  return Promise.resolve({ default: EditorComponent });
+});
+
+const LoadingSpinner = ({ text = "Loading..." }) => (
+  <div className="flex flex-col items-center justify-center p-8 space-y-4">
+    <div className="relative">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500/30 border-t-blue-500"></div>
+      <div className="absolute inset-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 animate-pulse opacity-20"></div>
+    </div>
+    <p className="text-gray-400 text-sm animate-pulse">{text}</p>
+  </div>
+);
+
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const baseClasses = "fixed top-6 right-6 p-4 rounded-xl shadow-2xl z-50 flex items-center space-x-3 text-white text-sm animate-bounce-in backdrop-blur-lg border";
+  const typeClasses = {
+    success: 'bg-green-500/90 border-green-400/30 shadow-green-500/20',
+    error: 'bg-red-500/90 border-red-400/30 shadow-red-500/20',
+    info: 'bg-blue-500/90 border-blue-400/30 shadow-blue-500/20'
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans relative overflow-hidden mt-[10px] px-2 sm:px-4">
-      <ThreeJSBackground />
-      {/* ...existing code... */}
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .responsive-main {
-            flex-direction: column !important;
-            height: auto !important;
-            min-height: 100vh;
-          }
-          .responsive-sidebar {
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: 100vw !important;
-            margin-bottom: 1rem;
-            box-shadow: none !important;
-          }
-          .responsive-editor {
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: 100vw !important;
-            margin-bottom: 1rem;
-          }
-          .responsive-chat {
-            position: static !important;
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: 100vw !important;
-            border-left: none !important;
-            box-shadow: none !important;
-            margin-bottom: 1rem;
+    <div className={`${baseClasses} ${typeClasses[type] || typeClasses.info}`}>
+      {type === 'success' && <CheckCircle className="w-5 h-5 animate-pulse" />}
+      {type === 'error' && <AlertCircle className="w-5 h-5 animate-pulse" />}
+      <span className="font-medium">{message}</span>
+      <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+// Enhanced Live Preview with better React.js support
+const LivePreview = ({ files, isVisible, onClose }) => {
+  const [previewContent, setPreviewContent] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
+  const [previewError, setPreviewError] = useState(null);
+
+  const generatePreviewContent = useCallback(() => {
+    if (!files.length) return '';
+
+    const htmlFile = files.find(f => f.name.includes('index.html') || f.name.endsWith('.html'));
+    const jsxFile = files.find(f => f.name.includes('App.jsx') || f.name.includes('App.js') || f.name.endsWith('.jsx') || f.name.includes('index.jsx'));
+    const cssFiles = files.filter(f => f.name.endsWith('.css'));
+    const jsFiles = files.filter(f => f.name.endsWith('.js') && !f.name.includes('.jsx'));
+    const componentFiles = files.filter(f => f.name.endsWith('.jsx') && !f.name.includes('App'));
+
+    if (htmlFile) {
+      let content = htmlFile.content;
+      
+      // Inject CSS files
+      cssFiles.forEach(cssFile => {
+        const styleTag = `<style>/* ${cssFile.name} */\n${cssFile.content}</style>`;
+        content = content.replace('</head>', `${styleTag}\n</head>`);
+      });
+
+      // Inject JS files
+      jsFiles.forEach(jsFile => {
+        const scriptTag = `<script>/* ${jsFile.name} */\n${jsFile.content}</script>`;
+        content = content.replace('</body>', `${scriptTag}\n</body>`);
+      });
+
+      return content;
+    } else if (jsxFile) {
+      const cssContent = cssFiles.map(f => f.content).join('\n');
+      const allJsxFiles = [jsxFile, ...componentFiles];
+      
+      return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Preview</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+              'slide-up': 'slideUp 0.5s ease-out',
+              'bounce-in': 'bounceIn 0.6s ease-out'
+            }
           }
         }
-      `}</style>
-      {/* ...existing code... */}
-      <main className={`responsive-main ${showSettings ? 'h-[calc(100vh-180px)]' : 'h-[calc(100vh-100px)]'} flex flex-col sm:flex-row overflow-hidden relative z-10 mt-2`}>
-        {!projectGenerated ? (
-          <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-            {/* ...existing code... */}
+      }
+    </script>
+    <style>
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+      body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+      #root { min-height: 100vh; }
+      .scrollbar-thin { scrollbar-width: thin; }
+      .scrollbar-thumb-blue-500 { scrollbar-color: #3b82f6 transparent; }
+      ${cssContent}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useEffect, useCallback, useMemo, useRef } = React;
+      
+      // Load all component files
+      ${allJsxFiles.map(file => `
+      // File: ${file.name}
+      ${file.content}
+      `).join('\n')}
+      
+      // Enhanced rendering with error boundary
+      class ErrorBoundary extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { hasError: false, error: null };
+        }
+
+        static getDerivedStateFromError(error) {
+          return { hasError: true, error };
+        }
+
+        componentDidCatch(error, errorInfo) {
+          console.error("Preview Error:", error, errorInfo);
+          window.parent?.postMessage({ type: 'preview-error', error: error.message }, '*');
+        }
+
+        render() {
+          if (this.state.hasError) {
+            return React.createElement('div', {
+              className: 'min-h-screen flex items-center justify-center bg-gray-900 p-8'
+            }, 
+              React.createElement('div', {
+                className: 'bg-red-500/10 border border-red-500/30 rounded-xl p-6 max-w-lg text-center'
+              },
+                React.createElement('div', { className: 'text-red-400 text-lg font-semibold mb-2' }, 'Preview Error'),
+                React.createElement('div', { className: 'text-gray-300 text-sm' }, this.state.error?.message || 'Something went wrong'),
+                React.createElement('button', {
+                  className: 'mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition-colors',
+                  onClick: () => window.location.reload()
+                }, 'Reload Preview')
+              )
+            );
+          }
+          return this.props.children;
+        }
+      }
+      
+      const rootElement = document.getElementById('root');
+      
+      try {
+        // Try to find the main component
+        const possibleComponents = [
+          window.App, window.Main, window.Component, window.Index, 
+          window.Home, window.default, window.Application
+        ];
+        
+        const MainComponent = possibleComponents.find(comp => comp && typeof comp === 'function');
+        
+        if (MainComponent) {
+          const root = ReactDOM.createRoot ? ReactDOM.createRoot(rootElement) : null;
+          
+          if (root) {
+            root.render(
+              React.createElement(ErrorBoundary, null, 
+                React.createElement(MainComponent, null)
+              )
+            );
+          } else {
+            ReactDOM.render(
+              React.createElement(ErrorBoundary, null, 
+                React.createElement(MainComponent, null)
+              ),
+              rootElement
+            );
+          }
+          
+          // Notify parent of successful render
+          window.parent?.postMessage({ type: 'preview-success' }, '*');
+        } else {
+          throw new Error('No main React component found. Make sure to export a component named App, Main, or Component.');
+        }
+      } catch (error) {
+        console.error('Render Error:', error);
+        rootElement.innerHTML = \`
+          <div class="min-h-screen flex items-center justify-center bg-gray-900 p-8">
+            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6 max-w-lg text-center">
+              <div class="text-red-400 text-lg font-semibold mb-2">Render Error</div>
+              <div class="text-gray-300 text-sm">\${error.message}</div>
+              <div class="text-xs text-gray-500 mt-2">Check the console for more details</div>
+            </div>
           </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row flex-1 overflow-visible p-3 sm:p-6 gap-3 sm:gap-6">
-            {/* Enhanced File Explorer with animations */}
-            <div className="responsive-sidebar w-full sm:w-80 lg:w-96 glass-morphism border border-gray-700/50 rounded-2xl flex flex-col overflow-hidden shadow-2xl mb-3 sm:mb-0 animate-slide-up">
-              {/* ...existing code... */}
-            </div>
-            {/* Enhanced Code Editor with premium styling */}
-            <div className="responsive-editor flex-1 flex flex-col glass-morphism border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl animate-fade-in">
-              {/* ...existing code... */}
-            </div>
-            {/* Enhanced Agentic Chat Panel with premium animations */}
-            <div className={`responsive-chat fixed top-0 right-0 h-full w-80 sm:w-[28rem] glass-morphism border-l border-gray-700/50 shadow-2xl flex flex-col transition-all duration-500 ease-out z-30 ${
-              isChatVisible ? 'translate-x-0' : 'translate-x-full'
-            }`}>
-              {/* ...existing code... */}
-            </div>
-          </div>
-        )}
-      </main>
-      {/* ...existing code... */}
+        \`;
+        window.parent?.postMessage({ type: 'preview-error', error: error.message }, '*');
+      }
+    </script>
+</body>
+</html>`;
+    }
+    
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Not Available</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="min-h-screen flex items-center justify-center p-8">
+      <div class="text-center space-y-4">
+        <div class="text-6xl opacity-50">🔍</div>
+        <h2 class="text-xl font-semibold">No Previewable Files</h2>
+        <p class="text-gray-400">Add an index.html, App.jsx, or other previewable file to see your project in action.</p>
+      </div>
     </div>
+</body>
+</html>`;
+  }, [files]);
+
+  useEffect(() => {
+    if (isVisible) {
+      const content = generatePreviewContent();
+      setPreviewContent(content);
+      setPreviewKey(prev => prev + 1);
+      setPreviewError(null);
+    }
+  }, [isVisible, files, generatePreviewContent]);
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === 'preview-error') {
+        setPreviewError(event.data.error);
+      } else if (event.data?.type === 'preview-success') {
+        setPreviewError(null);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const handleRefresh = () => {
+    const content = generatePreviewContent();
+    setPreviewContent(content);
+    setPreviewKey(prev => prev + 1);
+    setPreviewError(null);
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-lg z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className={`bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col border-2 border-gray-200 transition-all duration-500 ${isFullscreen ? 'w-full h-full' : 'w-[95vw] h-[90vh] max-w-7xl'}`}>
+        <div className="bg-gradient-to-r from-gray-100 to-gray-50 border-b border-gray-200 p-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Monitor className="w-6 h-6 text-gray-600" />
+            <div>
+              <h3 className="font-bold text-gray-800 text-lg">Live Preview</h3>
+              <p className="text-sm text-gray-500">Real-time project preview</p>
+            </div>
+            <div className="flex space-x-1">
+              <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            {previewError && (
+              <div className="text-red-500 text-sm font-medium">Error Detected</div>
+            )}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-3 bg-blue-100 hover:bg-blue-200 rounded-xl transition-all duration-200 group"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 className="w-5 h-5 group-hover:scale-110 transition-transform" /> : <Maximize2 className="w-5 h-5 group-hover:scale-110 transition-transform" />}
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="p-3 bg-green-100 hover:bg-green-200 rounded-xl transition-all duration-200 group"
+              title="Refresh Preview"
+            >
+              <RotateCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-3 bg-red-100 hover:bg-red-200 rounded-xl transition-all duration-200 group"
+              title="Close Preview"
+            >
+              <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden relative">
+          {previewContent ? (
             <iframe
               key={previewKey}
               srcDoc={previewContent}
@@ -149,10 +634,10 @@ export default function AgenticAICodeGenerator() {
   // 1. Store an array of API keys. Replace these with your actual keys,
   // preferably loaded from environment variables for security.
   const apiKeys = useMemo(() => [
-    process.env.REACT_APP_OPENROUTER_API2_KEY,
-    process.env.REACT_APP_OPENROUTER_API3_KEY,
     process.env.REACT_APP_OPENROUTER_API_KEY,
     process.env.REACT_APP_OPENROUTER_API2_KEY,
+    process.env.REACT_APP_OPENROUTER_API3_KEY,
+    process.env.REACT_APP_OPENAI_API4_KEY,
   ], []);
 
   // 2. Use a ref to keep track of the current key index across re-renders.
