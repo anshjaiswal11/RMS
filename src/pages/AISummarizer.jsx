@@ -321,13 +321,13 @@ const AISummarizer = () => {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Authorization": `Bearer ${OPENROUTER_API2_KEY}`,
           "HTTP-Referer": YOUR_SITE_URL,
           "X-Title": YOUR_SITE_NAME,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",
+          model: "deepseek/deepseek-chat-v3.1:free",
           messages: messagesPayload,
           temperature: 0.7,
           stream: true

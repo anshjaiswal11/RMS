@@ -282,13 +282,13 @@ const TestGenerator = () => {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Authorization": `Bearer ${OPENROUTER_API3_KEY}`,
           "HTTP-Referer": YOUR_SITE_URL,
           "X-Title": YOUR_SITE_NAME,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+          model: "deepseek/deepseek-chat-v3.1:free",
           messages: messagesPayload,
           temperature: 0.7,
           max_tokens: 4000
