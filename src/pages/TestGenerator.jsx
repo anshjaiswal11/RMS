@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 // It's recommended to store API keys in environment variables for security
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API3_KEY;
 const YOUR_SITE_URL = 'www.rmslpu.xyz';
 const YOUR_SITE_NAME = 'RMS Study Assistant';
 const BACKEND_API_BASE_URL = 'https://rms-backend-taupe.vercel.app/api'; // Your backend URL
@@ -282,7 +282,7 @@ const TestGenerator = () => {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API3_KEY}`,
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           "HTTP-Referer": YOUR_SITE_URL,
           "X-Title": YOUR_SITE_NAME,
           "Content-Type": "application/json"
