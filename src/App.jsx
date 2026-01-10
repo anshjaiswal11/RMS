@@ -29,6 +29,7 @@ import ServerError from './pages/servererror';
 import Agenticpreview from './pages/RMSAgenticLanding';
 import Pdfgenerator from './pages/Pdfgenerator';
 import PDFEditor from './pages/Pdfeditor';
+import PPTPDF from './pages/PPTtoPDF';
 
 
 function App() {
@@ -91,6 +92,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/subject-resource" element={<SubjectResource />} />
+            <Route path="/ppt-pdf" element={<PPTPDF />} />
           </Routes>
         </AnimatePresence>
       </div>
