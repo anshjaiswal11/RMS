@@ -1,4 +1,6 @@
 import React from 'react';
+import mammoth from 'mammoth';
+import JSZip from 'jszip';
 import { useState, useCallback, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
@@ -100,11 +102,11 @@ const TestGenerator = () => {
 
   const onDrop = useCallback((acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
-    if (uploadedFile && (uploadedFile.type === 'application/pdf' || uploadedFile.name.endsWith('.docx'))) {
+    if (uploadedFile) {
       setFile(uploadedFile);
       toast.success('File uploaded successfully!');
     } else {
-      toast.error('Please upload a valid PDF or DOCX file.');
+      toast.error('Please upload a valid file (PDF, DOCX, PPTX, or TXT).');
     }
   }, []);
 
@@ -112,10 +114,77 @@ const TestGenerator = () => {
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'text/plain': ['.txt']
     },
     multiple: false
   });
+
+  const extractTextFromFile = async (file) => {
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error("File size exceeds limit (50MB).");
+    }
+
+    const fileType = file.name.split('.').pop().toLowerCase();
+
+    if (fileType === 'pdf') {
+      return extractTextFromPDF(file);
+    } else if (fileType === 'docx') {
+      return extractTextFromDOCX(file);
+    } else if (fileType === 'pptx') {
+      return extractTextFromPPTX(file);
+    } else if (fileType === 'txt') {
+      return await file.text();
+    } else {
+      throw new Error("Unsupported file type.");
+    }
+  };
+
+  const extractTextFromDOCX = async (file) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      return result.value;
+    } catch (error) {
+      console.error("DOCX Extraction Error", error);
+      throw new Error("Failed to extract text from DOCX.");
+    }
+  };
+
+  const extractTextFromPPTX = async (file) => {
+    try {
+      const zip = new JSZip();
+      const zipContent = await zip.loadAsync(file);
+      const slideFiles = Object.keys(zipContent.files).filter(fileName =>
+        fileName.startsWith('ppt/slides/slide') && fileName.endsWith('.xml')
+      );
+
+      slideFiles.sort((a, b) => {
+        const numA = parseInt(a.match(/slide(\d+)\.xml/)[1]);
+        const numB = parseInt(b.match(/slide(\d+)\.xml/)[1]);
+        return numA - numB;
+      });
+
+      let fullText = "";
+      const parser = new DOMParser();
+
+      for (const fileName of slideFiles) {
+        const slideXmlStr = await zipContent.file(fileName).async('string');
+        const xmlDoc = parser.parseFromString(slideXmlStr, 'text/xml');
+        const textElements = xmlDoc.getElementsByTagName('a:t');
+        for (let j = 0; j < textElements.length; j++) {
+          fullText += textElements[j].textContent + " ";
+        }
+        fullText += "\n";
+      }
+      return fullText;
+    } catch (error) {
+      console.error("PPTX Extraction Error", error);
+      throw new Error("Failed to extract text from PPTX.");
+    }
+  };
 
   const extractTextFromPDF = async (file) => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -232,7 +301,7 @@ const TestGenerator = () => {
 
     try {
       setUploadProgress(30);
-      const pdfContent = await extractTextFromPDF(file);
+      const content = await extractTextFromFile(file);
       setUploadProgress(70);
 
       const systemPrompt = `You are an expert academic test generator. Create a multiple-choice quiz based on the provided content.
@@ -263,7 +332,7 @@ const TestGenerator = () => {
 
       const messagesPayload = [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate a ${level} level test based on:\n\n${pdfContent.substring(0, 3000)}` }
+        { role: "user", content: `Generate a ${level} level test based on:\n\n${content.substring(0, 15000)}` }
       ];
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -651,7 +720,7 @@ const TestGenerator = () => {
                             Drag & drop a file here, or click to select
                           </p>
                           <p className="text-sm text-secondary-500 dark:text-secondary-500">
-                            Supports PDF and DOCX files up to 10MB
+                            Supports PDF, DOCX, PPTX, and TXT files up to 50MB
                           </p>
                         </div>
                       )}
