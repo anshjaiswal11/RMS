@@ -29,7 +29,7 @@ import ServerError from './pages/servererror';
 import Agenticpreview from './pages/RMSAgenticLanding';
 import Pdfgenerator from './pages/Pdfgenerator';
 import PDFEditor from './pages/Pdfeditor';
-import PPTPDF from './pages/PPTtoPDF';
+import PPTPDF from './pages/ppt-pdf';
 
 
 function App() {
