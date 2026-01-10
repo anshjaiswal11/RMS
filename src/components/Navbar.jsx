@@ -19,7 +19,6 @@ import {
   Lightbulb,
   KeyRound,
   Users,
-  Users,
   Code,
   FileType
 } from 'lucide-react';
