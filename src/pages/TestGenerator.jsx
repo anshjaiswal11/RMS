@@ -32,7 +32,7 @@ const TestGenerator = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [userCode, setUserCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  
+
   // --- EXISTING STATE ---
   const [file, setFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -57,31 +57,31 @@ const TestGenerator = () => {
     { icon: BarChart3, title: 'Detailed Analytics', description: 'Get insights into your performance with explanations for each answer.', color: 'from-green-500 to-emerald-500' },
     { icon: Lightbulb, title: 'Learning Enhancement', description: 'Advanced questions that expand your knowledge beyond the PDF.', color: 'from-orange-500 to-red-500' }
   ];
-  
+
   // --- VERIFICATION HANDLER ---
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     if (!userCode || userCode.length !== 6) {
-        toast.error("Please enter a valid 6-digit key.");
-        return;
+      toast.error("Please enter a valid 6-digit key.");
+      return;
     }
     setIsVerifying(true);
     try {
-        const response = await fetch(`${BACKEND_API_BASE_URL}/user/verify-code`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userCode })
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Verification failed.');
-        }
-        toast.success('Verification Successful! Access granted.');
-        setIsVerified(true);
+      const response = await fetch(`${BACKEND_API_BASE_URL}/user/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userCode })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed.');
+      }
+      toast.success('Verification Successful! Access granted.');
+      setIsVerified(true);
     } catch (error) {
-        toast.error(`Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     } finally {
-        setIsVerifying(false);
+      setIsVerifying(false);
     }
   };
 
@@ -174,57 +174,57 @@ const TestGenerator = () => {
     console.log('Raw AI Response:', text);
 
     questionBlocks.forEach(block => {
-        let currentQuestion = { text: '', options: [], correctAnswer: '', explanation: '' };
-        const lines = block.split('\n').filter(line => line.trim() !== '');
-        let inExplanation = false;
-        let questionTextParts = [];
+      let currentQuestion = { text: '', options: [], correctAnswer: '', explanation: '' };
+      const lines = block.split('\n').filter(line => line.trim() !== '');
+      let inExplanation = false;
+      let questionTextParts = [];
 
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-            if (trimmedLine.match(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]/i) && !currentQuestion.text) {
-                let questionText = trimmedLine.replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '').replace(/^\*\*|\*\*$/g, '').trim();
-                questionTextParts.push(questionText);
-            } else if (trimmedLine.match(/^(\*\*)?[A-D][\).\]:]/i)) {
-                inExplanation = false;
-                const optionMatch = trimmedLine.match(/^(\*\*)?([A-D])[\).\]:]/i);
-                if (optionMatch && currentQuestion.options.length < 4) {
-                    const optionLetter = optionMatch[2].toUpperCase();
-                    let optionText = trimmedLine.replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '').replace(/\*\*/g, '').trim();
-                    const isMarkedCorrect = trimmedLine.toLowerCase().includes('correct') || trimmedLine.includes('✓') || trimmedLine.includes('[CORRECT]');
-                    if (isMarkedCorrect) {
-                        currentQuestion.correctAnswer = optionLetter;
-                        optionText = optionText.replace(/\s*\(?correct\)?/i, '').replace('✓', '').replace('[CORRECT]', '').trim();
-                    }
-                    const expectedIndex = optionLetter.charCodeAt(0) - 65;
-                    while (currentQuestion.options.length <= expectedIndex) {
-                        currentQuestion.options.push('');
-                    }
-                    if (optionText && expectedIndex < 4) {
-                        currentQuestion.options[expectedIndex] = optionText;
-                    }
-                }
-            } else if (trimmedLine.match(/^(Correct\s+Answer|Answer|Correct)[:.]/i)) {
-                inExplanation = false;
-                const answerMatch = trimmedLine.match(/\b([A-D])\b/i); 
-                if (answerMatch && answerMatch[1] && !currentQuestion.correctAnswer) {
-                    currentQuestion.correctAnswer = answerMatch[1].toUpperCase();
-                }
-            } else if (trimmedLine.match(/^Explanation[:.]/i)) {
-                currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').replace(/\*\*/g, '').trim();
-                inExplanation = true;
-            } else if (inExplanation) {
-                currentQuestion.explanation += ' ' + trimmedLine.replace(/\*\*/g, '');
-            } else if (!currentQuestion.text || currentQuestion.options.length === 0) {
-                questionTextParts.push(trimmedLine);
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.match(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]/i) && !currentQuestion.text) {
+          let questionText = trimmedLine.replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '').replace(/^\*\*|\*\*$/g, '').trim();
+          questionTextParts.push(questionText);
+        } else if (trimmedLine.match(/^(\*\*)?[A-D][\).\]:]/i)) {
+          inExplanation = false;
+          const optionMatch = trimmedLine.match(/^(\*\*)?([A-D])[\).\]:]/i);
+          if (optionMatch && currentQuestion.options.length < 4) {
+            const optionLetter = optionMatch[2].toUpperCase();
+            let optionText = trimmedLine.replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '').replace(/\*\*/g, '').trim();
+            const isMarkedCorrect = trimmedLine.toLowerCase().includes('correct') || trimmedLine.includes('✓') || trimmedLine.includes('[CORRECT]');
+            if (isMarkedCorrect) {
+              currentQuestion.correctAnswer = optionLetter;
+              optionText = optionText.replace(/\s*\(?correct\)?/i, '').replace('✓', '').replace('[CORRECT]', '').trim();
             }
-        });
-
-        currentQuestion.text = questionTextParts.join('\n').trim();
-        currentQuestion.options = currentQuestion.options.filter(option => option && option.trim() !== '');
-
-        if (currentQuestion.text && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
-            questions.push(currentQuestion);
+            const expectedIndex = optionLetter.charCodeAt(0) - 65;
+            while (currentQuestion.options.length <= expectedIndex) {
+              currentQuestion.options.push('');
+            }
+            if (optionText && expectedIndex < 4) {
+              currentQuestion.options[expectedIndex] = optionText;
+            }
+          }
+        } else if (trimmedLine.match(/^(Correct\s+Answer|Answer|Correct)[:.]/i)) {
+          inExplanation = false;
+          const answerMatch = trimmedLine.match(/\b([A-D])\b/i);
+          if (answerMatch && answerMatch[1] && !currentQuestion.correctAnswer) {
+            currentQuestion.correctAnswer = answerMatch[1].toUpperCase();
+          }
+        } else if (trimmedLine.match(/^Explanation[:.]/i)) {
+          currentQuestion.explanation = trimmedLine.replace(/^Explanation[:.]\s*/i, '').replace(/\*\*/g, '').trim();
+          inExplanation = true;
+        } else if (inExplanation) {
+          currentQuestion.explanation += ' ' + trimmedLine.replace(/\*\*/g, '');
+        } else if (!currentQuestion.text || currentQuestion.options.length === 0) {
+          questionTextParts.push(trimmedLine);
         }
+      });
+
+      currentQuestion.text = questionTextParts.join('\n').trim();
+      currentQuestion.options = currentQuestion.options.filter(option => option && option.trim() !== '');
+
+      if (currentQuestion.text && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
+        questions.push(currentQuestion);
+      }
     });
 
     console.log('Final parsed questions:', JSON.parse(JSON.stringify(questions)));
@@ -288,7 +288,7 @@ const TestGenerator = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-chat-v3.1:free",
+          model: "xiaomi/mimo-v2-flash:free",
           messages: messagesPayload,
           temperature: 0.7,
           max_tokens: 4000
@@ -529,14 +529,14 @@ const TestGenerator = () => {
                         onClick={() => handleAnswerSelect(index, optionLetter)}
                         disabled={isSubmitted}
                         className={`p-4 text-left rounded-lg border transition-all ${isSelected
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                            : isSubmitted
-                              ? showCorrect
-                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                : showIncorrect
-                                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                  : 'border-secondary-200 dark:border-secondary-700'
-                              : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                          : isSubmitted
+                            ? showCorrect
+                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                              : showIncorrect
+                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                : 'border-secondary-200 dark:border-secondary-700'
+                            : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
                           }`}
                       >
                         <div className="flex items-center">
@@ -648,8 +648,8 @@ const TestGenerator = () => {
                     <div
                       {...getRootProps()}
                       className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
                         }`}
                     >
                       <input {...getInputProps()} />
@@ -692,49 +692,49 @@ const TestGenerator = () => {
                   </div>
 
                   <div>
-                     <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-                        Step 2: Verify Key
-                     </h3>
-                     {isVerified ? (
-                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center space-x-3">
-                            <CheckCircle className="w-5 h-5 text-green-500" />
-                            <p className="font-medium text-green-800 dark:text-green-200">
-                                Key Verified! You can now generate a test.
-                            </p>
+                    <h3 className="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
+                      Step 2: Verify Key
+                    </h3>
+                    {isVerified ? (
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center space-x-3">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <p className="font-medium text-green-800 dark:text-green-200">
+                          Key Verified! You can now generate a test.
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleVerifyCode} className="space-y-3">
+                        <div className="relative">
+                          <KeyRound className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400" />
+                          <input
+                            type="text"
+                            value={userCode}
+                            onChange={(e) => setUserCode(e.target.value.replace(/\D/g, ''))}
+                            maxLength="6"
+                            className="w-full pl-10 pr-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            placeholder="Enter 6-digit key"
+                            required
+                          />
                         </div>
-                     ) : (
-                        <form onSubmit={handleVerifyCode} className="space-y-3">
-                            <div className="relative">
-                                <KeyRound className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400" />
-                                <input
-                                    type="text"
-                                    value={userCode}
-                                    onChange={(e) => setUserCode(e.target.value.replace(/\D/g, ''))}
-                                    maxLength="6"
-                                    className="w-full pl-10 pr-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                    placeholder="Enter 6-digit key"
-                                    required
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={isVerifying}
-                                className="w-full btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50"
-                            >
-                                {isVerifying ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span>Verifying...</span>
-                                    </>
-                                ) : (
-                                    <span>Verify Key</span>
-                                )}
-                            </button>
-                            <p className="text-xs text-center text-secondary-500">
-                                Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
-                            </p>
-                        </form>
-                     )}
+                        <button
+                          type="submit"
+                          disabled={isVerifying}
+                          className="w-full btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50"
+                        >
+                          {isVerifying ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <span>Verifying...</span>
+                            </>
+                          ) : (
+                            <span>Verify Key</span>
+                          )}
+                        </button>
+                        <p className="text-xs text-center text-secondary-500">
+                          Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
+                        </p>
+                      </form>
+                    )}
                   </div>
 
                   <div>
@@ -750,8 +750,8 @@ const TestGenerator = () => {
                           onClick={() => setTestLevel(level.id)}
                           disabled={isProcessing}
                           className={`w-full text-left p-4 rounded-lg border transition-all ${testLevel === level.id
-                              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                              : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                            : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
                             } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           <div className="flex justify-between items-start">
@@ -767,7 +767,7 @@ const TestGenerator = () => {
                         </motion.button>
                       ))}
                     </div>
-                     <button
+                    <button
                       onClick={() => generateTest(testLevel)}
                       disabled={!file || isProcessing || !isVerified}
                       className="w-full mt-4 btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -785,7 +785,7 @@ const TestGenerator = () => {
                       )}
                     </button>
                   </div>
-                  
+
                   <div className="mt-8">
                     <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
                       Features

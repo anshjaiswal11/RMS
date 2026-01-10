@@ -165,76 +165,76 @@ const TestGenerator = () => {
     console.log('Raw AI Response:', text); // Debug: see full response
 
     questionBlocks.forEach(block => {
-        let currentQuestion = {
-            text: '',
-            options: [],
-            correctAnswer: '',
-            explanation: ''
-        };
+      let currentQuestion = {
+        text: '',
+        options: [],
+        correctAnswer: '',
+        explanation: ''
+      };
 
-        const lines = block.split('\n').filter(line => line.trim() !== '');
-        let inExplanation = false;
-        let questionTextParts = [];
+      const lines = block.split('\n').filter(line => line.trim() !== '');
+      let inExplanation = false;
+      let questionTextParts = [];
 
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
 
-            if (trimmedLine.match(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]/i) && !currentQuestion.text) {
-                let questionText = trimmedLine
-                    .replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '')
-                    .replace(/^\*\*|\*\*$/g, '')
-                    .trim();
-                questionTextParts.push(questionText);
-            } else if (trimmedLine.match(/^(\*\*)?[A-D][\).\]:]/i)) {
-                inExplanation = false;
-                const optionMatch = trimmedLine.match(/^(\*\*)?([A-D])[\).\]:]/i);
-                if (optionMatch && currentQuestion.options.length < 4) {
-                    const optionLetter = optionMatch[2].toUpperCase();
-                    let optionText = trimmedLine
-                        .replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '')
-                        .replace(/\*\*/g, '')
-                        .trim();
-                    
-                    const isMarkedCorrect = trimmedLine.toLowerCase().includes('correct') || trimmedLine.includes('✓') || trimmedLine.includes('[CORRECT]');
-                    if (isMarkedCorrect) {
-                        currentQuestion.correctAnswer = optionLetter;
-                        optionText = optionText.replace(/\s*\(?correct\)?/i, '').replace('✓', '').replace('[CORRECT]', '').trim();
-                    }
-                    
-                    const expectedIndex = optionLetter.charCodeAt(0) - 65;
-                    while (currentQuestion.options.length <= expectedIndex) {
-                        currentQuestion.options.push('');
-                    }
-                    if (optionText && expectedIndex < 4) {
-                        currentQuestion.options[expectedIndex] = optionText;
-                    }
-                }
-            } else if (trimmedLine.match(/^(Correct\s+Answer|Answer|Correct)[:.]/i)) {
-                inExplanation = false;
-                const answerMatch = trimmedLine.match(/\b([A-D])\b/i); 
-                if (answerMatch && answerMatch[1] && !currentQuestion.correctAnswer) {
-                    currentQuestion.correctAnswer = answerMatch[1].toUpperCase();
-                }
-            } else if (trimmedLine.match(/^Explanation[:.]/i)) {
-                currentQuestion.explanation = trimmedLine
-                    .replace(/^Explanation[:.]\s*/i, '')
-                    .replace(/\*\*/g, '')
-                    .trim();
-                inExplanation = true;
-            } else if (inExplanation) {
-                currentQuestion.explanation += ' ' + trimmedLine.replace(/\*\*/g, '');
-            } else if (!currentQuestion.text || currentQuestion.options.length === 0) {
-                // This captures multi-line questions or code blocks before options start
-                questionTextParts.push(trimmedLine);
+        if (trimmedLine.match(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]/i) && !currentQuestion.text) {
+          let questionText = trimmedLine
+            .replace(/^(Question\s*\d+|Q\s*\d+|\d+\.|^\*\*\d+\.)[:.]\s*/i, '')
+            .replace(/^\*\*|\*\*$/g, '')
+            .trim();
+          questionTextParts.push(questionText);
+        } else if (trimmedLine.match(/^(\*\*)?[A-D][\).\]:]/i)) {
+          inExplanation = false;
+          const optionMatch = trimmedLine.match(/^(\*\*)?([A-D])[\).\]:]/i);
+          if (optionMatch && currentQuestion.options.length < 4) {
+            const optionLetter = optionMatch[2].toUpperCase();
+            let optionText = trimmedLine
+              .replace(/^(\*\*)?[A-D][\).\]:]\s*(\*\*)?/i, '')
+              .replace(/\*\*/g, '')
+              .trim();
+
+            const isMarkedCorrect = trimmedLine.toLowerCase().includes('correct') || trimmedLine.includes('✓') || trimmedLine.includes('[CORRECT]');
+            if (isMarkedCorrect) {
+              currentQuestion.correctAnswer = optionLetter;
+              optionText = optionText.replace(/\s*\(?correct\)?/i, '').replace('✓', '').replace('[CORRECT]', '').trim();
             }
-        });
 
-        currentQuestion.text = questionTextParts.join('\n').trim();
-        currentQuestion.options = currentQuestion.options.filter(option => option && option.trim() !== '');
-
-        if (currentQuestion.text && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
-            questions.push(currentQuestion);
+            const expectedIndex = optionLetter.charCodeAt(0) - 65;
+            while (currentQuestion.options.length <= expectedIndex) {
+              currentQuestion.options.push('');
+            }
+            if (optionText && expectedIndex < 4) {
+              currentQuestion.options[expectedIndex] = optionText;
+            }
+          }
+        } else if (trimmedLine.match(/^(Correct\s+Answer|Answer|Correct)[:.]/i)) {
+          inExplanation = false;
+          const answerMatch = trimmedLine.match(/\b([A-D])\b/i);
+          if (answerMatch && answerMatch[1] && !currentQuestion.correctAnswer) {
+            currentQuestion.correctAnswer = answerMatch[1].toUpperCase();
+          }
+        } else if (trimmedLine.match(/^Explanation[:.]/i)) {
+          currentQuestion.explanation = trimmedLine
+            .replace(/^Explanation[:.]\s*/i, '')
+            .replace(/\*\*/g, '')
+            .trim();
+          inExplanation = true;
+        } else if (inExplanation) {
+          currentQuestion.explanation += ' ' + trimmedLine.replace(/\*\*/g, '');
+        } else if (!currentQuestion.text || currentQuestion.options.length === 0) {
+          // This captures multi-line questions or code blocks before options start
+          questionTextParts.push(trimmedLine);
         }
+      });
+
+      currentQuestion.text = questionTextParts.join('\n').trim();
+      currentQuestion.options = currentQuestion.options.filter(option => option && option.trim() !== '');
+
+      if (currentQuestion.text && currentQuestion.options.length >= 2 && currentQuestion.correctAnswer) {
+        questions.push(currentQuestion);
+      }
     });
 
     console.log('Final parsed questions:', JSON.parse(JSON.stringify(questions)));
@@ -300,7 +300,7 @@ const TestGenerator = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+          model: "xiaomi/mimo-v2-flash:free",
           messages: messagesPayload,
           temperature: 0.7,
           max_tokens: 4000
@@ -543,14 +543,14 @@ const TestGenerator = () => {
                         onClick={() => handleAnswerSelect(index, optionLetter)}
                         disabled={isSubmitted}
                         className={`p-4 text-left rounded-lg border transition-all ${isSelected
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                            : isSubmitted
-                              ? showCorrect
-                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                : showIncorrect
-                                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                  : 'border-secondary-200 dark:border-secondary-700'
-                              : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                          : isSubmitted
+                            ? showCorrect
+                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                              : showIncorrect
+                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                : 'border-secondary-200 dark:border-secondary-700'
+                            : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
                           }`}
                       >
                         <div className="flex items-center">
@@ -661,8 +661,8 @@ const TestGenerator = () => {
                   <div
                     {...getRootProps()}
                     className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
                       }`}
                   >
                     <input {...getInputProps()} />
@@ -741,8 +741,8 @@ const TestGenerator = () => {
                           onClick={() => setTestLevel(level.id)}
                           disabled={isProcessing}
                           className={`w-full text-left p-4 rounded-lg border transition-all ${testLevel === level.id
-                              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                              : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                            : 'border-secondary-200 dark:border-secondary-700 hover:border-primary-300 dark:hover:border-primary-700'
                             } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           <div className="flex justify-between items-start">

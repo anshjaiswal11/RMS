@@ -56,15 +56,15 @@ const AISummarizer = () => {
   useEffect(() => {
     const premiumStatus = localStorage.getItem('isPremiumSummarizer') === 'true';
     const storedKey = localStorage.getItem('verifiedRmsKeySummarizer');
-    
+
     if (premiumStatus && storedKey) {
-        setIsPremium(true);
-        setVerifiedKey(storedKey);
+      setIsPremium(true);
+      setVerifiedKey(storedKey);
     } else if (!premiumStatus) {
-        const storedUsage = localStorage.getItem('summarizerUsageCount');
-        if (storedUsage) {
-            setUsageCount(JSON.parse(storedUsage));
-        }
+      const storedUsage = localStorage.getItem('summarizerUsageCount');
+      if (storedUsage) {
+        setUsageCount(JSON.parse(storedUsage));
+      }
     }
   }, []);
 
@@ -99,23 +99,23 @@ const AISummarizer = () => {
       setIsVerifyingKey(false);
     }
   };
-  
+
   const revalidateKey = async () => {
     if (!verifiedKey) return false;
     try {
-        const response = await fetch(`${BACKEND_API_BASE_URL}/user/check-code`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userCode: verifiedKey })
-        });
-        const data = await response.json();
-        return data.success;
+      const response = await fetch(`${BACKEND_API_BASE_URL}/user/check-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userCode: verifiedKey })
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
-        console.error("Key re-validation failed:", error);
-        return false;
+      console.error("Key re-validation failed:", error);
+      return false;
     }
   };
-  
+
   const revokePremiumAccess = () => {
     toast.error("Your key has expired. Please enter a new one.");
     setIsPremium(false);
@@ -244,17 +244,17 @@ const AISummarizer = () => {
       toast.error('Please upload a PDF file first.');
       return;
     }
-    
+
     if (isPremium) {
-        const isKeyStillValid = await revalidateKey();
-        if (!isKeyStillValid) {
-            revokePremiumAccess();
-            return;
-        }
-    } else if (usageCount.summaries >= FREE_LIMIT) {
-        toast.error("You've reached your free summary limit.");
-        setIsBlocked(true);
+      const isKeyStillValid = await revalidateKey();
+      if (!isKeyStillValid) {
+        revokePremiumAccess();
         return;
+      }
+    } else if (usageCount.summaries >= FREE_LIMIT) {
+      toast.error("You've reached your free summary limit.");
+      setIsBlocked(true);
+      return;
     }
 
     setIsProcessing(true);
@@ -327,7 +327,7 @@ const AISummarizer = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-chat-v3.1:free",
+          model: "xiaomi/mimo-v2-flash:free",
           messages: messagesPayload,
           temperature: 0.7,
           stream: true
@@ -368,13 +368,13 @@ const AISummarizer = () => {
           }
         }
       }
-      
+
       setSummary(finalMessage);
       setMessages([{ role: "assistant", content: finalMessage, type: "summary" }]);
       if (!isPremium) {
-          const newCount = { ...usageCount, summaries: usageCount.summaries + 1 };
-          setUsageCount(newCount);
-          localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
+        const newCount = { ...usageCount, summaries: usageCount.summaries + 1 };
+        setUsageCount(newCount);
+        localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
       }
       toast.success('Summary generated successfully!');
 
@@ -384,28 +384,28 @@ const AISummarizer = () => {
         toast.error('Error generating summary. Please try again.');
       }
     } finally {
-        setIsProcessing(false);
-        setIsStreaming(false);
-        setStreamingMessage('');
-        setStreamingType('');
-        abortControllerRef.current = null;
+      setIsProcessing(false);
+      setIsStreaming(false);
+      setStreamingMessage('');
+      setStreamingType('');
+      abortControllerRef.current = null;
     }
   };
 
   const handleAskQuestion = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || isChatLoading) return;
-    
+
     if (isPremium) {
-        const isKeyStillValid = await revalidateKey();
-        if (!isKeyStillValid) {
-            revokePremiumAccess();
-            return;
-        }
-    } else if (usageCount.chats >= FREE_LIMIT) {
-        toast.error("You've reached your free chat limit.");
-        setIsBlocked(true);
+      const isKeyStillValid = await revalidateKey();
+      if (!isKeyStillValid) {
+        revokePremiumAccess();
         return;
+      }
+    } else if (usageCount.chats >= FREE_LIMIT) {
+      toast.error("You've reached your free chat limit.");
+      setIsBlocked(true);
+      return;
     }
 
     const userMessage = { role: "user", content: inputValue };
@@ -475,26 +475,26 @@ const AISummarizer = () => {
           }
         }
       }
-      
+
       setMessages(prev => [...prev, { role: "assistant", content: finalMessage }]);
-       if (!isPremium) {
-          const newCount = { ...usageCount, chats: usageCount.chats + 1 };
-          setUsageCount(newCount);
-          localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
+      if (!isPremium) {
+        const newCount = { ...usageCount, chats: usageCount.chats + 1 };
+        setUsageCount(newCount);
+        localStorage.setItem('summarizerUsageCount', JSON.stringify(newCount));
       }
 
     } catch (error) {
-        if (error.name !== 'AbortError') {
-            console.error('Error getting response:', error);
-            toast.error('Error getting response. Please try again.');
-            setMessages(prev => prev.slice(0, -1)); // Remove the user's message on failure
-        }
+      if (error.name !== 'AbortError') {
+        console.error('Error getting response:', error);
+        toast.error('Error getting response. Please try again.');
+        setMessages(prev => prev.slice(0, -1)); // Remove the user's message on failure
+      }
     } finally {
-        setIsChatLoading(false);
-        setIsStreaming(false);
-        setStreamingMessage('');
-        setStreamingType('');
-        abortControllerRef.current = null;
+      setIsChatLoading(false);
+      setIsStreaming(false);
+      setStreamingMessage('');
+      setStreamingType('');
+      abortControllerRef.current = null;
     }
   };
 
@@ -519,11 +519,11 @@ const AISummarizer = () => {
   const renderMarkdown = (content) => {
     const noBoldContent = content.replace(/\*\*/g, ''); // Remove bold markdown
     const parts = noBoldContent.split(/(```[\s\S]*?```)/g);
-  
+
     const renderLineWithLinks = (line, key) => {
       const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
       const lineParts = line.split(linkRegex);
-  
+
       return (
         <>
           {lineParts.map((part, index) => {
@@ -543,7 +543,7 @@ const AISummarizer = () => {
         </>
       );
     };
-  
+
     return parts.map((part, i) => {
       if (part.startsWith('```')) {
         const code = part.replace(/```(\w*\n)?/g, '').replace(/```$/, '').trim();
@@ -594,55 +594,55 @@ const AISummarizer = () => {
 
   const VerificationModal = () => (
     <AnimatePresence>
-        {isBlocked && (
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    className="bg-white dark:bg-secondary-800 rounded-2xl p-8 shadow-xl max-w-md w-full relative"
+      {isBlocked && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white dark:bg-secondary-800 rounded-2xl p-8 shadow-xl max-w-md w-full relative"
+          >
+            <button onClick={() => setIsBlocked(false)} className="absolute top-4 right-4 text-secondary-400 hover:text-secondary-600">
+              <X size={24} />
+            </button>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <KeyRound className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">Free Limit Reached</h2>
+              <p className="text-secondary-600 dark:text-secondary-400 mt-2 mb-6">
+                Please enter your RMS Key for unlimited access.
+              </p>
+              <form onSubmit={handleVerifyKey} className="space-y-4">
+                <input
+                  type="text"
+                  value={rmsKey}
+                  onChange={(e) => setRmsKey(e.target.value.replace(/\D/g, ''))}
+                  maxLength="6"
+                  className="w-full text-center text-xl font-mono tracking-widest px-4 py-2 bg-secondary-100 dark:bg-secondary-700 border-2 border-secondary-200 dark:border-secondary-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="_ _ _ _ _ _"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isVerifyingKey}
+                  className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50"
                 >
-                    <button onClick={() => setIsBlocked(false)} className="absolute top-4 right-4 text-secondary-400 hover:text-secondary-600">
-                        <X size={24} />
-                    </button>
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <KeyRound className="w-8 h-8 text-white" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">Free Limit Reached</h2>
-                        <p className="text-secondary-600 dark:text-secondary-400 mt-2 mb-6">
-                            Please enter your RMS Key for unlimited access.
-                        </p>
-                        <form onSubmit={handleVerifyKey} className="space-y-4">
-                            <input
-                                type="text"
-                                value={rmsKey}
-                                onChange={(e) => setRmsKey(e.target.value.replace(/\D/g, ''))}
-                                maxLength="6"
-                                className="w-full text-center text-xl font-mono tracking-widest px-4 py-2 bg-secondary-100 dark:bg-secondary-700 border-2 border-secondary-200 dark:border-secondary-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                placeholder="_ _ _ _ _ _"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                disabled={isVerifyingKey}
-                                className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50"
-                            >
-                                {isVerifyingKey ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Unlock Now</span>}
-                            </button>
-                        </form>
-                        <p className="text-xs text-center text-secondary-500 mt-4">
-                            Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
-                        </p>
-                    </div>
-                </motion.div>
-            </motion.div>
-        )}
+                  {isVerifyingKey ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Unlock Now</span>}
+                </button>
+              </form>
+              <p className="text-xs text-center text-secondary-500 mt-4">
+                Don't have a key? <a href="/GetRMSKey" className="text-primary-600 hover:underline">Get one here</a>.
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 
@@ -701,8 +701,8 @@ const AISummarizer = () => {
                 <div
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer transition-all duration-200 ${isDragActive
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-secondary-300 dark:border-secondary-600 hover:border-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-800'
                     }`}
                 >
                   <input {...getInputProps()} />
@@ -797,13 +797,13 @@ const AISummarizer = () => {
                     </button>
                   )}
                 </div>
-                 {!isPremium && (
-                    <div className="mt-4 text-center text-sm text-secondary-500 dark:text-secondary-400">
-                        <p>Summaries left: {Math.max(0, FREE_LIMIT - usageCount.summaries)}</p>
-                        <p>Chats left: {Math.max(0, FREE_LIMIT - usageCount.chats)}</p>
-                    </div>
+                {!isPremium && (
+                  <div className="mt-4 text-center text-sm text-secondary-500 dark:text-secondary-400">
+                    <p>Summaries left: {Math.max(0, FREE_LIMIT - usageCount.summaries)}</p>
+                    <p>Chats left: {Math.max(0, FREE_LIMIT - usageCount.chats)}</p>
+                  </div>
                 )}
-                  <div className="mt-6 sm:mt-8 space-y-4">
+                <div className="mt-6 sm:mt-8 space-y-4">
                   <h3 className="font-semibold text-secondary-900 dark:text-white">
                     Features:
                   </h3>
@@ -871,8 +871,8 @@ const AISummarizer = () => {
                               className={`mb-4 ${message.role === 'user' ? 'text-right' : ''}`}
                             >
                               <div className={`inline-block max-w-[85%] rounded-lg p-4 ${message.role === 'user'
-                                  ? 'bg-primary-500 text-white ml-auto'
-                                  : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-800 dark:text-secondary-200'}`}
+                                ? 'bg-primary-500 text-white ml-auto'
+                                : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-800 dark:text-secondary-200'}`}
                               >
                                 <div className="flex items-center mb-2">
                                   {message.role === 'user' ? (
