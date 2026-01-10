@@ -524,7 +524,7 @@ const TestGenerator = () => {
                         key={optIndex}
                         onClick={() => handleAnswerSelect(index, optionLetter)}
                         disabled={isSubmitted}
-                        className={`p-4 text-left rounded-lg border transition-all ${isSelected
+                        className={`p-4 text-left rounded-lg border transition-all text-secondary-900 dark:text-white ${isSelected
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                           : isSubmitted
                             ? showCorrect

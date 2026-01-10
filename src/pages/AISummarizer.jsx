@@ -68,6 +68,17 @@ const AISummarizer = () => {
     }
   }, []);
 
+  // Load PDF.js library
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleVerifyKey = async (e) => {
     e.preventDefault();
     if (!rmsKey || rmsKey.length !== 6) {
@@ -183,58 +194,33 @@ const AISummarizer = () => {
       return Promise.reject(new Error("File size exceeds limit"));
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    if (!window.pdfjsLib) {
+      toast.error('PDF Library not loaded yet. Please wait a moment and try again.');
+      return Promise.reject(new Error('PDF Library not loaded'));
+    }
+
+    // Set worker source
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
 
     try {
-      const startResponse = await fetch("https://python-api-totg.onrender.com/api/start-extraction", {
-        method: "POST",
-        body: formData,
-      });
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument(arrayBuffer).promise;
+      let fullText = '';
 
-      if (startResponse.status !== 202) {
-        const errorData = await startResponse.json();
-        throw new Error(errorData.error || `Failed to start job. Status: ${startResponse.status}`);
+      const maxPages = pdf.numPages;
+      const pagesToProcess = Math.min(maxPages, 20);
+
+      for (let i = 1; i <= pagesToProcess; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + ' ';
       }
 
-      const { job_id } = await startResponse.json();
-      toast.success("Processing started! This may take a moment for large files.");
-
-      return new Promise((resolve, reject) => {
-        const intervalId = setInterval(async () => {
-          try {
-            const statusResponse = await fetch(`https://python-api-totg.onrender.com/api/extraction-status/${job_id}`);
-
-            if (!statusResponse.ok) {
-              clearInterval(intervalId);
-              reject(new Error(`Failed to get job status. Status: ${statusResponse.status}`));
-              return;
-            }
-
-            const data = await statusResponse.json();
-
-            if (data.status === 'complete') {
-              clearInterval(intervalId);
-              if (data.text) {
-                resolve(data.text);
-              } else {
-                reject(new Error("Extraction completed but no text was returned."));
-              }
-            } else if (data.status === 'failed') {
-              clearInterval(intervalId);
-              reject(new Error(data.error || "File processing failed on the server."));
-            }
-          } catch (error) {
-            clearInterval(intervalId);
-            reject(error);
-          }
-        }, 3000);
-      });
-
+      return fullText;
     } catch (error) {
-      console.error("Error in extraction process:", error);
-      toast.error(error.message || "Failed to process PDF. Please try again.");
-      throw error;
+      console.error("PDF Extraction error:", error);
+      throw new Error("Failed to extract text from PDF. Please ensure it is a valid PDF text document.");
     }
   };
 
